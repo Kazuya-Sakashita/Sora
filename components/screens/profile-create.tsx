@@ -1,0 +1,154 @@
+"use client"
+
+import { useState } from "react"
+import { useApp } from "@/lib/app-context"
+import { GlassCard } from "@/components/glass-card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Camera, ArrowLeft } from "lucide-react"
+
+export function ProfileCreateScreen() {
+  const { setCurrentScreen, setPet } = useApp()
+  const [formData, setFormData] = useState({
+    name: "",
+    nickname: "",
+    personality: "",
+    favorites: "",
+    memories: "",
+  })
+  const [photo, setPhoto] = useState<string | null>(null)
+
+  const handleSubmit = () => {
+    if (formData.name) {
+      setPet({
+        id: Date.now().toString(),
+        ...formData,
+        photo: photo || undefined,
+      })
+      setCurrentScreen("home")
+    }
+  }
+
+  return (
+    <div className="min-h-screen pb-safe">
+      {/* Header */}
+      <header className="sticky top-0 z-10 px-4 pt-safe">
+        <div className="h-14 flex items-center">
+          <button 
+            onClick={() => setCurrentScreen("onboarding")}
+            className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        </div>
+      </header>
+
+      <main className="px-6 pb-8">
+        {/* Title */}
+        <div className="mb-8">
+          <h1 className="text-xl font-medium text-foreground/90 mb-2">
+            どんな子でしたか？
+          </h1>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            少しずつで大丈夫です。<br />思い出せる範囲で大丈夫ですよ
+          </p>
+        </div>
+
+        <GlassCard className="space-y-6">
+          {/* Photo Upload */}
+          <div className="flex justify-center">
+            <button
+              onClick={() => {/* Photo upload logic */}}
+              className="w-28 h-28 rounded-3xl bg-gradient-to-br from-white/80 to-white/40 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/40 transition-colors overflow-hidden"
+            >
+              {photo ? (
+                <img src={photo} alt="Pet" className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <Camera size={24} className="text-primary/50" />
+                  <span className="text-xs">写真を追加する</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                お名前
+              </label>
+              <Input
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="例：ポチ、ミケ"
+                className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                呼び方（ニックネーム）
+              </label>
+              <Input
+                value={formData.nickname}
+                onChange={(e) => setFormData(prev => ({ ...prev, nickname: e.target.value }))}
+                placeholder="例：ポチくん、みーちゃん"
+                className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                性格
+              </label>
+              <Input
+                value={formData.personality}
+                onChange={(e) => setFormData(prev => ({ ...prev, personality: e.target.value }))}
+                placeholder="例：甘えんぼ、元気、マイペース"
+                className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                好きだったこと
+              </label>
+              <Input
+                value={formData.favorites}
+                onChange={(e) => setFormData(prev => ({ ...prev, favorites: e.target.value }))}
+                placeholder="例：お散歩、ひなたぼっこ"
+                className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20 placeholder:text-muted-foreground/40"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                思い出を少しだけ教えてください
+              </label>
+              <Textarea
+                value={formData.memories}
+                onChange={(e) => setFormData(prev => ({ ...prev, memories: e.target.value }))}
+                placeholder="いちばん印象に残っていること..."
+                rows={4}
+                className="rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20 placeholder:text-muted-foreground/40 resize-none"
+              />
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* Submit Button */}
+        <div className="mt-8">
+          <Button
+            onClick={handleSubmit}
+            disabled={!formData.name}
+            className="w-full h-14 rounded-2xl bg-primary/80 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground font-medium text-base shadow-lg shadow-primary/10 transition-all"
+          >
+            この子を登録する
+          </Button>
+        </div>
+      </main>
+    </div>
+  )
+}

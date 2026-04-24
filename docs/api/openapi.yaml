@@ -1,0 +1,563 @@
+openapi: "3.1.0"
+
+info:
+  title: Sora API
+  version: "0.1.0"
+  description: |
+    ペットメモリーケアアプリ Sora のREST API定義。
+    MVP段階はlocalStorageで代替。将来バックエンド実装時にこの定義を使う。
+
+servers:
+  - url: /api
+    description: Next.js API Routes (将来実装)
+
+# -----------------------------------------------
+# 認証（MVP段階では未実装）
+# -----------------------------------------------
+# TODO: MVP後にNextAuth.jsで実装予定
+# securitySchemes:
+#   bearerAuth:
+#     type: http
+#     scheme: bearer
+
+tags:
+  - name: pets
+    description: ペットプロフィール
+  - name: memories
+    description: 思い出記録
+  - name: feelings
+    description: 気持ち記録
+  - name: schedules
+    description: 予定管理
+
+# -----------------------------------------------
+# パス定義
+# -----------------------------------------------
+paths:
+
+  # === ペット ===
+
+  /pets:
+    post:
+      tags: [pets]
+      summary: ペットを登録する
+      # security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetInput"
+      responses:
+        "201":
+          description: 登録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /pets/{petId}:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [pets]
+      summary: ペットを取得する
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+          description: 取得成功
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [pets]
+      summary: ペットを更新する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PetInput"
+      responses:
+        "200":
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # === 思い出 ===
+
+  /pets/{petId}/memories:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [memories]
+      summary: 思い出一覧を取得する（新しい順）
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: "#/components/schemas/MemoryCategory"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Memory"
+                  total:
+                    type: integer
+    post:
+      tags: [memories]
+      summary: 思い出を記録する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryInput"
+      responses:
+        "201":
+          description: 記録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Memory"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  /pets/{petId}/memories/{memoryId}:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+      - $ref: "#/components/parameters/memoryId"
+    delete:
+      tags: [memories]
+      summary: 思い出を削除する
+      responses:
+        "204":
+          description: 削除成功
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # === 気持ち記録 ===
+
+  /pets/{petId}/feelings:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [feelings]
+      summary: 気持ち記録一覧を取得する
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Feeling"
+                  total:
+                    type: integer
+    post:
+      tags: [feelings]
+      summary: 気持ちを記録する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeelingInput"
+      responses:
+        "201":
+          description: 記録成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feeling"
+
+  # === 予定 ===
+
+  /pets/{petId}/schedules:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [schedules]
+      summary: 予定一覧を取得する（日付昇順）
+      parameters:
+        - name: from
+          in: query
+          description: 開始日（ISO 8601）
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          description: 終了日（ISO 8601）
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Schedule"
+                  total:
+                    type: integer
+    post:
+      tags: [schedules]
+      summary: 予定を追加する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleInput"
+      responses:
+        "201":
+          description: 追加成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Schedule"
+
+  /pets/{petId}/schedules/{scheduleId}:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+      - $ref: "#/components/parameters/scheduleId"
+    delete:
+      tags: [schedules]
+      summary: 予定を削除する
+      responses:
+        "204":
+          description: 削除成功
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+# -----------------------------------------------
+# スキーマ・共通定義
+# -----------------------------------------------
+components:
+
+  parameters:
+    petId:
+      name: petId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    memoryId:
+      name: memoryId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    scheduleId:
+      name: scheduleId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+
+    # --- ペット ---
+    Pet:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 50
+        nickname:
+          type: string
+          maxLength: 50
+        species:
+          type: string
+          enum: [dog, cat, rabbit, bird, other]
+        breed:
+          type: string
+          maxLength: 100
+        birthDate:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        photoUrl:
+          type: string
+          format: uri
+        personality:
+          type: string
+          maxLength: 500
+        favorites:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [alive, rainbow_bridge]
+          default: alive
+        createdAt:
+          type: string
+          format: date-time
+
+    PetInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        nickname:
+          type: string
+          maxLength: 50
+        species:
+          type: string
+          enum: [dog, cat, rabbit, bird, other]
+        breed:
+          type: string
+          maxLength: 100
+        birthDate:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, unknown]
+        photoUrl:
+          type: string
+          format: uri
+        personality:
+          type: string
+          maxLength: 500
+        favorites:
+          type: string
+          maxLength: 500
+        status:
+          type: string
+          enum: [alive, rainbow_bridge]
+
+    # --- 思い出 ---
+    MemoryCategory:
+      type: string
+      enum: [trip, daily, hospital, trimming, anniversary, other]
+
+    MoodTag:
+      type: string
+      enum: [happy, calm, worried, fun, loving]
+
+    Memory:
+      type: object
+      required: [id, title, date, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 2000
+        date:
+          type: string
+          format: date
+        category:
+          $ref: "#/components/schemas/MemoryCategory"
+        moodTag:
+          $ref: "#/components/schemas/MoodTag"
+        photoUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          maxItems: 10
+        createdAt:
+          type: string
+          format: date-time
+
+    MemoryInput:
+      type: object
+      required: [title, date]
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 2000
+        date:
+          type: string
+          format: date
+        category:
+          $ref: "#/components/schemas/MemoryCategory"
+        moodTag:
+          $ref: "#/components/schemas/MoodTag"
+        photoUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+          maxItems: 10
+
+    # --- 気持ち記録 ---
+    FeelingTag:
+      type: string
+      enum: [happy, calm, lonely, sad, grateful, anxious]
+
+    Feeling:
+      type: object
+      required: [id, tag, date, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        tag:
+          $ref: "#/components/schemas/FeelingTag"
+        memo:
+          type: string
+          maxLength: 500
+        date:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+
+    FeelingInput:
+      type: object
+      required: [tag, date]
+      properties:
+        tag:
+          $ref: "#/components/schemas/FeelingTag"
+        memo:
+          type: string
+          maxLength: 500
+        date:
+          type: string
+          format: date
+
+    # --- 予定 ---
+    ScheduleType:
+      type: string
+      enum: [hospital, trimming, vaccine, anniversary, other]
+
+    Schedule:
+      type: object
+      required: [id, type, title, date, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/ScheduleType"
+        title:
+          type: string
+          maxLength: 100
+        date:
+          type: string
+          format: date
+        memo:
+          type: string
+          maxLength: 500
+        createdAt:
+          type: string
+          format: date-time
+
+    ScheduleInput:
+      type: object
+      required: [type, title, date]
+      properties:
+        type:
+          $ref: "#/components/schemas/ScheduleType"
+        title:
+          type: string
+          maxLength: 100
+        date:
+          type: string
+          format: date
+        memo:
+          type: string
+          maxLength: 500
+
+    # --- エラー（RFC 9457）---
+    ProblemDetail:
+      type: object
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+
+  responses:
+    BadRequest:
+      description: リクエストが不正
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    NotFound:
+      description: リソースが存在しない
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    UnprocessableEntity:
+      description: バリデーションエラー
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
