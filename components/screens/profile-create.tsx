@@ -56,7 +56,7 @@ export function ProfileCreateScreen() {
         {/* Title */}
         <div className="mb-8">
           <h1 className="text-xl font-medium text-foreground/90 mb-2">
-            どんな子ですか？
+            あなたの大切な子を教えてください
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             少しずつで大丈夫です。<br />わかる範囲で教えてください
