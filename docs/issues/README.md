@@ -9,10 +9,10 @@
 | [001](ISSUE-001-data-persistence.md) | データ永続化がない（リロードで全データ消える） | 🔴 critical | done |
 | [006](ISSUE-006-app-title-metadata.md) | アプリタイトルが「ペットロスヒーリング」でロス後専用に見える | 🔴 critical | done |
 | [007](ISSUE-007-profile-create-past-tense.md) | プロフィール登録のコピーが過去形でロス後前提になっている | 🔴 critical | done |
-| [011](ISSUE-011-days-counter.md) | 「今日で〇〇日目」カウンターをホーム画面に実装する | 🔴 critical | open |
+| [011](ISSUE-011-days-counter.md) | 「今日で〇〇日目」カウンターをホーム画面に実装する | 🔴 critical | done |
 | [012](ISSUE-012-supabase-auth.md) | Supabase認証基盤を実装する | 🔴 critical | done |
 | [003](ISSUE-003-onboarding-tone.md) | オンボーディングを新しく迎えたペットのオーナー向けに全面再設計する | 🟠 high | open |
-| [004](ISSUE-004-home-greeting-copy.md) | ホーム画面を「今日で〇〇日目」カウンター中心に全面再設計する | 🟠 high | open |
+| [004](ISSUE-004-home-greeting-copy.md) | ホーム画面を「今日で〇〇日目」カウンター中心に全面再設計する | 🟠 high | done |
 | [008](ISSUE-008-feelings-options-postloss-only.md) | 気持ち記録の選択肢がロス後ユーザー専用でしか使えない | 🟠 high | open |
 | [009](ISSUE-009-letter-hardcoded-pet-voice.md) | 手紙画面をPhase 3まで非表示化し、倫理NGの「ペット視点」を除去する | 🟠 high | open |
 | [013](ISSUE-013-photo-upload-storage.md) | 写真アップロードをSupabase Storageで実装する | 🟠 high | open |
