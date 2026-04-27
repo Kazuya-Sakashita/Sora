@@ -1,21 +1,49 @@
 # ISSUE一覧
 
-最終更新: 2026-04-24
+最終更新: 2026-04-28
 
 ## 現在のISSUE
 
 | # | タイトル | 優先度 | ステータス |
 |---|---------|--------|----------|
-| [001](ISSUE-001-data-persistence.md) | データ永続化がない（リロードで全データ消える） | 🔴 critical | open |
-| [006](ISSUE-006-app-title-metadata.md) | アプリタイトルが「ペットロスヒーリング」でロス後専用に見える | 🔴 critical | open |
+| [001](ISSUE-001-data-persistence.md) | データ永続化がない（リロードで全データ消える） | 🔴 critical | done |
+| [006](ISSUE-006-app-title-metadata.md) | アプリタイトルが「ペットロスヒーリング」でロス後専用に見える | 🔴 critical | done |
 | [007](ISSUE-007-profile-create-past-tense.md) | プロフィール登録のコピーが過去形でロス後前提になっている | 🔴 critical | open |
-| [002](ISSUE-002-schedule-screen-missing.md) | 予定管理画面が未実装 | 🟠 high | open |
-| [003](ISSUE-003-onboarding-tone.md) | オンボーディングがペットロス専用に見える可能性 | 🟠 high | open |
+| [011](ISSUE-011-days-counter.md) | 「今日で〇〇日目」カウンターをホーム画面に実装する | 🔴 critical | open |
+| [012](ISSUE-012-supabase-auth.md) | Supabase認証基盤を実装する | 🔴 critical | open |
+| [003](ISSUE-003-onboarding-tone.md) | オンボーディングを新しく迎えたペットのオーナー向けに全面再設計する | 🟠 high | open |
+| [004](ISSUE-004-home-greeting-copy.md) | ホーム画面を「今日で〇〇日目」カウンター中心に全面再設計する | 🟠 high | open |
 | [008](ISSUE-008-feelings-options-postloss-only.md) | 気持ち記録の選択肢がロス後ユーザー専用でしか使えない | 🟠 high | open |
-| [009](ISSUE-009-letter-hardcoded-pet-voice.md) | 手紙がハードコードテンプレート＋ペット視点で倫理・品質に問題 | 🟠 high | open |
-| [004](ISSUE-004-home-greeting-copy.md) | ホームのグリーティング文言が生前利用に違和感 | 🟡 medium | open |
+| [009](ISSUE-009-letter-hardcoded-pet-voice.md) | 手紙画面をPhase 3まで非表示化し、倫理NGの「ペット視点」を除去する | 🟠 high | open |
+| [013](ISSUE-013-photo-upload-storage.md) | 写真アップロードをSupabase Storageで実装する | 🟠 high | open |
+| [014](ISSUE-014-timeline-ux.md) | タイムライン画面を写真主体のUXに改善する | 🟠 high | open |
+| [002](ISSUE-002-schedule-screen-missing.md) | 予定管理画面が未実装 | 🟡 medium | open |
 | [005](ISSUE-005-timeline-empty-state.md) | タイムラインの空状態設計が不足 | 🟡 medium | open |
-| [010](ISSUE-010-chat-prompts-postloss-only.md) | チャットのクイックプロンプトがロス後ユーザー専用 | 🟡 medium | open |
+| [010](ISSUE-010-chat-prompts-postloss-only.md) | チャット画面をPhase 3まで非表示化する | 🟡 medium | open |
+| [015](ISSUE-015-record-completion-feedback.md) | 記録完了後の達成フィードバックを実装する | 🟡 medium | open |
+| [016](ISSUE-016-settings-professional-resource.md) | 設定画面に専門家リソースへのリンクを追加する | 🟡 medium | open |
+
+---
+
+## 実装フェーズと対応ISSUE
+
+### MVP フェーズ（今すぐ着手）
+
+優先して対応するISSUEと着手順:
+
+```
+Step 1: ISSUE-006, 007（コピー修正・即時対応）
+Step 2: ISSUE-012（Supabase認証基盤 ← 最重要インフラ）
+Step 3: ISSUE-001（データ永続化 ← ISSUE-012完了後）
+Step 4: ISSUE-013（写真アップロード ← ISSUE-012完了後）
+Step 5: ISSUE-003, 004, 008, 009, 010, 011（UI・UX修正）
+Step 6: ISSUE-014, 015, 005（仕上げ）
+```
+
+### Phase 1後半（MVP完了後）
+
+- ISSUE-002（予定管理画面）
+- ISSUE-016（設定画面の専門家リソース）
 
 ---
 
@@ -33,8 +61,8 @@
 ISSUE-{3桁連番}-{kebab-case-title}.md
 
 例:
-ISSUE-006-photo-upload.md
-ISSUE-007-ai-chat-placeholder.md
+ISSUE-017-monthly-story.md
+ISSUE-018-happiness-dashboard.md
 ```
 
 ### ファイル作成手順
@@ -49,9 +77,9 @@ ISSUE-007-ai-chat-placeholder.md
 
 | 記号 | 優先度 | 判断基準 |
 |------|--------|---------|
-| 🔴 | critical | アプリが機能しない・データが消える・クラッシュする |
-| 🟠 | high | MVPの中心機能が欠けている・UXが大きく損なわれる |
-| 🟡 | medium | UX改善・感情設計の改善・軽微な問題 |
+| 🔴 | critical | アプリが機能しない・データが消える・クラッシュする・MVPの日常利用フックがない |
+| 🟠 | high | MVPの中心機能が欠けている・UXが大きく損なわれる・倫理設計の問題 |
+| 🟡 | medium | UX改善・感情設計の改善・Phase 1後半の機能 |
 | ⚪ | low | 将来対応でよい・Phase 2以降 |
 
 ---
