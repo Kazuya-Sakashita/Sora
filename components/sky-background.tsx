@@ -3,29 +3,53 @@
 export function SkyBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* Base sky gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#e8f4ff] via-[#f0f6ff] to-[#faf8ff]" />
-      
-      {/* Soft rainbow hint at top */}
-      <div 
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[400px] opacity-[0.15]"
+      {/* 朝焼けグラデーション: 桃白 → 薄ピンク → 空青 */}
+      <div
+        className="absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse at center top, rgba(255,182,193,0.4) 0%, rgba(255,218,185,0.3) 20%, rgba(255,255,200,0.2) 40%, rgba(200,255,200,0.2) 60%, rgba(173,216,230,0.3) 80%, transparent 100%)",
+          background: "linear-gradient(to bottom, #fff5ee 0%, #fdf0f8 50%, #eff4ff 100%)",
         }}
       />
-      
-      {/* Soft light orbs */}
-      <div 
-        className="absolute top-[10%] right-[10%] w-[300px] h-[300px] rounded-full opacity-30 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(255,220,230,0.6) 0%, transparent 70%)" }}
+
+      {/* 頂部: 虹の輝き */}
+      <div
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[200%] h-[420px] opacity-[0.18]"
+        style={{
+          background:
+            "radial-gradient(ellipse at center top, rgba(255,190,150,0.5) 0%, rgba(255,180,210,0.35) 25%, rgba(255,245,180,0.2) 50%, rgba(200,225,255,0.25) 75%, transparent 100%)",
+        }}
       />
-      <div 
-        className="absolute top-[30%] left-[5%] w-[200px] h-[200px] rounded-full opacity-20 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(200,220,255,0.6) 0%, transparent 70%)" }}
+
+      {/* 右上: 温かいピーチ光 */}
+      <div
+        className="absolute top-[8%] right-[8%] w-[320px] h-[320px] rounded-full blur-3xl opacity-25"
+        style={{
+          background: "radial-gradient(circle, rgba(255,195,155,0.65) 0%, transparent 70%)",
+        }}
       />
-      <div 
-        className="absolute bottom-[20%] right-[15%] w-[250px] h-[250px] rounded-full opacity-20 blur-3xl"
-        style={{ background: "radial-gradient(circle, rgba(230,200,255,0.5) 0%, transparent 70%)" }}
+
+      {/* 左上: 柔らかいゴールド */}
+      <div
+        className="absolute top-[15%] left-[3%] w-[220px] h-[220px] rounded-full blur-3xl opacity-20"
+        style={{
+          background: "radial-gradient(circle, rgba(255,225,150,0.55) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* 中央左: スカイブルー */}
+      <div
+        className="absolute top-[40%] left-[0%] w-[200px] h-[200px] rounded-full blur-3xl opacity-[0.18]"
+        style={{
+          background: "radial-gradient(circle, rgba(180,215,255,0.5) 0%, transparent 70%)",
+        }}
+      />
+
+      {/* 右下: ラベンダー */}
+      <div
+        className="absolute bottom-[18%] right-[12%] w-[260px] h-[260px] rounded-full blur-3xl opacity-[0.18]"
+        style={{
+          background: "radial-gradient(circle, rgba(215,190,255,0.45) 0%, transparent 70%)",
+        }}
       />
     </div>
   )
