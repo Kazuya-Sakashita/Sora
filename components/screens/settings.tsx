@@ -1,11 +1,29 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useApp } from "@/lib/app-context"
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut } from "lucide-react"
 
 export function SettingsScreen() {
   const { setCurrentScreen, conversationTone, setConversationTone } = useApp()
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient()
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email ?? null)
+    })
+  }, [])
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    const supabase = createSupabaseBrowserClient()
+    await supabase.auth.signOut()
+    window.location.href = "/auth/login"
+  }
 
   const toneOptions = [
     { label: "やさしく寄り添う", description: "あたたかく、そっと支える言葉" },
@@ -25,7 +43,7 @@ export function SettingsScreen() {
       <header className="sticky top-0 z-10 bg-white/30 backdrop-blur-xl border-b border-white/40">
         <div className="px-4 pt-safe">
           <div className="h-14 flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setCurrentScreen("home")}
               className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground"
             >
@@ -37,6 +55,21 @@ export function SettingsScreen() {
       </header>
 
       <main className="px-6 py-6 space-y-8">
+        {/* Account */}
+        {userEmail && (
+          <section>
+            <GlassCard className="flex items-center gap-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary/70 font-medium text-sm">
+                {userEmail[0].toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">ログイン中</p>
+                <p className="text-sm font-medium text-foreground/80 truncate">{userEmail}</p>
+              </div>
+            </GlassCard>
+          </section>
+        )}
+
         {/* Conversation Tone */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
@@ -48,7 +81,7 @@ export function SettingsScreen() {
               <p className="text-xs text-muted-foreground">どんな言葉で寄り添いますか？</p>
             </div>
           </div>
-          
+
           <div className="space-y-3">
             {toneOptions.map(({ label, description }) => (
               <button
@@ -92,8 +125,20 @@ export function SettingsScreen() {
           ))}
         </section>
 
+        {/* Logout */}
+        <section>
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 text-sm text-muted-foreground/70 hover:text-destructive/70 hover:bg-destructive/5 transition-colors disabled:opacity-50"
+          >
+            <LogOut size={16} />
+            {isLoggingOut ? "ログアウト中..." : "ログアウト"}
+          </button>
+        </section>
+
         {/* Footer Message */}
-        <div className="pt-8 text-center">
+        <div className="text-center">
           <p className="text-xs text-muted-foreground/60 leading-relaxed">
             あなたの思い出は、<br />大切に守られています
           </p>
