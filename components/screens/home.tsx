@@ -44,8 +44,8 @@ export function HomeScreen() {
           <GlassCard className="relative overflow-hidden">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
-                {pet.photo ? (
-                  <img src={pet.photo} alt={pet.name} className="w-full h-full object-cover" />
+                {pet.photoUrl ? (
+                  <img src={pet.photoUrl} alt={pet.name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-2xl text-primary/60">🐾</span>
                 )}

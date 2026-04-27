@@ -12,17 +12,23 @@ export function TimelineScreen() {
   const { setCurrentScreen, memories, addMemory } = useApp()
   const [isAdding, setIsAdding] = useState(false)
   const [newMemory, setNewMemory] = useState({ title: "", description: "" })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleAddMemory = () => {
-    if (newMemory.title) {
-      addMemory({
-        id: Date.now().toString(),
+  const handleAddMemory = async () => {
+    if (!newMemory.title || isSubmitting) return
+    setIsSubmitting(true)
+    try {
+      await addMemory({
         title: newMemory.title,
-        description: newMemory.description,
-        date: new Date().toISOString(),
+        description: newMemory.description || undefined,
+        date: new Date().toISOString().split("T")[0],
       })
       setNewMemory({ title: "", description: "" })
       setIsAdding(false)
+    } catch {
+      // stay on form
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -32,7 +38,7 @@ export function TimelineScreen() {
       <header className="sticky top-0 z-10 bg-white/30 backdrop-blur-xl border-b border-white/40">
         <div className="px-4 pt-safe">
           <div className="h-14 flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setCurrentScreen("home")}
               className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground"
             >
@@ -49,7 +55,7 @@ export function TimelineScreen() {
           <GlassCard className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-medium text-foreground/80">新しい思い出</h3>
-              <button 
+              <button
                 onClick={() => setIsAdding(false)}
                 className="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground"
               >
@@ -58,23 +64,23 @@ export function TimelineScreen() {
             </div>
             <Input
               value={newMemory.title}
-              onChange={(e) => setNewMemory(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) => setNewMemory((prev) => ({ ...prev, title: e.target.value }))}
               placeholder="タイトル（例：いっしょにお散歩した日）"
               className="h-12 rounded-xl bg-white/50 border-white/60"
             />
             <Textarea
               value={newMemory.description}
-              onChange={(e) => setNewMemory(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setNewMemory((prev) => ({ ...prev, description: e.target.value }))}
               placeholder="その時の思い出を少しだけ..."
               rows={3}
               className="rounded-xl bg-white/50 border-white/60 resize-none"
             />
             <Button
               onClick={handleAddMemory}
-              disabled={!newMemory.title}
+              disabled={!newMemory.title || isSubmitting}
               className="w-full h-12 rounded-xl bg-primary/80 hover:bg-primary/90"
             >
-              保存する
+              {isSubmitting ? "保存中..." : "保存する"}
             </Button>
           </GlassCard>
         ) : (
@@ -96,7 +102,10 @@ export function TimelineScreen() {
                   <div className="flex items-start justify-between">
                     <h3 className="font-medium text-foreground/90">{memory.title}</h3>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(memory.date).toLocaleDateString("ja-JP", { month: "short", day: "numeric" })}
+                      {new Date(memory.date).toLocaleDateString("ja-JP", {
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
                   {memory.description && (
@@ -108,12 +117,14 @@ export function TimelineScreen() {
               </GlassCard>
             ))}
           </div>
-        ) : !isAdding && (
-          <div className="py-16 text-center">
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              少しずつ、<br />思い出を残していきましょう
-            </p>
-          </div>
+        ) : (
+          !isAdding && (
+            <div className="py-16 text-center">
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                少しずつ、<br />思い出を残していきましょう
+              </p>
+            </div>
+          )
         )}
       </main>
     </div>
