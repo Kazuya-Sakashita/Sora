@@ -10,22 +10,23 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: 'にじのはし - ペットロスヒーリング',
-  description: '大切な思い出と、ゆっくり向き合うための場所です',
-  generator: 'v0.app',
+  title: 'Sora — ペットとの毎日を残す場所',
+  description: '写真や日々の記録が、ずっと大切な思い出になる',
   icons: {
     icon: [
       {
+        url: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+      {
         url: '/icon-light-32x32.png',
+        sizes: '32x32',
         media: '(prefers-color-scheme: light)',
       },
       {
         url: '/icon-dark-32x32.png',
+        sizes: '32x32',
         media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
       },
     ],
     apple: '/apple-icon.png',
