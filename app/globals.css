@@ -4,149 +4,111 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ================================================================
- * Sora Brand Color System — Sunrise Edition
+ * Sora Design System
  *
- * 設計思想：朝焼けの空のように温かく、静かで、前向きな印象
- * palette:
- *   Sky Blue   …穏やかな空
- *   Dawn Peach …夜明けの温もり (primary CTA)
- *   Warm Light …黄金の光
- *   Soft Pink  …やさしいハイライト
- *   Lavender   …穏やかなアクセント
- *   Gold Glow  …装飾的な輝き
- *   Cloud White…表面の白
- *   Deep Text  …読みやすい深いテキスト
+ * Palette:
+ *   Sky Blue      #E8F4FF  背景ベース
+ *   Twilight Blue #D8E4F0  セカンダリ・薄明
+ *   Sage Mist     #E5EDE8  アクセント・自然
+ *   Warm Sand     #F0E6D8  プライマリ CTA
+ *   Amber Light   #EDD9B5  ハイライト
+ *   Deep Text     #4A5568  テキスト
+ *
+ * 禁止: ピンク・ラベンダー・パープル系
  * ================================================================ */
 
 :root {
 
   /* ── Semantic tokens (shadcn/ui 互換) ──────────────────────── */
 
-  /* Background: 温かみのある雲白 */
-  --background: oklch(0.99 0.006 60);
-  /* Foreground: 深い温かブラウン — 読みやすく、暗すぎない */
-  --foreground: oklch(0.28 0.025 40);
+  /* Background: Sky Blue */
+  --background: oklch(0.96 0.022 219);
+  /* Foreground: Deep Text */
+  --foreground: oklch(0.41 0.030 249);
 
   /* Card: ガラス白 */
-  --card: oklch(1 0 0 / 0.70);
-  --card-foreground: oklch(0.28 0.025 40);
+  --card: oklch(1 0 0 / 0.72);
+  --card-foreground: oklch(0.41 0.030 249);
   --popover: oklch(1 0 0 / 0.95);
-  --popover-foreground: oklch(0.28 0.025 40);
+  --popover-foreground: oklch(0.41 0.030 249);
 
-  /* Primary: Dawn Peach — CTA・アクションの核心色 */
-  --primary: oklch(0.60 0.13 35);
-  --primary-foreground: oklch(0.99 0.003 60);
+  /* Primary: Amber Light — CTA ボタン */
+  --primary: oklch(0.88 0.060 72);
+  --primary-foreground: oklch(0.41 0.030 249);
 
-  /* Secondary: Pale Sky Blue — 落ち着いた補助色 */
-  --secondary: oklch(0.94 0.03 218);
-  --secondary-foreground: oklch(0.38 0.04 218);
+  /* Secondary: Twilight Blue */
+  --secondary: oklch(0.91 0.022 219);
+  --secondary-foreground: oklch(0.41 0.030 249);
 
-  /* Muted: 温かいオフホワイト */
-  --muted: oklch(0.96 0.01 55);
-  --muted-foreground: oklch(0.58 0.025 40);
+  /* Muted: Warm Sand */
+  --muted: oklch(0.93 0.030 65);
+  --muted-foreground: oklch(0.58 0.025 249);
 
-  /* Accent: Soft Pink — 装飾的ハイライト */
-  --accent: oklch(0.92 0.04 352);
-  --accent-foreground: oklch(0.45 0.06 352);
+  /* Accent: Sage Mist */
+  --accent: oklch(0.94 0.014 158);
+  --accent-foreground: oklch(0.45 0.035 155);
 
-  /* Destructive: 温かみある赤 (医療的な寒色を避ける) */
+  /* Destructive */
   --destructive: oklch(0.58 0.17 25);
   --destructive-foreground: oklch(0.99 0.003 60);
 
-  --border: oklch(0.90 0.012 55 / 0.50);
-  --input: oklch(0.97 0.008 55);
-  --ring: oklch(0.68 0.10 35);
+  --border: oklch(0.88 0.018 219 / 0.50);
+  --input: oklch(0.97 0.010 65);
+  --ring: oklch(0.72 0.060 68);
   --radius: 1rem;
 
   /* ── Chart ─────────────────────────────────────────────────── */
-  --chart-1: oklch(0.72 0.12 35);   /* peach */
-  --chart-2: oklch(0.68 0.09 218);  /* sky */
-  --chart-3: oklch(0.70 0.08 292);  /* lavender */
-  --chart-4: oklch(0.78 0.10 78);   /* gold */
-  --chart-5: oklch(0.76 0.08 352);  /* pink */
+  --chart-1: oklch(0.88 0.060 72);   /* amber */
+  --chart-2: oklch(0.91 0.022 219);  /* twilight */
+  --chart-3: oklch(0.94 0.014 158);  /* sage */
+  --chart-4: oklch(0.93 0.030 65);   /* warm sand */
+  --chart-5: oklch(0.70 0.040 155);  /* deeper sage */
 
   /* ── Sidebar ────────────────────────────────────────────────── */
-  --sidebar: oklch(0.985 0.005 60);
-  --sidebar-foreground: oklch(0.28 0.025 40);
-  --sidebar-primary: oklch(0.60 0.13 35);
-  --sidebar-primary-foreground: oklch(0.99 0.003 60);
-  --sidebar-accent: oklch(0.92 0.04 352);
-  --sidebar-accent-foreground: oklch(0.45 0.06 352);
-  --sidebar-border: oklch(0.90 0.012 55 / 0.50);
-  --sidebar-ring: oklch(0.68 0.10 35);
+  --sidebar: oklch(0.96 0.022 219);
+  --sidebar-foreground: oklch(0.41 0.030 249);
+  --sidebar-primary: oklch(0.88 0.060 72);
+  --sidebar-primary-foreground: oklch(0.41 0.030 249);
+  --sidebar-accent: oklch(0.94 0.014 158);
+  --sidebar-accent-foreground: oklch(0.45 0.035 155);
+  --sidebar-border: oklch(0.88 0.018 219 / 0.50);
+  --sidebar-ring: oklch(0.72 0.060 68);
 
   /* ── Sora Brand Palette — 名前付きトークン ────────────────── */
-  --sora-sky:      oklch(0.93 0.04 218);  /* Sky Blue    */
-  --sora-dawn:     oklch(0.83 0.09 35);   /* Dawn Peach  */
-  --sora-warm:     oklch(0.92 0.06 78);   /* Warm Light  */
-  --sora-pink:     oklch(0.90 0.05 352);  /* Soft Pink   */
-  --sora-lavender: oklch(0.88 0.05 292);  /* Lavender    */
-  --sora-gold:     oklch(0.86 0.10 68);   /* Gold Glow   */
-  --sora-cloud:    oklch(0.99 0.003 60);  /* Cloud White */
-  --sora-deep:     oklch(0.28 0.025 40);  /* Deep Text   */
+  --sora-sky-blue:     #E8F4FF;
+  --sora-twilight:     #D8E4F0;
+  --sora-sage:         #E5EDE8;
+  --sora-warm-sand:    #F0E6D8;
+  --sora-amber:        #EDD9B5;
+  --sora-deep-text:    #4A5568;
 
   /* Glass surface */
   --glass:        oklch(1 0 0 / 0.62);
   --glass-border: oklch(1 0 0 / 0.35);
 
   /* ── Gradient 定義値 ────────────────────────────────────────── */
-  /* [背景] 温かい朝焼け: 桃白 → 薄ピンク白 → 空青白 */
-  --gradient-sky-from: #fff5ee;
-  --gradient-sky-via:  #fdf0f8;
-  --gradient-sky-to:   #eff4ff;
+  /* [背景] Sky Blue → Twilight Blue → Warm Sand */
+  --gradient-sky-from: #E8F4FF;
+  --gradient-sky-via:  #D8E4F0;
+  --gradient-sky-to:   #F0E6D8;
 
-  /* [CTA] Dawn Peach → Warm Rose */
-  --gradient-cta-from: oklch(0.68 0.12 40);
-  --gradient-cta-to:   oklch(0.56 0.15 18);
+  /* [CTA] Warm Sand → Amber Light */
+  --gradient-cta-from: #F0E6D8;
+  --gradient-cta-to:   #EDD9B5;
 
-  /* [カード] ガラス白 → ラベンダーヒント */
+  /* [カード] ガラス白 → Twilight Blue ヒント */
   --gradient-card-from: oklch(1 0 0 / 0.72);
-  --gradient-card-to:   oklch(0.96 0.03 292 / 0.28);
+  --gradient-card-to:   oklch(0.91 0.022 219 / 0.30);
 
-  /* [光アクセント] ゴールド → ソフトピンク */
-  --gradient-glow-from: oklch(0.92 0.06 78 / 0.32);
-  --gradient-glow-to:   oklch(0.90 0.05 352 / 0.28);
-}
-
-/* ── ダークモード ───────────────────────────────────────────── */
-.dark {
-  --background: oklch(0.17 0.008 40);
-  --foreground: oklch(0.96 0.005 60);
-  --card: oklch(0.22 0.008 40 / 0.80);
-  --card-foreground: oklch(0.96 0.005 60);
-  --popover: oklch(0.22 0.008 40 / 0.95);
-  --popover-foreground: oklch(0.96 0.005 60);
-  --primary: oklch(0.75 0.10 35);
-  --primary-foreground: oklch(0.20 0.015 40);
-  --secondary: oklch(0.28 0.015 218);
-  --secondary-foreground: oklch(0.90 0.03 218);
-  --muted: oklch(0.25 0.008 40);
-  --muted-foreground: oklch(0.65 0.02 40);
-  --accent: oklch(0.32 0.04 352);
-  --accent-foreground: oklch(0.90 0.04 352);
-  --destructive: oklch(0.48 0.18 25);
-  --destructive-foreground: oklch(0.96 0.005 60);
-  --border: oklch(0.30 0.010 40);
-  --input: oklch(0.26 0.008 40);
-  --ring: oklch(0.65 0.09 35);
-  --chart-1: oklch(0.76 0.12 35);
-  --chart-2: oklch(0.65 0.09 218);
-  --chart-3: oklch(0.68 0.09 292);
-  --chart-4: oklch(0.76 0.10 78);
-  --chart-5: oklch(0.74 0.09 352);
-  --sidebar: oklch(0.22 0.008 40);
-  --sidebar-foreground: oklch(0.96 0.005 60);
-  --sidebar-primary: oklch(0.75 0.10 35);
-  --sidebar-primary-foreground: oklch(0.20 0.015 40);
-  --sidebar-accent: oklch(0.32 0.04 352);
-  --sidebar-accent-foreground: oklch(0.90 0.04 352);
-  --sidebar-border: oklch(0.30 0.010 40);
-  --sidebar-ring: oklch(0.65 0.09 35);
+  /* [光アクセント] Amber → Sage */
+  --gradient-glow-from: oklch(0.93 0.030 65 / 0.32);
+  --gradient-glow-to:   oklch(0.94 0.014 158 / 0.28);
 }
 
 /* ── @theme inline (Tailwind v4 トークン登録) ──────────────── */
 @theme inline {
-  --font-sans: var(--font-sans, 'Noto Sans JP', sans-serif);
+  --font-sans: var(--font-sans, 'Zen Maru Gothic', sans-serif);
+  --font-handwriting: var(--font-handwriting, 'Klee One', cursive);
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
 
   --color-background:               var(--background);
@@ -187,14 +149,12 @@
   --color-sidebar-ring:                  var(--sidebar-ring);
 
   /* Sora brand palette — Tailwind クラスで使える */
-  --color-sora-sky:      var(--sora-sky);
-  --color-sora-dawn:     var(--sora-dawn);
-  --color-sora-warm:     var(--sora-warm);
-  --color-sora-pink:     var(--sora-pink);
-  --color-sora-lavender: var(--sora-lavender);
-  --color-sora-gold:     var(--sora-gold);
-  --color-sora-cloud:    var(--sora-cloud);
-  --color-sora-deep:     var(--sora-deep);
+  --color-sora-sky:      var(--sora-sky-blue);
+  --color-sora-twilight: var(--sora-twilight);
+  --color-sora-sage:     var(--sora-sage);
+  --color-sora-sand:     var(--sora-warm-sand);
+  --color-sora-amber:    var(--sora-amber);
+  --color-sora-deep:     var(--sora-deep-text);
 }
 
 /* ── Base ───────────────────────────────────────────────────── */
@@ -220,10 +180,10 @@
   /* Sora グラデーション ユーティリティ */
   .bg-sora-sky {
     background: linear-gradient(
-      to bottom,
-      var(--gradient-sky-from),
-      var(--gradient-sky-via),
-      var(--gradient-sky-to)
+      180deg,
+      var(--gradient-sky-from) 0%,
+      var(--gradient-sky-via)  40%,
+      var(--gradient-sky-to)   100%
     );
   }
   .bg-sora-cta {
@@ -234,5 +194,10 @@
   }
   .bg-sora-glow {
     background: linear-gradient(135deg, var(--gradient-glow-from), var(--gradient-glow-to));
+  }
+
+  /* 手書きフォント */
+  .font-handwriting {
+    font-family: var(--font-handwriting);
   }
 }

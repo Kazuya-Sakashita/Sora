@@ -22,6 +22,7 @@
 | [010](ISSUE-010-chat-prompts-postloss-only.md) | チャット画面をPhase 3まで非表示化する | 🟡 medium | open |
 | [015](ISSUE-015-record-completion-feedback.md) | 記録完了後の達成フィードバックを実装する | 🟡 medium | open |
 | [016](ISSUE-016-settings-professional-resource.md) | 設定画面に専門家リソースへのリンクを追加する | 🟡 medium | open |
+| [017](ISSUE-017-design-system.md) | デザインシステムを新パレット・フォントに刷新する | 🟠 high | done |
 
 ---
 

@@ -1,13 +1,19 @@
 import type { Metadata, Viewport } from 'next'
-import { Noto_Sans_JP } from 'next/font/google'
+import { Zen_Maru_Gothic, Klee_One } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const notoSansJP = Noto_Sans_JP({ 
+const zenMaruGothic = Zen_Maru_Gothic({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-sans",
-});
+})
+
+const kleeOne = Klee_One({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-handwriting",
+})
 
 export const metadata: Metadata = {
   title: 'Sora — ペットとの毎日を残す場所',
@@ -38,7 +44,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#e8f0ff',
+  themeColor: '#E8F4FF',
 }
 
 export default function RootLayout({
@@ -48,7 +54,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className="bg-background">
-      <body className={`${notoSansJP.variable} font-sans antialiased min-h-screen`}>
+      <body className={`${zenMaruGothic.variable} ${kleeOne.variable} font-sans antialiased min-h-screen`}>
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
