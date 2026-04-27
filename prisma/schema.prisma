@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------
+// ユーザー（Supabase Auth と同じ UUID を使用）
+// -----------------------------------------------
+model User {
+  id        String   @id // Supabase Auth user UUID
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  pets      Pet[]
+
+  @@map("users")
+}
+
+// -----------------------------------------------
+// ペットプロフィール
+// -----------------------------------------------
+model Pet {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  nickname    String?
+  species     Species?
+  breed       String?
+  birthDate   DateTime?  @map("birth_date")
+  gender      Gender?
+  personality String?
+  favorites   String?
+  photoUrl    String?    @map("photo_url")
+  broughtAt   DateTime?  @map("brought_at")
+  status      PetStatus  @default(ALIVE)
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  memories  Memory[]
+  feelings  Feeling[]
+  schedules Schedule[]
+
+  @@map("pets")
+}
+
+enum PetStatus {
+  ALIVE
+  RAINBOW_BRIDGE
+}
+
+enum Species {
+  DOG
+  CAT
+  RABBIT
+  BIRD
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+// -----------------------------------------------
+// 思い出記録
+// -----------------------------------------------
+model Memory {
+  id          String         @id @default(uuid())
+  petId       String         @map("pet_id")
+  pet         Pet            @relation(fields: [petId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  date        DateTime
+  category    MemoryCategory @default(OTHER)
+  moodTag     MoodTag?       @map("mood_tag")
+  photoUrls   String[]       @default([]) @map("photo_urls")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  @@map("memories")
+}
+
+enum MemoryCategory {
+  TRIP
+  DAILY
+  HOSPITAL
+  TRIMMING
+  ANNIVERSARY
+  OTHER
+}
+
+enum MoodTag {
+  HAPPY
+  CALM
+  WORRIED
+  FUN
+  LOVING
+}
+
+// -----------------------------------------------
+// 気持ち記録
+// -----------------------------------------------
+model Feeling {
+  id        String     @id @default(uuid())
+  petId     String     @map("pet_id")
+  pet       Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+  tag       FeelingTag
+  memo      String?
+  date      DateTime
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@map("feelings")
+}
+
+enum FeelingTag {
+  HAPPY
+  CALM
+  LONELY
+  SAD
+  GRATEFUL
+  ANXIOUS
+}
+
+// -----------------------------------------------
+// 予定管理
+// -----------------------------------------------
+model Schedule {
+  id        String       @id @default(uuid())
+  petId     String       @map("pet_id")
+  pet       Pet          @relation(fields: [petId], references: [id], onDelete: Cascade)
+  type      ScheduleType
+  title     String
+  date      DateTime
+  memo      String?
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@map("schedules")
+}
+
+enum ScheduleType {
+  HOSPITAL
+  TRIMMING
+  VACCINE
+  ANNIVERSARY
+  OTHER
+}
