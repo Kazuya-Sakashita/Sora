@@ -71,9 +71,7 @@ export type Screen =
   | "onboarding"
   | "profile-create"
   | "home"
-  | "chat"
   | "timeline"
-  | "letter"
   | "feelings"
   | "settings"
 

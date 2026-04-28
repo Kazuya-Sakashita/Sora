@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |------|------|
 | 優先度 | medium |
-| ステータス | open |
+| ステータス | done |
 | 関連画面 | お話しする（チャット）画面 |
 | 関連ファイル | `components/screens/chat.tsx`, `app/page.tsx` |
 

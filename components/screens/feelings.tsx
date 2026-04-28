@@ -6,10 +6,10 @@ import { GlassCard } from "@/components/glass-card"
 import { ArrowLeft, Check } from "lucide-react"
 
 const feelingOptions = [
-  { emoji: "😊", label: "うれしい", tag: "happy" },
-  { emoji: "🌿", label: "おだやか", tag: "calm" },
+  { emoji: "🥰", label: "うれしい", tag: "happy" },
+  { emoji: "😌", label: "おだやか", tag: "calm" },
   { emoji: "😄", label: "笑った", tag: "fun" },
-  { emoji: "💭", label: "心配", tag: "worried" },
+  { emoji: "😟", label: "心配", tag: "worried" },
   { emoji: "💝", label: "愛おしい", tag: "loving" },
 ]
 

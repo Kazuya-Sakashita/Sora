@@ -5,9 +5,7 @@ import { SkyBackground } from "@/components/sky-background"
 import { OnboardingScreen } from "@/components/screens/onboarding"
 import { ProfileCreateScreen } from "@/components/screens/profile-create"
 import { HomeScreen } from "@/components/screens/home"
-import { ChatScreen } from "@/components/screens/chat"
 import { TimelineScreen } from "@/components/screens/timeline"
-import { LetterScreen } from "@/components/screens/letter"
 import { FeelingsScreen } from "@/components/screens/feelings"
 import { SettingsScreen } from "@/components/screens/settings"
 
@@ -30,12 +28,8 @@ function AppContent() {
         return <ProfileCreateScreen />
       case "home":
         return <HomeScreen />
-      case "chat":
-        return <ChatScreen />
       case "timeline":
         return <TimelineScreen />
-      case "letter":
-        return <LetterScreen />
       case "feelings":
         return <FeelingsScreen />
       case "settings":

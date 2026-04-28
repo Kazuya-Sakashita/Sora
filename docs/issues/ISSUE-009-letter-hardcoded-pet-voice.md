@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |------|------|
 | 優先度 | high |
-| ステータス | open |
+| ステータス | done |
 | 関連画面 | ことば（手紙）画面 |
 | 関連ファイル | `components/screens/letter.tsx`, `app/page.tsx` |
 

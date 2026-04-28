@@ -20,7 +20,7 @@ const letters = [
 ]
 
 export function LetterScreen() {
-  const { setCurrentScreen, pet } = useApp()
+  const { setCurrentScreen } = useApp()
   const [currentLetter, setCurrentLetter] = useState<string | null>(null)
   const [savedLetters, setSavedLetters] = useState<string[]>([])
   const [isAnimating, setIsAnimating] = useState(false)
@@ -72,11 +72,7 @@ export function LetterScreen() {
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
             
             <div className={`py-8 px-4 transition-opacity duration-500 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
-              {pet && (
-                <p className="text-sm text-primary/60 mb-6 text-center">
-                  {pet.name}より
-                </p>
-              )}
+
               <p className="text-center text-foreground/80 leading-loose whitespace-pre-line text-base">
                 {currentLetter}
               </p>
