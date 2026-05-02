@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2 } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
@@ -52,6 +52,7 @@ export function TimelineScreen() {
   const [showLimitWarning, setShowLimitWarning] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [view, setView] = useState<"list" | "calendar">("list")
@@ -72,6 +73,26 @@ export function TimelineScreen() {
       setScrollTarget(null)
     }
   }, [scrollTarget, view])
+
+  const handleDownloadReport = async () => {
+    if (!pet || isDownloadingReport) return
+    setIsDownloadingReport(true)
+    const year = new Date().getFullYear() - 1
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/report?year=${year}`)
+      if (res.status === 402) { setShowUpgradeModal(true); return }
+      if (res.status === 404) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `sora-${year}-report.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setIsDownloadingReport(false)
+    }
+  }
 
   const handleShare = async (memoryId: string, title: string) => {
     const result = await shareMemory(memoryId, title)
@@ -348,6 +369,24 @@ export function TimelineScreen() {
             </div>
           </div>
         ))}
+
+        {/* Annual Report */}
+        {view === "list" && memories.length > 0 && (
+          <div className="flex justify-center pt-1 pb-2">
+            <button
+              onClick={handleDownloadReport}
+              disabled={isDownloadingReport}
+              className="flex items-center gap-2 px-5 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-sm text-amber-700 hover:bg-amber-100 transition-colors disabled:opacity-60"
+            >
+              {isDownloadingReport ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <FileText size={15} />
+              )}
+              {new Date().getFullYear() - 1}年の思い出レポート
+            </button>
+          </div>
+        )}
 
         {/* Load More */}
         {view === "list" && memories.length < memoriesTotal && (
