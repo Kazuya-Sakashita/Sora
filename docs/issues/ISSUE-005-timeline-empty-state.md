@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |------|------|
 | 優先度 | medium |
-| ステータス | open |
+| ステータス | done |
 | 関連画面 | タイムライン画面 |
 | 関連ファイル | `components/screens/timeline.tsx` |
 
