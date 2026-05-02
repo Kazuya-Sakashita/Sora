@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     customer: customerId,
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${appUrl}/settings?upgraded=1`,
+    success_url: `${appUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/settings?canceled=1`,
     metadata: { userId: user.id },
   })

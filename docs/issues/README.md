@@ -47,7 +47,7 @@
 | [039](ISSUE-039-zod-validation.md) | zodバリデーション統一 | 🟡 medium | done |
 | [040](ISSUE-040-first-record-nudge.md) | 初回記録への強制誘導（First Record Nudge） | 🔴 critical | done |
 | [041](ISSUE-041-plus-preview.md) | Sora+ 機能プレビュー（価値の先見せ） | 🟠 high | open |
-| [042](ISSUE-042-billing-success-page.md) | 課金成功後のWelcome画面 | 🟠 high | open |
+| [042](ISSUE-042-billing-success-page.md) | 課金成功後のWelcome画面 | 🟠 high | done |
 | [043](ISSUE-043-home-plus-banner.md) | ホームにSora+誘引バナーを常設 | 🟠 high | done |
 | [044](ISSUE-044-milestone-share.md) | マイルストーン当日のSNSシェア強化 | 🟡 medium | open |
 | [045](ISSUE-045-weekly-push.md) | 週次リマインダープッシュ通知 | 🟡 medium | open |
