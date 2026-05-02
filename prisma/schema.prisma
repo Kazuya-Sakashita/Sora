@@ -11,13 +11,21 @@ datasource db {
 // ユーザー（Supabase Auth と同じ UUID を使用）
 // -----------------------------------------------
 model User {
-  id                String             @id // Supabase Auth user UUID
-  email             String             @unique
-  createdAt         DateTime           @default(now()) @map("created_at")
-  pets              Pet[]
-  pushSubscriptions PushSubscription[]
+  id                   String             @id // Supabase Auth user UUID
+  email                String             @unique
+  plan                 Plan               @default(FREE)
+  stripeCustomerId     String?            @map("stripe_customer_id")
+  stripeSubscriptionId String?            @map("stripe_subscription_id")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  pets                 Pet[]
+  pushSubscriptions    PushSubscription[]
 
   @@map("users")
+}
+
+enum Plan {
+  FREE
+  PLUS
 }
 
 // -----------------------------------------------

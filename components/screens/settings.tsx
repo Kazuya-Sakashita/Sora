@@ -12,12 +12,15 @@ import {
   deletePushSubscription,
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2 } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink } from "lucide-react"
 
 export function SettingsScreen() {
   const { setCurrentScreen, conversationTone, setConversationTone } = useApp()
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false)
   const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported" | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isTogglingNotif, setIsTogglingNotif] = useState(false)
@@ -27,6 +30,7 @@ export function SettingsScreen() {
     supabase.auth.getUser().then(({ data }) => {
       setUserEmail(data.user?.email ?? null)
     })
+    fetch("/api/billing/plan").then((r) => r.json()).then(({ plan }) => setPlan(plan))
     getNotificationStatus().then(setNotifStatus)
     isCurrentlySubscribed().then(setIsSubscribed)
   }, [])
@@ -56,6 +60,32 @@ export function SettingsScreen() {
     } finally {
       setIsTogglingNotif(false)
       getNotificationStatus().then(setNotifStatus)
+    }
+  }
+
+  const handleCheckout = async (interval: "month" | "year") => {
+    setIsCheckingOut(true)
+    try {
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interval }),
+      })
+      const { url } = await res.json()
+      if (url) window.location.href = url
+    } finally {
+      setIsCheckingOut(false)
+    }
+  }
+
+  const handlePortal = async () => {
+    setIsOpeningPortal(true)
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" })
+      const { url } = await res.json()
+      if (url) window.location.href = url
+    } finally {
+      setIsOpeningPortal(false)
     }
   }
 
@@ -106,9 +136,74 @@ export function SettingsScreen() {
                 <p className="text-xs text-muted-foreground">ログイン中</p>
                 <p className="text-sm font-medium text-foreground/80 truncate">{userEmail}</p>
               </div>
+              {plan === "PLUS" && (
+                <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-xs font-semibold text-amber-600">
+                  <Sparkles size={11} />Sora+
+                </span>
+              )}
+              {plan === "FREE" && (
+                <span className="shrink-0 inline-flex items-center px-2.5 py-1 rounded-full bg-muted/40 text-xs text-muted-foreground">
+                  Free
+                </span>
+              )}
             </GlassCard>
           </section>
         )}
+
+        {/* Plan */}
+        <section className="space-y-3">
+          {plan === "FREE" && (
+            <GlassCard className="space-y-4 py-5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
+                  <Sparkles size={20} className="text-amber-500" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-foreground/90">Sora+</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">無制限記録・年次レポート・フォトブック</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleCheckout("month")}
+                  disabled={isCheckingOut}
+                  className="h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
+                >
+                  {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "月額 ¥480"}
+                </button>
+                <button
+                  onClick={() => handleCheckout("year")}
+                  disabled={isCheckingOut}
+                  className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
+                >
+                  <span>年額 ¥4,300</span>
+                  <span className="text-[10px] opacity-80">約25%お得</span>
+                </button>
+              </div>
+            </GlassCard>
+          )}
+          {plan === "PLUS" && (
+            <GlassCard className="py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
+                  <Sparkles size={20} className="text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-foreground/90 text-sm">Sora+ ご利用中</p>
+                  <p className="text-xs text-muted-foreground">すべての機能をお使いいただけます</p>
+                </div>
+                <button
+                  onClick={handlePortal}
+                  disabled={isOpeningPortal}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground/70 transition-colors disabled:opacity-60"
+                >
+                  {isOpeningPortal ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
+                  管理
+                </button>
+              </div>
+            </GlassCard>
+          )}
+        </section>
 
         {/* Conversation Tone */}
         <section className="space-y-4">

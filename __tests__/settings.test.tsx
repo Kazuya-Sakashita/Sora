@@ -24,6 +24,12 @@ const mockSavePushSubscription = vi.fn()
 const mockUnsubscribePush = vi.fn()
 const mockDeletePushSubscription = vi.fn()
 
+// /api/billing/plan fetch をモック
+vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+  json: () => Promise.resolve({ plan: "FREE" }),
+  ok: true,
+} as Response))
+
 vi.mock("@/lib/push-client", () => ({
   getNotificationStatus: () => mockGetNotificationStatus(),
   isCurrentlySubscribed: () => mockIsCurrentlySubscribed(),
