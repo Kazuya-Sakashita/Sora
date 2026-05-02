@@ -82,6 +82,7 @@ function mockContext(memories: Memory[], pet: Pet | null = mockPet) {
     deleteSchedule: vi.fn(),
     conversationTone: "やさしく寄り添う",
     setConversationTone: vi.fn(),
+    updatePetStatus: vi.fn(),
   })
 }
 

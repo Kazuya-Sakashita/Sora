@@ -60,6 +60,7 @@ function mockAppContext() {
     deleteSchedule: vi.fn(),
     conversationTone: "やさしく寄り添う",
     setConversationTone: vi.fn(),
+    updatePetStatus: vi.fn(),
   })
 }
 

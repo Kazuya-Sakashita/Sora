@@ -12,15 +12,17 @@ import {
   deletePushSubscription,
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow } from "lucide-react"
 
 export function SettingsScreen() {
-  const { setCurrentScreen, conversationTone, setConversationTone } = useApp()
+  const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus } = useApp()
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const [isOpeningPortal, setIsOpeningPortal] = useState(false)
+  const [showStatusModal, setShowStatusModal] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
   const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported" | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isTogglingNotif, setIsTogglingNotif] = useState(false)
@@ -86,6 +88,18 @@ export function SettingsScreen() {
       if (url) window.location.href = url
     } finally {
       setIsOpeningPortal(false)
+    }
+  }
+
+  const handleStatusChange = async (status: "alive" | "rainbow_bridge") => {
+    setIsUpdatingStatus(true)
+    try {
+      await updatePetStatus(status)
+      setShowStatusModal(false)
+    } catch {
+      // keep modal open on error
+    } finally {
+      setIsUpdatingStatus(false)
     }
   }
 
@@ -298,6 +312,95 @@ export function SettingsScreen() {
             </GlassCard>
           ))}
         </section>
+
+        {/* Pet Status */}
+        {pet && (
+          <section>
+            <GlassCard className="flex items-center gap-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center">
+                <Rainbow size={20} className="text-sky-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-foreground/80 text-sm">{pet.name}のステータス</p>
+                <p className="text-xs text-muted-foreground">
+                  {pet.status === "rainbow_bridge" ? "虹の橋の向こうに" : "一緒に過ごしている"}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowStatusModal(true)}
+                className="text-xs text-muted-foreground hover:text-foreground/70 transition-colors"
+              >
+                変更
+              </button>
+            </GlassCard>
+          </section>
+        )}
+
+        {/* Status Change Modal */}
+        {showStatusModal && pet && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
+              {pet.status === "rainbow_bridge" ? (
+                <>
+                  <div className="text-center space-y-3">
+                    <p className="text-4xl">🌿</p>
+                    <h2 className="font-semibold text-foreground/90 text-base leading-snug">
+                      {pet.name}のステータスを<br />「一緒に過ごしている」に戻しますか？
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      いつでもまた変更できます。
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleStatusChange("alive")}
+                      disabled={isUpdatingStatus}
+                      className="w-full h-12 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {isUpdatingStatus ? <Loader2 size={16} className="animate-spin" /> : "「一緒に過ごしている」に戻す"}
+                    </button>
+                    <button
+                      onClick={() => setShowStatusModal(false)}
+                      className="w-full h-10 text-sm text-muted-foreground hover:text-foreground/70 transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center space-y-3">
+                    <p className="text-4xl">🌈</p>
+                    <h2 className="font-semibold text-foreground/90 text-base leading-snug">
+                      {pet.name}が虹の橋へ<br />旅立ったことを記録しますか？
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {pet.name}との思い出を、これからも大切に残していけます。手紙やおはなし機能が使えるようになります。
+                    </p>
+                    <p className="text-xs text-muted-foreground/60">
+                      いつでも変更できます
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => handleStatusChange("rainbow_bridge")}
+                      disabled={isUpdatingStatus}
+                      className="w-full h-12 rounded-2xl bg-primary/10 hover:bg-primary/15 text-primary/80 font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      {isUpdatingStatus ? <Loader2 size={16} className="animate-spin" /> : "虹の橋へ旅立ったことを記録する"}
+                    </button>
+                    <button
+                      onClick={() => setShowStatusModal(false)}
+                      className="w-full h-10 text-sm text-muted-foreground hover:text-foreground/70 transition-colors"
+                    >
+                      キャンセル
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Logout */}
         <section>

@@ -93,12 +93,15 @@ export type Screen =
   | "feelings"
   | "settings"
   | "schedule"
+  | "letter"
+  | "chat"
 
 type AppContextType = {
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
   pet: Pet | null
   createPet: (input: CreatePetInput) => Promise<void>
+  updatePetStatus: (status: "alive" | "rainbow_bridge") => Promise<void>
   memories: Memory[]
   memoriesTotal: number
   addMemory: (input: CreateMemoryInput) => Promise<void>
@@ -172,6 +175,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const newPet = (await res.json()) as Pet
     setPet(newPet)
     setCurrentScreen("home")
+  }
+
+  const updatePetStatus = async (status: "alive" | "rainbow_bridge") => {
+    if (!pet) return
+    const res = await fetch(`/api/pets/${pet.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    })
+    if (!res.ok) throw new Error("ステータスの更新に失敗しました")
+    const updated = (await res.json()) as Pet
+    setPet(updated)
   }
 
   const addMemory = async (input: CreateMemoryInput) => {
@@ -249,6 +264,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setCurrentScreen,
         pet,
         createPet,
+        updatePetStatus,
         memories,
         memoriesTotal,
         addMemory,

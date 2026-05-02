@@ -9,6 +9,8 @@ import { TimelineScreen } from "@/components/screens/timeline"
 import { FeelingsScreen } from "@/components/screens/feelings"
 import { SettingsScreen } from "@/components/screens/settings"
 import { ScheduleScreen } from "@/components/screens/schedule"
+import { LetterScreen } from "@/components/screens/letter"
+import { ChatScreen } from "@/components/screens/chat"
 
 function AppContent() {
   const { currentScreen, isLoading } = useApp()
@@ -37,6 +39,10 @@ function AppContent() {
         return <SettingsScreen />
       case "schedule":
         return <ScheduleScreen />
+      case "letter":
+        return <LetterScreen />
+      case "chat":
+        return <ChatScreen />
       default:
         return <OnboardingScreen />
     }

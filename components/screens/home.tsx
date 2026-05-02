@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
@@ -109,7 +109,7 @@ export function HomeScreen() {
         {pet && (
           <GlassCard className="text-center py-10 space-y-2">
             <p className="text-sm text-muted-foreground">
-              {pet.name}と一緒に
+              {pet.status === "rainbow_bridge" ? `${pet.name}と過ごした` : `${pet.name}と一緒に`}
             </p>
             {days !== null ? (
               <div className="flex items-end justify-center gap-2">
@@ -195,6 +195,26 @@ export function HomeScreen() {
             予定を見る
           </button>
         </div>
+
+        {/* Loss Care Navigation — RAINBOW_BRIDGE only */}
+        {pet?.status === "rainbow_bridge" && (
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setCurrentScreen("letter")}
+              className="h-12 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-white/80 transition-colors"
+            >
+              <Mail size={16} />
+              ことば
+            </button>
+            <button
+              onClick={() => setCurrentScreen("chat")}
+              className="h-12 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-white/80 transition-colors"
+            >
+              <MessageCircle size={16} />
+              はなす
+            </button>
+          </div>
+        )}
 
         {/* On This Day */}
         {onThisDay && (
