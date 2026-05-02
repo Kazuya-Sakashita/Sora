@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
+import { validateLength, validatePhotoUrls } from "@/lib/validate"
 
 type Params = { params: Promise<{ petId: string }> }
 
@@ -72,6 +73,14 @@ export async function POST(request: Request, { params }: Params) {
   const body = await request.json().catch(() => null)
   if (!body || !body.title || !body.date) {
     return problem(400, "Bad Request", "title と date は必須です")
+  }
+
+  const validationError =
+    validateLength(body.title, "title", 100) ??
+    validateLength(body.description, "description", 2000) ??
+    validatePhotoUrls(body.photoUrls)
+  if (validationError) {
+    return problem(400, "Bad Request", validationError.message)
   }
 
   const memory = await prisma.memory.create({

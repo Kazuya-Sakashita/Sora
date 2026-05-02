@@ -1,8 +1,14 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
-
+import { applyRateLimit } from "@/lib/ratelimit"
 
 export async function middleware(request: NextRequest) {
+  // APIルートにレート制限を適用
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    const rateLimitResponse = await applyRateLimit(request)
+    if (rateLimitResponse) return rateLimitResponse
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
