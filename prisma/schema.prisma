@@ -11,10 +11,11 @@ datasource db {
 // ユーザー（Supabase Auth と同じ UUID を使用）
 // -----------------------------------------------
 model User {
-  id        String   @id // Supabase Auth user UUID
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
-  pets      Pet[]
+  id                String             @id // Supabase Auth user UUID
+  email             String             @unique
+  createdAt         DateTime           @default(now()) @map("created_at")
+  pets              Pet[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -147,4 +148,19 @@ enum ScheduleType {
   VACCINE
   ANNIVERSARY
   OTHER
+}
+
+// -----------------------------------------------
+// Web Push 購読情報
+// -----------------------------------------------
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String   @map("p256dh")
+  auth      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("push_subscriptions")
 }

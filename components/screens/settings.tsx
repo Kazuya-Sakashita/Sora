@@ -3,20 +3,61 @@
 import { useEffect, useState } from "react"
 import { useApp } from "@/lib/app-context"
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser"
+import {
+  getNotificationStatus,
+  isCurrentlySubscribed,
+  subscribePush,
+  savePushSubscription,
+  unsubscribePush,
+  deletePushSubscription,
+} from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2 } from "lucide-react"
 
 export function SettingsScreen() {
   const { setCurrentScreen, conversationTone, setConversationTone } = useApp()
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported" | null>(null)
+  const [isSubscribed, setIsSubscribed] = useState(false)
+  const [isTogglingNotif, setIsTogglingNotif] = useState(false)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
     supabase.auth.getUser().then(({ data }) => {
       setUserEmail(data.user?.email ?? null)
     })
+    getNotificationStatus().then(setNotifStatus)
+    isCurrentlySubscribed().then(setIsSubscribed)
   }, [])
+
+  const handleToggleNotification = async () => {
+    if (isTogglingNotif) return
+    setIsTogglingNotif(true)
+    try {
+      if (isSubscribed) {
+        const reg = await navigator.serviceWorker.getRegistration("/sw.js")
+        const sub = await reg?.pushManager.getSubscription()
+        if (sub) {
+          await deletePushSubscription(sub.endpoint)
+          await unsubscribePush()
+        }
+        setIsSubscribed(false)
+      } else {
+        const sub = await subscribePush()
+        if (sub) {
+          await savePushSubscription(sub)
+          setIsSubscribed(true)
+          setNotifStatus("granted")
+        }
+      }
+    } catch {
+      // permission denied or error — do nothing
+    } finally {
+      setIsTogglingNotif(false)
+      getNotificationStatus().then(setNotifStatus)
+    }
+  }
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -32,7 +73,6 @@ export function SettingsScreen() {
   ]
 
   const settingSections = [
-    { icon: Bell, label: "通知", description: "やさしいリマインダー" },
     { icon: Palette, label: "テーマ", description: "画面の雰囲気" },
     { icon: Lock, label: "プライバシー", description: "あなたの思い出を守る" },
   ]
@@ -107,6 +147,45 @@ export function SettingsScreen() {
           </div>
         </section>
 
+        {/* Notification Toggle */}
+        {notifStatus !== "unsupported" && (
+          <section>
+            <GlassCard className="flex items-center gap-4 py-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bell size={20} className="text-primary/70" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-foreground/80 text-sm">毎朝のリマインダー</p>
+                <p className="text-xs text-muted-foreground">
+                  {notifStatus === "denied"
+                    ? "通知がブロックされています（ブラウザ設定から変更）"
+                    : isSubscribed
+                    ? "毎朝8時にお知らせします"
+                    : "やさしいリマインダー"}
+                </p>
+              </div>
+              <button
+                onClick={handleToggleNotification}
+                disabled={isTogglingNotif || notifStatus === "denied"}
+                className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
+                  isSubscribed ? "bg-primary/70" : "bg-muted/50"
+                }`}
+                aria-label="通知トグル"
+              >
+                {isTogglingNotif ? (
+                  <Loader2 size={12} className="absolute inset-0 m-auto animate-spin text-white" />
+                ) : (
+                  <span
+                    className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                      isSubscribed ? "translate-x-6" : "translate-x-0.5"
+                    }`}
+                  />
+                )}
+              </button>
+            </GlassCard>
+          </section>
+        )}
+
         {/* Other Settings */}
         <section className="space-y-3">
           {settingSections.map(({ icon: Icon, label, description }) => (
@@ -135,6 +214,25 @@ export function SettingsScreen() {
             <LogOut size={16} />
             {isLoggingOut ? "ログアウト中..." : "ログアウト"}
           </button>
+        </section>
+
+        {/* Professional Support */}
+        <section className="space-y-3">
+          <div className="h-px bg-foreground/8" />
+          <div className="px-1 space-y-2">
+            <p className="text-xs font-medium text-muted-foreground/70">サポートについて</p>
+            <p className="text-xs text-muted-foreground/60 leading-relaxed">
+              このアプリはペットとの思い出を大切にするためのものです。深刻な悲しみや日常生活への影響を感じている場合は、専門家のサポートもご検討ください。
+            </p>
+            <a
+              href="https://www.mhlw.go.jp/mamorouyokokoro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground/60 underline underline-offset-2 hover:text-muted-foreground/80 transition-colors"
+            >
+              こころの健康について（厚生労働省）
+            </a>
+          </div>
         </section>
 
         {/* Footer Message */}
