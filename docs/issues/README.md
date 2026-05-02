@@ -30,7 +30,7 @@
 | [022](ISSUE-022-memories-pagination.md) | memories/feelingsの取得をページネーション化する | 🟡 medium | done |
 | [023](ISSUE-023-replace-alert-with-inline-error.md) | alert()をインラインエラー表示に置換する | 🟠 high | done |
 | [024](ISSUE-024-record-streak.md) | 記録ストリーク（連続記録日数の可視化） | 🔴 critical | done |
-| [025](ISSUE-025-calendar-view.md) | 記録カレンダービュー | 🔴 critical | open |
+| [025](ISSUE-025-calendar-view.md) | 記録カレンダービュー | 🔴 critical | done |
 | [026](ISSUE-026-monthly-recap.md) | 月次ふりかえりカードの自動生成 | 🟠 high | open |
 | [027](ISSUE-027-share-memory.md) | 思い出シェア機能（OGP画像生成） | 🟠 high | open |
 | [028](ISSUE-028-milestone-notification.md) | 記念日・マイルストーン通知とお祝いカード | 🟠 high | open |

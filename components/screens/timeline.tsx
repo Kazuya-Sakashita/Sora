@@ -1,14 +1,15 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useApp } from "@/lib/app-context"
 import type { Memory } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
+import { MemoryCalendar } from "@/components/memory-calendar"
 
 const moodMap: Record<string, { emoji: string; label: string }> = {
   happy: { emoji: "🥰", label: "うれしい" },
@@ -47,6 +48,40 @@ export function TimelineScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [view, setView] = useState<"list" | "calendar">("list")
+  const today = new Date()
+  const [calYear, setCalYear] = useState(today.getFullYear())
+  const [calMonth, setCalMonth] = useState(today.getMonth())
+  const [scrollTarget, setScrollTarget] = useState<string | null>(null)
+
+  const recordedDates = new Set(memories.map((m) => m.date))
+  const hasPhotoDates = new Set(
+    memories.filter((m) => m.photoUrls.length > 0).map((m) => m.date)
+  )
+
+  useEffect(() => {
+    if (scrollTarget && view === "list") {
+      const el = document.getElementById(`memory-${scrollTarget}`)
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+      setScrollTarget(null)
+    }
+  }, [scrollTarget, view])
+
+  const handleCalendarDayClick = (dateStr: string) => {
+    setView("list")
+    setScrollTarget(dateStr)
+  }
+
+  const handlePrevMonth = () => {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11) }
+    else setCalMonth(m => m - 1)
+  }
+
+  const handleNextMonth = () => {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0) }
+    else setCalMonth(m => m + 1)
+  }
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -102,13 +137,22 @@ export function TimelineScreen() {
             </button>
             <h1 className="flex-1 font-medium text-foreground/90">思い出</h1>
             {!isAdding && (
-              <button
-                aria-label="思い出を追加"
-                onClick={() => setIsAdding(true)}
-                className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary/70 hover:bg-primary/25 transition-colors"
-              >
-                <Plus size={20} />
-              </button>
+              <>
+                <button
+                  aria-label={view === "list" ? "カレンダービューに切り替え" : "リストビューに切り替え"}
+                  onClick={() => setView(v => v === "list" ? "calendar" : "list")}
+                  className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground hover:bg-white/80 transition-colors"
+                >
+                  {view === "list" ? <CalendarDays size={18} /> : <LayoutList size={18} />}
+                </button>
+                <button
+                  aria-label="思い出を追加"
+                  onClick={() => { setIsAdding(true); setView("list") }}
+                  className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary/70 hover:bg-primary/25 transition-colors"
+                >
+                  <Plus size={20} />
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -180,8 +224,21 @@ export function TimelineScreen() {
           </GlassCard>
         )}
 
+        {/* Calendar View */}
+        {view === "calendar" && (
+          <MemoryCalendar
+            year={calYear}
+            month={calMonth}
+            recordedDates={recordedDates}
+            hasPhotoDates={hasPhotoDates}
+            onDayClick={handleCalendarDayClick}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+          />
+        )}
+
         {/* Empty State */}
-        {memories.length === 0 && !isAdding && (
+        {memories.length === 0 && !isAdding && view === "list" && (
           <div className="py-20 flex flex-col items-center gap-6 text-center">
             <div className="w-20 h-20 rounded-full bg-white/60 backdrop-blur-sm border border-white/50 flex items-center justify-center">
               <Image size={32} className="text-primary/40" />
@@ -204,7 +261,7 @@ export function TimelineScreen() {
         )}
 
         {/* Monthly Groups */}
-        {groups.map((group) => (
+        {view === "list" && groups.map((group) => (
           <div key={group.label} className="space-y-3">
             {/* Month Header */}
             <div className="flex items-center gap-3 px-1">
@@ -217,6 +274,7 @@ export function TimelineScreen() {
               {group.items.map((memory) => (
                 <div
                   key={memory.id}
+                  id={`memory-${memory.date}`}
                   className="rounded-3xl overflow-hidden bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"
                 >
                   {/* Photo */}
@@ -265,7 +323,7 @@ export function TimelineScreen() {
         ))}
 
         {/* Load More */}
-        {memories.length < memoriesTotal && (
+        {view === "list" && memories.length < memoriesTotal && (
           <div className="flex justify-center pt-2 pb-4">
             <button
               onClick={loadMoreMemories}
