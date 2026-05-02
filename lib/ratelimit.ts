@@ -12,13 +12,15 @@ function getLimiter() {
   const { Redis } = require("@upstash/redis")
   limiter = new Ratelimit({
     redis: new Redis({ url, token }),
-    limiter: Ratelimit.slidingWindow(10, "1 m"),
+    limiter: Ratelimit.slidingWindow(60, "1 m"),
     prefix: "sora:rl",
   })
   return limiter
 }
 
 export async function applyRateLimit(req: NextRequest): Promise<NextResponse | null> {
+  if (process.env.NODE_ENV === "development") return null
+
   const rl = getLimiter()
   if (!rl) return null
 
