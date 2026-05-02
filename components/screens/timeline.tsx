@@ -52,6 +52,7 @@ export function TimelineScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showPreview, setShowPreview] = useState<"photobook" | "report" | null>(null)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const [downloadingPhotobook, setDownloadingPhotobook] = useState<string | null>(null)
@@ -90,7 +91,7 @@ export function TimelineScreen() {
     const year = new Date().getFullYear() - 1
     try {
       const res = await fetch(`/api/pets/${pet.id}/report?year=${year}`)
-      if (res.status === 402) { setShowUpgradeModal(true); return }
+      if (res.status === 402) { setShowPreview("report"); return }
       if (res.status === 404) return
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
@@ -109,7 +110,7 @@ export function TimelineScreen() {
     setDownloadingPhotobook(label)
     try {
       const res = await fetch(`/api/pets/${pet.id}/photobook?year=${year}&month=${month}`)
-      if (res.status === 402) { setShowUpgradeModal(true); return }
+      if (res.status === 402) { setShowPreview("photobook"); return }
       if (!res.ok) return
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
@@ -162,7 +163,6 @@ export function TimelineScreen() {
   const handleAddMemory = async () => {
     if (!newMemory.title || isSubmitting) return
     setIsSubmitting(true)
-    const newTotal = memoriesTotal + 1
     try {
       await addMemory({
         title: newMemory.title,
@@ -469,6 +469,46 @@ export function TimelineScreen() {
           </div>
         )}
       </main>
+
+      {/* Plus 機能プレビューモーダル */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+            <img
+              src={showPreview === "photobook" ? "/samples/photobook-sample.svg" : "/samples/report-sample.svg"}
+              alt={showPreview === "photobook" ? "フォトブックサンプル" : "年次レポートサンプル"}
+              className="w-full h-52 object-cover object-top"
+            />
+            <div className="p-5 space-y-4">
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground/90">
+                  {showPreview === "photobook" ? "月別フォトブック" : "年次メモリーレポート"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {showPreview === "photobook"
+                    ? "毎月の思い出をPDFにまとめて保存できます"
+                    : "1年間の記録を自動でまとめてPDFに出力できます"}
+                </p>
+              </div>
+              <p className="text-xs text-amber-600 font-medium">Sora+ で作成できます</p>
+              <div className="space-y-2">
+                <button
+                  onClick={() => { setShowPreview(null); setShowUpgradeModal(true) }}
+                  className="w-full h-11 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-medium text-sm transition-colors"
+                >
+                  アップグレードする
+                </button>
+                <button
+                  onClick={() => setShowPreview(null)}
+                  className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+                >
+                  閉じる
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Upgrade モーダル */}
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
