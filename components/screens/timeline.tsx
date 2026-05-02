@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
@@ -21,19 +21,21 @@ const moodMap: Record<string, { emoji: string; label: string }> = {
   loving: { emoji: "💝", label: "愛おしい" },
 }
 
-function groupByMonth(memories: Memory[]): { label: string; items: Memory[] }[] {
+function groupByMonth(memories: Memory[]): { label: string; year: number; month: number; items: Memory[] }[] {
   const sorted = [...memories].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
-  const groups: { label: string; items: Memory[] }[] = []
+  const groups: { label: string; year: number; month: number; items: Memory[] }[] = []
   const indexMap = new Map<string, number>()
 
   for (const memory of sorted) {
     const d = new Date(memory.date)
-    const key = `${d.getFullYear()}年${d.getMonth() + 1}月`
+    const year = d.getFullYear()
+    const month = d.getMonth() + 1
+    const key = `${year}年${month}月`
     if (!indexMap.has(key)) {
       indexMap.set(key, groups.length)
-      groups.push({ label: key, items: [] })
+      groups.push({ label: key, year, month, items: [] })
     }
     groups[indexMap.get(key)!].items.push(memory)
   }
@@ -53,6 +55,7 @@ export function TimelineScreen() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
+  const [downloadingPhotobook, setDownloadingPhotobook] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [view, setView] = useState<"list" | "calendar">("list")
@@ -91,6 +94,25 @@ export function TimelineScreen() {
       URL.revokeObjectURL(url)
     } finally {
       setIsDownloadingReport(false)
+    }
+  }
+
+  const handleDownloadPhotobook = async (label: string, year: number, month: number) => {
+    if (!pet || downloadingPhotobook) return
+    setDownloadingPhotobook(label)
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/photobook?year=${year}&month=${month}`)
+      if (res.status === 402) { setShowUpgradeModal(true); return }
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `sora-${pet.name}-${year}-${String(month).padStart(2, "0")}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setDownloadingPhotobook(null)
     }
   }
 
@@ -306,6 +328,17 @@ export function TimelineScreen() {
             <div className="flex items-center gap-3 px-1">
               <span className="text-sm font-medium text-foreground/50">{group.label}</span>
               <div className="flex-1 h-px bg-foreground/10" />
+              <button
+                onClick={() => handleDownloadPhotobook(group.label, group.year, group.month)}
+                disabled={downloadingPhotobook === group.label}
+                aria-label={`${group.label}のフォトブックを作る`}
+                className="shrink-0 flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-primary/60 transition-colors disabled:opacity-50"
+              >
+                {downloadingPhotobook === group.label
+                  ? <Loader2 size={12} className="animate-spin" />
+                  : <BookOpen size={12} />}
+                <span className="hidden sm:inline">フォトブック</span>
+              </button>
             </div>
 
             {/* Memory Cards */}
