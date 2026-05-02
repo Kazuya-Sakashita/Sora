@@ -31,9 +31,10 @@
 
 ### OpenAPI First
 
-- APIの追加・変更は必ず `docs/api/openapi.yaml` を先に更新する
+- `docs/api/openapi.yaml` が唯一の仕様ソース（コードより先に更新）
 - フロント実装はOpenAPIの定義に従う
 - 定義なしにAPIを実装・呼び出さない
+- 詳細: `docs/api/API_DRIVEN_DEVELOPMENT.md`
 
 ---
 
@@ -41,14 +42,16 @@
 
 1. `docs/issues/README.md` で未対応ISSUEを確認する
 2. 対象ISSUEのステータスを `in_progress` に更新する
-3. API変更を伴う場合は `docs/api/openapi.yaml` を先に更新する
+3. API変更を伴う場合は `docs/api/openapi.yaml` を**先に**更新する
 4. 変更するファイルと影響範囲を1〜2行で示してから着手する
 
 ## 実装後に必ずやること
 
-1. `pnpm dev` → ブラウザで動作確認
-2. 変更画面以外のナビゲーションが壊れていないか確認
-3. ISSUEのステータスを `done` に更新する
+1. `pnpm tsc --noEmit` → 型エラーなし
+2. `pnpm test` → 全件通過
+3. `pnpm dev` → ブラウザで正常系・異常系を確認
+4. 変更画面以外のナビゲーションが壊れていないか確認
+5. ISSUEのステータスを `done` に更新する
 
 ## 絶対にやってはいけないこと
 
@@ -57,6 +60,7 @@
 - 動作確認せずにISSUEをcloseしない
 - MVPスコープ外の機能を先取り実装しない
 - OpenAPIを更新せずにAPIを追加・変更しない
+- テストを追加せずにAPIを新規実装しない
 
 ---
 
@@ -73,11 +77,25 @@
 
 ## ISSUE管理
 
-詳細: `docs/issues/README.md`
+詳細: `docs/issues/README.md`  
+テンプレート: `docs/issues/ISSUE_TEMPLATE.md`
 
 - ファイル: `docs/issues/ISSUE-XXX-kebab-title.md`
-- 優先度順: `critical` → `high` → `medium` → `low`
-- ステータス: `open` → `in_progress` → `done`
+- 優先度: `critical` → `high` → `medium` → `low`
+- ステータス:
+
+| ステータス | 意味 |
+|-----------|------|
+| `open` | 未着手 |
+| `in_progress` | 実装中 |
+| `done` | 完了・検証済み |
+| `wont_fix` | 対応しない（理由必須） |
+
+### ISSUEの必須項目
+概要 / 背景 / 目的 / スコープ / 非スコープ / API変更有無 / 受け入れ条件 / テスト観点 / 完了確認チェックリスト
+
+### PRマージ前
+`docs/PR_CHECKLIST.md` の全項目を確認する
 
 ---
 
