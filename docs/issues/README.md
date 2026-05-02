@@ -40,6 +40,7 @@
 | [032](ISSUE-032-annual-memory-report.md) | 年次メモリーレポートを自動生成する（Sora+） | 🔴 critical | done |
 | [033](ISSUE-033-loss-care-mode.md) | ロスケアモード（Phase 3）をステータス変更で解放する | 🟠 high | done |
 | [034](ISSUE-034-family-sharing.md) | 家族共有（ペット共同オーナー）を実装する | 🟠 high | done |
+| [037](ISSUE-037-openapi-sync.md) | openapi.yamlを現行実装と完全同期させる | 🟠 high | done |
 | [035](ISSUE-035-photobook-pdf.md) | フォトブックPDF出力を実装する（Sora+） | 🟠 high | open |
 | [036](ISSUE-036-milestone-card-download.md) | マイルストーン記念カードのPNG保存を実装する（Sora+） | 🟡 medium | open |
 

@@ -60,24 +60,6 @@
 
 ---
 
-## 現在の既知乖離（ISSUE-037対応待ち）
-
-以下はopenapi.yamlに未定義だが実装済み：
-
-- `GET /api/pets` — 一覧取得（`role`フィールド付き）
-- `POST /api/pets/:petId/invite`
-- `GET/DELETE /api/pets/:petId/members`
-- `POST /api/invite/accept`
-- `POST/GET /api/billing/*`
-- `GET /api/pets/:petId/report`
-- `GET /api/og`
-- `POST /api/push/*`
-- `GET /api/share/:memoryId`
-
-Pet レスポンスの未定義フィールド: `broughtAt`, `role`
-
----
-
 ## PRチェックリスト
 
 → `docs/PR_CHECKLIST.md` 参照

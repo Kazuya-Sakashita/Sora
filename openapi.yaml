@@ -19,12 +19,22 @@ tags:
     description: 認証
   - name: pets
     description: ペットプロフィール
+  - name: members
+    description: 家族共有（ペット共同オーナー）
   - name: memories
     description: 思い出記録
   - name: feelings
     description: 気持ち記録
   - name: schedules
     description: 予定管理
+  - name: billing
+    description: 課金・プラン管理（Stripe）
+  - name: sharing
+    description: 思い出シェア・OGP
+  - name: push
+    description: Web Push 通知
+  - name: report
+    description: 年次メモリーレポート
 
 # -----------------------------------------------
 # パス定義
@@ -34,6 +44,24 @@ paths:
   # === ペット ===
 
   /pets:
+    get:
+      tags: [pets]
+      summary: アクセス可能なペット一覧を取得する（所有 + 共有）
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Pet"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
     post:
       tags: [pets]
       summary: ペットを登録する
@@ -310,6 +338,328 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  # === 家族共有 ===
+
+  /pets/{petId}/invite:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    post:
+      tags: [members]
+      summary: 招待リンクを生成する（OWNER のみ）
+      responses:
+        "200":
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url, expiresAt]
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /pets/{petId}/members:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [members]
+      summary: メンバー一覧を取得する（OWNER のみ）
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PetMember"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /pets/{petId}/members/{memberId}:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+      - $ref: "#/components/parameters/memberId"
+    delete:
+      tags: [members]
+      summary: メンバーを除外する（OWNER のみ）
+      responses:
+        "204":
+          description: 除外成功
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /invite/accept:
+    post:
+      tags: [members]
+      summary: 招待を受け入れてメンバーとして参加する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  format: uuid
+      responses:
+        "201":
+          description: 参加成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [petId]
+                properties:
+                  petId:
+                    type: string
+                    format: uuid
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "410":
+          description: 招待リンクの有効期限切れ
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+
+  # === 年次メモリーレポート ===
+
+  /pets/{petId}/report:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [report]
+      summary: 年次メモリーレポートを PDF で取得する（Sora+ のみ）
+      parameters:
+        - name: year
+          in: query
+          description: 対象年（省略時は前年）
+          schema:
+            type: integer
+            minimum: 2000
+            maximum: 2100
+      responses:
+        "200":
+          description: PDF 生成成功
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PaymentRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # === 課金・プラン管理 ===
+
+  /billing/plan:
+    get:
+      tags: [billing]
+      summary: 現在のプランを取得する
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [plan]
+                properties:
+                  plan:
+                    $ref: "#/components/schemas/BillingPlan"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /billing/checkout:
+    post:
+      tags: [billing]
+      summary: Stripe Checkout セッションを作成する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [interval]
+              properties:
+                interval:
+                  $ref: "#/components/schemas/CheckoutInterval"
+      responses:
+        "200":
+          description: セッション作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url:
+                    type: string
+                    format: uri
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /billing/portal:
+    post:
+      tags: [billing]
+      summary: Stripe Customer Portal セッションを作成する
+      responses:
+        "200":
+          description: セッション作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url]
+                properties:
+                  url:
+                    type: string
+                    format: uri
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /billing/webhook:
+    post:
+      tags: [billing]
+      summary: Stripe Webhook イベントを受信する（Stripe からのみ呼ばれる）
+      security: []
+      responses:
+        "200":
+          description: 受信成功
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+  # === 思い出シェア・OGP ===
+
+  /share/{memoryId}:
+    parameters:
+      - name: memoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [sharing]
+      summary: 公開思い出データを取得する（認証不要）
+      security: []
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShareMemory"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /og:
+    get:
+      tags: [sharing]
+      summary: OGP 画像を生成する（認証不要）
+      security: []
+      parameters:
+        - name: title
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: petName
+          in: query
+          schema:
+            type: string
+        - name: photoUrl
+          in: query
+          schema:
+            type: string
+            format: uri
+      responses:
+        "200":
+          description: 画像生成成功
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  # === Web Push 通知 ===
+
+  /push/subscribe:
+    post:
+      tags: [push]
+      summary: Push 購読情報を登録する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint, p256dh, auth]
+              properties:
+                endpoint:
+                  type: string
+                  format: uri
+                p256dh:
+                  type: string
+                auth:
+                  type: string
+      responses:
+        "201":
+          description: 登録成功
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /push/send:
+    post:
+      tags: [push]
+      summary: デイリーリマインダー Push を送信する（Cron のみ）
+      security: []
+      responses:
+        "200":
+          description: 送信成功
+
+  /push/annual:
+    post:
+      tags: [push]
+      summary: 年次レポート完成 Push を送信する（Cron のみ）
+      security: []
+      responses:
+        "200":
+          description: 送信成功
+
 # -----------------------------------------------
 # スキーマ・共通定義
 # -----------------------------------------------
@@ -344,6 +694,13 @@ components:
       schema:
         type: string
         format: uuid
+    memberId:
+      name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
 
   schemas:
 
@@ -360,9 +717,14 @@ components:
       type: string
       enum: [alive, rainbow_bridge]
 
+    PetRole:
+      type: string
+      enum: [owner, member]
+      description: owner = ペット登録者, member = 招待で参加した家族
+
     Pet:
       type: object
-      required: [id, name, status, createdAt, updatedAt]
+      required: [id, name, status, role, createdAt, updatedAt]
       properties:
         id:
           type: string
@@ -381,6 +743,10 @@ components:
         birthDate:
           type: string
           format: date
+        broughtAt:
+          type: string
+          format: date
+          description: ペットを迎えた日
         gender:
           $ref: "#/components/schemas/Gender"
         photoUrl:
@@ -394,6 +760,8 @@ components:
           maxLength: 500
         status:
           $ref: "#/components/schemas/PetStatus"
+        role:
+          $ref: "#/components/schemas/PetRole"
         createdAt:
           type: string
           format: date-time
@@ -417,6 +785,9 @@ components:
           type: string
           maxLength: 100
         birthDate:
+          type: string
+          format: date
+        broughtAt:
           type: string
           format: date
         gender:
@@ -576,6 +947,61 @@ components:
           type: string
           maxLength: 500
 
+    # --- 家族共有 ---
+    PetMember:
+      type: object
+      required: [id, userId, email, role, joinedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/PetRole"
+        joinedAt:
+          type: string
+          format: date-time
+
+    # --- 課金 ---
+    BillingPlan:
+      type: string
+      enum: [FREE, PLUS]
+
+    CheckoutInterval:
+      type: string
+      enum: [month, year]
+
+    # --- シェア ---
+    ShareMemory:
+      type: object
+      required: [id, title, date, photoUrls, petName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date
+        photoUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        petName:
+          type: string
+        petPhotoUrl:
+          type: string
+          format: uri
+
     # --- エラー（RFC 9457）---
     ProblemDetail:
       type: object
@@ -608,6 +1034,12 @@ components:
             $ref: "#/components/schemas/ProblemDetail"
     NotFound:
       description: リソースが存在しない
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+    PaymentRequired:
+      description: Sora+ プランが必要
       content:
         application/problem+json:
           schema:
