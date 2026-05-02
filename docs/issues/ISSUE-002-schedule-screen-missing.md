@@ -5,7 +5,7 @@
 | 項目 | 内容 |
 |------|------|
 | 優先度 | medium |
-| ステータス | open |
+| ステータス | done |
 | 関連画面 | なし（新規作成） |
 | 関連ファイル | `components/screens/`（新規）, `lib/app-context.tsx`, `app/page.tsx` |
 

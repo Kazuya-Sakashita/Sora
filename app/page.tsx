@@ -8,6 +8,7 @@ import { HomeScreen } from "@/components/screens/home"
 import { TimelineScreen } from "@/components/screens/timeline"
 import { FeelingsScreen } from "@/components/screens/feelings"
 import { SettingsScreen } from "@/components/screens/settings"
+import { ScheduleScreen } from "@/components/screens/schedule"
 
 function AppContent() {
   const { currentScreen, isLoading } = useApp()
@@ -34,6 +35,8 @@ function AppContent() {
         return <FeelingsScreen />
       case "settings":
         return <SettingsScreen />
+      case "schedule":
+        return <ScheduleScreen />
       default:
         return <OnboardingScreen />
     }
