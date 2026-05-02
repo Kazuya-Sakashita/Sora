@@ -5,6 +5,8 @@ import { GlassCard } from "@/components/glass-card"
 import { Settings, BookOpen, Heart, CalendarDays } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
+import { getTodayMilestone } from "@/lib/milestone"
+import { useState } from "react"
 
 export function HomeScreen() {
   const { pet, memories, setCurrentScreen } = useApp()
@@ -16,6 +18,8 @@ export function HomeScreen() {
   const recordedToday = memories.find((m) => m.date === todayStr)
   const streak = calcStreak(memories.map((m) => m.date))
   const milestoneMessage = getMilestoneMessage(streak)
+  const todayMilestone = pet ? getTodayMilestone(pet) : null
+  const [milestoneDissmissed, setMilestoneDismissed] = useState(false)
 
   const onThisDay = memories
     .filter((m) => {
@@ -35,6 +39,38 @@ export function HomeScreen() {
 
   return (
     <div className="min-h-screen pb-safe">
+      {/* Milestone Overlay */}
+      {todayMilestone && !milestoneDissmissed && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-500">
+          <div className="w-full max-w-sm rounded-3xl bg-white/90 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-5 text-center animate-in zoom-in-95 duration-300">
+            <p className="text-6xl">{todayMilestone.emoji}</p>
+            <div className="space-y-2">
+              <p className="text-xs font-medium text-primary/60 tracking-wide uppercase">
+                {todayMilestone.type === "days" && "記念日"}
+                {todayMilestone.type === "birthday" && "お誕生日"}
+                {todayMilestone.type === "anniversary" && "お迎え記念日"}
+              </p>
+              <h2 className="text-xl font-bold text-foreground/90">{todayMilestone.label}</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">{todayMilestone.message}</p>
+            </div>
+            <div className="space-y-2 pt-2">
+              <button
+                onClick={() => { setMilestoneDismissed(true); setCurrentScreen("timeline") }}
+                className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+              >
+                今日の思い出を残す
+              </button>
+              <button
+                onClick={() => setMilestoneDismissed(true)}
+                className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="px-6 pt-safe">
         <div className="h-16 flex items-center justify-between">
@@ -46,7 +82,7 @@ export function HomeScreen() {
           </div>
           <div className="flex items-center gap-2">
             {pet && (
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                 {pet.photoUrl ? (
                   <img src={pet.photoUrl} alt={pet.name} className="w-full h-full object-cover" />
                 ) : (

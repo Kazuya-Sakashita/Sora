@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server"
 import prisma from "@/lib/prisma"
 import { problem } from "@/lib/auth"
 import { webpush } from "@/lib/push-server"
+import { getTodayMilestone } from "@/lib/milestone"
 
 export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
@@ -25,14 +26,22 @@ export async function GET(request: NextRequest) {
 
   const results = await Promise.allSettled(
     subscriptions.map(async (sub) => {
-      const petName = sub.user.pets[0]?.name ?? "あなたの大切な子"
+      const pet = sub.user.pets[0]
+      const petName = pet?.name ?? "あなたの大切な子"
+
+      const milestone = pet
+        ? getTodayMilestone({
+            name: pet.name,
+            broughtAt: pet.broughtAt?.toISOString().split("T")[0] ?? null,
+            birthDate: pet.birthDate?.toISOString().split("T")[0] ?? null,
+          })
+        : null
+
+      const body = milestone ? milestone.pushBody : `${petName}との今日を残しませんか`
+
       await webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-        JSON.stringify({
-          title: "Sora",
-          body: `${petName}との今日を残しませんか`,
-          url: "/",
-        })
+        JSON.stringify({ title: "Sora", body, url: "/" })
       )
     })
   )
