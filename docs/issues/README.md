@@ -15,14 +15,20 @@
 | [004](ISSUE-004-home-greeting-copy.md) | ホーム画面を「今日で〇〇日目」カウンター中心に全面再設計する | 🟠 high | done |
 | [008](ISSUE-008-feelings-options-postloss-only.md) | 気持ち記録の選択肢がロス後ユーザー専用でしか使えない | 🟠 high | done |
 | [009](ISSUE-009-letter-hardcoded-pet-voice.md) | 手紙画面をPhase 3まで非表示化し、倫理NGの「ペット視点」を除去する | 🟠 high | done |
-| [013](ISSUE-013-photo-upload-storage.md) | 写真アップロードをSupabase Storageで実装する | 🟠 high | open |
-| [014](ISSUE-014-timeline-ux.md) | タイムライン画面を写真主体のUXに改善する | 🟠 high | open |
-| [002](ISSUE-002-schedule-screen-missing.md) | 予定管理画面が未実装 | 🟡 medium | open |
-| [005](ISSUE-005-timeline-empty-state.md) | タイムラインの空状態設計が不足 | 🟡 medium | open |
+| [013](ISSUE-013-photo-upload-storage.md) | 写真アップロードをSupabase Storageで実装する | 🟠 high | done |
+| [014](ISSUE-014-timeline-ux.md) | タイムライン画面を写真主体のUXに改善する | 🟠 high | done |
+| [002](ISSUE-002-schedule-screen-missing.md) | 予定管理画面が未実装 | 🟡 medium | done |
+| [005](ISSUE-005-timeline-empty-state.md) | タイムラインの空状態設計が不足 | 🟡 medium | done |
 | [010](ISSUE-010-chat-prompts-postloss-only.md) | チャット画面をPhase 3まで非表示化する | 🟡 medium | done |
-| [015](ISSUE-015-record-completion-feedback.md) | 記録完了後の達成フィードバックを実装する | 🟡 medium | open |
-| [016](ISSUE-016-settings-professional-resource.md) | 設定画面に専門家リソースへのリンクを追加する | 🟡 medium | open |
+| [015](ISSUE-015-record-completion-feedback.md) | 記録完了後の達成フィードバックを実装する | 🟡 medium | done |
+| [016](ISSUE-016-settings-professional-resource.md) | 設定画面に専門家リソースへのリンクを追加する | 🟡 medium | done |
 | [017](ISSUE-017-design-system.md) | デザインシステムを新パレット・フォントに刷新する | 🟠 high | done |
+| [018](ISSUE-018-daily-reminder-push.md) | デイリーリマインダー（Web Push通知）を実装する | 🔴 critical | done |
+| [019](ISSUE-019-home-today-state.md) | ホームに「今日の記録状態」を反映する | 🟠 high | done |
+| [020](ISSUE-020-api-rate-limit-validation.md) | APIレート制限とinputバリデーションを実装する | 🟠 high | done |
+| [021](ISSUE-021-home-memories-on-this-day.md) | ホームに「n日前の今日」カードを追加する | 🟠 high | done |
+| [022](ISSUE-022-memories-pagination.md) | memories/feelingsの取得をページネーション化する | 🟡 medium | done |
+| [023](ISSUE-023-replace-alert-with-inline-error.md) | alert()をインラインエラー表示に置換する | 🟠 high | done |
 
 ---
 
