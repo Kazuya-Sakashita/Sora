@@ -1,90 +1,14 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import type { Pet, Memory, Feeling, Schedule, PetInput, MemoryInput, FeelingInput, ScheduleInput, ScheduleType } from "@/lib/api-types"
 
-export type Pet = {
-  id: string
-  name: string
-  nickname: string | null
-  species: string | null
-  breed: string | null
-  birthDate: string | null
-  broughtAt: string | null
-  gender: string | null
-  photoUrl: string | null
-  personality: string | null
-  favorites: string | null
-  status: "alive" | "rainbow_bridge"
-  role: "owner" | "member"
-  createdAt: string
-  updatedAt: string
-}
+export type { Pet, Memory, Feeling, Schedule, ScheduleType }
 
-export type Memory = {
-  id: string
-  title: string
-  description: string | null
-  date: string
-  category: string
-  moodTag: string | null
-  photoUrls: string[]
-  createdAt: string
-}
-
-export type Feeling = {
-  id: string
-  tag: string
-  memo: string | null
-  date: string
-  createdAt: string
-}
-
-export type CreatePetInput = {
-  name: string
-  nickname?: string
-  species?: string
-  breed?: string
-  birthDate?: string
-  broughtAt?: string
-  gender?: string
-  personality?: string
-  favorites?: string
-  photoUrl?: string
-  status?: "alive" | "rainbow_bridge"
-}
-
-export type CreateMemoryInput = {
-  title: string
-  description?: string
-  date: string
-  category?: string
-  moodTag?: string
-  photoUrls?: string[]
-}
-
-export type CreateFeelingInput = {
-  tag: string
-  memo?: string
-  date: string
-}
-
-export type ScheduleType = "hospital" | "trimming" | "vaccine" | "anniversary" | "other"
-
-export type Schedule = {
-  id: string
-  type: ScheduleType
-  title: string
-  date: string
-  memo: string | null
-  createdAt: string
-}
-
-export type CreateScheduleInput = {
-  type: ScheduleType
-  title: string
-  date: string
-  memo?: string
-}
+export type CreatePetInput = PetInput
+export type CreateMemoryInput = MemoryInput
+export type CreateFeelingInput = FeelingInput
+export type CreateScheduleInput = ScheduleInput
 
 export type Screen =
   | "onboarding"

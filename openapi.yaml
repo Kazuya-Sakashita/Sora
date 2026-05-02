@@ -923,7 +923,7 @@ components:
     # --- 気持ち記録 ---
     FeelingTag:
       type: string
-      enum: [happy, calm, lonely, sad, grateful, anxious]
+      enum: [happy, calm, fun, worried, loving]
 
     Feeling:
       type: object

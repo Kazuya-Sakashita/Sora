@@ -2,12 +2,13 @@
 
 import { useState } from "react"
 import { useApp } from "@/lib/app-context"
+import type { FeelingTag } from "@/lib/api-types"
 import { GlassCard } from "@/components/glass-card"
 import { MoodTrendChart } from "@/components/mood-trend-chart"
 import { ArrowLeft, Check, TrendingUp } from "lucide-react"
 import { buildDailyTrend, buildWeeklySummary, MOOD_TAGS, MOOD_INFO } from "@/lib/mood-trend"
 
-const feelingOptions = [
+const feelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
   { emoji: "🥰", label: "うれしい", tag: "happy" },
   { emoji: "😌", label: "おだやか", tag: "calm" },
   { emoji: "😄", label: "笑った", tag: "fun" },
@@ -29,7 +30,7 @@ export function FeelingsScreen() {
     0
   )
 
-  const handleSelectFeeling = async (tag: string) => {
+  const handleSelectFeeling = async (tag: FeelingTag) => {
     setSelectedTag(tag)
     try {
       await addFeeling({

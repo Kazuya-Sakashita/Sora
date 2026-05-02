@@ -163,10 +163,9 @@ model Feeling {
 enum FeelingTag {
   HAPPY
   CALM
-  LONELY
-  SAD
-  GRATEFUL
-  ANXIOUS
+  FUN
+  WORRIED
+  LOVING
 }
 
 // -----------------------------------------------

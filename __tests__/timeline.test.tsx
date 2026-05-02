@@ -58,7 +58,7 @@ const mockMemoryApril: Memory = {
   title: "初めての病院",
   description: null,
   date: "2026-04-10",
-  category: "health",
+  category: "hospital",
   moodTag: "worried",
   photoUrls: [],
   createdAt: "2026-04-10T09:00:00Z",

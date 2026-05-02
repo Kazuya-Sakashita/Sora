@@ -4,6 +4,7 @@ import { getAuthUser, problem } from "@/lib/auth"
 import { requirePlus } from "@/lib/plan"
 import { buildReportData } from "@/lib/report"
 import { AnnualReportDocument } from "@/lib/report-pdf"
+import type { MemoryCategory, MoodTag, FeelingTag } from "@/lib/api-types"
 import { renderToBuffer } from "@react-pdf/renderer"
 import React from "react"
 
@@ -45,14 +46,14 @@ export async function GET(request: NextRequest, { params }: Params) {
     title: m.title,
     description: m.description,
     date: m.date.toISOString().split("T")[0],
-    category: m.category.toLowerCase(),
-    moodTag: m.moodTag?.toLowerCase() ?? null,
+    category: m.category.toLowerCase() as MemoryCategory,
+    moodTag: (m.moodTag?.toLowerCase() ?? null) as MoodTag | null,
     photoUrls: m.photoUrls,
     createdAt: m.createdAt.toISOString(),
   }))
   const feelingsForReport = feelings.map((f) => ({
     id: f.id,
-    tag: f.tag.toLowerCase(),
+    tag: f.tag.toLowerCase() as FeelingTag,
     memo: f.memo,
     date: f.date.toISOString().split("T")[0],
     createdAt: f.createdAt.toISOString(),
