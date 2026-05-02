@@ -6,10 +6,11 @@ import { Settings, BookOpen, Heart, CalendarDays } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
+import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
 import { useState } from "react"
 
 export function HomeScreen() {
-  const { pet, memories, setCurrentScreen } = useApp()
+  const { pet, memories, feelings, setCurrentScreen } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
   const recentMemories = memories.slice(0, 3)
@@ -20,6 +21,8 @@ export function HomeScreen() {
   const milestoneMessage = getMilestoneMessage(streak)
   const todayMilestone = pet ? getTodayMilestone(pet) : null
   const [milestoneDissmissed, setMilestoneDismissed] = useState(false)
+
+  const monthlyRecap = isRecapWindow(today) ? buildMonthlyRecap(memories, feelings, today) : null
 
   const onThisDay = memories
     .filter((m) => {
@@ -214,6 +217,45 @@ export function HomeScreen() {
                 <p className="text-sm font-medium text-foreground/85 leading-snug">
                   {onThisDay.title}
                 </p>
+              </div>
+            </GlassCard>
+          </button>
+        )}
+
+        {/* Monthly Recap Card */}
+        {monthlyRecap && (
+          <button
+            onClick={() => setCurrentScreen("timeline")}
+            className="w-full text-left active:scale-[0.98] transition-all"
+            aria-label="先月のふりかえり"
+          >
+            <GlassCard className="overflow-hidden p-0">
+              {monthlyRecap.coverPhotoUrl && (
+                <img
+                  src={monthlyRecap.coverPhotoUrl}
+                  alt="先月のカバー写真"
+                  className="w-full h-28 object-cover"
+                />
+              )}
+              <div className="px-4 py-3 space-y-2">
+                <p className="text-xs font-medium text-primary/70">
+                  {monthlyRecap.label}のふりかえり
+                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-sm text-foreground/80">
+                    📝 {monthlyRecap.memoryCount}件の思い出
+                  </span>
+                  {monthlyRecap.photoCount > 0 && (
+                    <span className="text-sm text-foreground/80">
+                      📷 {monthlyRecap.photoCount}枚
+                    </span>
+                  )}
+                  {monthlyRecap.topMoodTag && (
+                    <span className="text-sm text-foreground/80">
+                      ✨ {monthlyRecap.topMoodTag}が多かった月
+                    </span>
+                  )}
+                </div>
               </div>
             </GlassCard>
           </button>
