@@ -5,6 +5,7 @@ import { Sparkles, Loader2, X } from "lucide-react"
 
 type Props = {
   onClose: () => void
+  featureName?: string
 }
 
 const BENEFITS = [
@@ -14,7 +15,7 @@ const BENEFITS = [
   "マイルストーン記念カード保存",
 ]
 
-export function UpgradeModal({ onClose }: Props) {
+export function UpgradeModal({ onClose, featureName }: Props) {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleCheckout = async (interval: "month" | "year") => {
@@ -43,7 +44,9 @@ export function UpgradeModal({ onClose }: Props) {
             </div>
             <div>
               <h2 className="font-bold text-foreground/90 text-base">Sora+</h2>
-              <p className="text-xs text-muted-foreground">大切な記録を、ずっと残せる</p>
+              <p className="text-xs text-muted-foreground">
+                {featureName ? `${featureName}を使うには Sora+ が必要です` : "大切な記録を、ずっと残せる"}
+              </p>
             </div>
           </div>
           <button

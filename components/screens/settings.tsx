@@ -12,7 +12,8 @@ import {
   deletePushSubscription,
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X } from "lucide-react"
+import { UpgradeModal } from "@/components/upgrade-modal"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity } from "lucide-react"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
 
@@ -22,6 +23,8 @@ export function SettingsScreen() {
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [upgradeFeature, setUpgradeFeature] = useState<string | undefined>(undefined)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [isOpeningPortal, setIsOpeningPortal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
@@ -214,42 +217,63 @@ export function SettingsScreen() {
 
         {/* Plan */}
         <section className="space-y-3">
-          {plan === "FREE" && (
-            <GlassCard className="space-y-4 py-5">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0">
-                  <Sparkles size={20} className="text-amber-500" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-foreground/90">Sora+</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">無制限記録・年次レポート・フォトブック</p>
-                </div>
+          <div className="flex items-center gap-2 px-1">
+            <Sparkles size={14} className="text-amber-500" />
+            <h2 className="text-sm font-semibold text-foreground/80">Sora+ でできること</h2>
+          </div>
+
+          {[
+            { icon: BookOpen, label: "月別フォトブック", desc: "毎月の思い出をPDFに", cta: "作ってみる →" },
+            { icon: FileText, label: "年次メモリーレポート", desc: "1年間の記録を自動まとめ", cta: "見てみる →" },
+            { icon: Download, label: "記念日カード保存", desc: "100日・誕生日を画像に", cta: "保存してみる →" },
+            { icon: Infinity, label: "無制限記録", desc: "50件の制限なし", cta: "今すぐ始める →" },
+          ].map(({ icon: Icon, label, desc, cta }) => (
+            <GlassCard key={label} className="flex items-center gap-4 py-3.5">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                <Icon size={18} className="text-amber-500" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleCheckout("month")}
-                  disabled={isCheckingOut}
-                  className="h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
-                >
-                  {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "月額 ¥480"}
-                </button>
-                <button
-                  onClick={() => handleCheckout("year")}
-                  disabled={isCheckingOut}
-                  className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
-                >
-                  <span>年額 ¥4,300</span>
-                  <span className="text-[10px] opacity-80">約25%お得</span>
-                </button>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground/85">{label}</p>
+                <p className="text-xs text-muted-foreground">{desc}</p>
               </div>
+              {plan === "PLUS" ? (
+                <span className="shrink-0 w-6 h-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <Check size={12} className="text-green-600" />
+                </span>
+              ) : (
+                <button
+                  onClick={() => { setUpgradeFeature(label); setShowUpgradeModal(true) }}
+                  className="shrink-0 text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors whitespace-nowrap"
+                >
+                  {cta}
+                </button>
+              )}
             </GlassCard>
+          ))}
+
+          {plan === "FREE" && (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <button
+                onClick={() => handleCheckout("month")}
+                disabled={isCheckingOut}
+                className="h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
+              >
+                {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "月額 ¥480"}
+              </button>
+              <button
+                onClick={() => handleCheckout("year")}
+                disabled={isCheckingOut}
+                className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
+              >
+                <span>年額 ¥4,300</span>
+                <span className="text-[10px] opacity-80">約25%お得</span>
+              </button>
+            </div>
           )}
+
           {plan === "PLUS" && (
-            <GlassCard className="py-4">
+            <GlassCard className="py-3.5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
-                  <Sparkles size={20} className="text-amber-500" />
-                </div>
                 <div className="flex-1">
                   <p className="font-semibold text-foreground/90 text-sm">Sora+ ご利用中</p>
                   <p className="text-xs text-muted-foreground">すべての機能をお使いいただけます</p>
@@ -266,6 +290,10 @@ export function SettingsScreen() {
             </GlassCard>
           )}
         </section>
+
+        {showUpgradeModal && (
+          <UpgradeModal featureName={upgradeFeature} onClose={() => setShowUpgradeModal(false)} />
+        )}
 
         {/* Conversation Tone */}
         <section className="space-y-4">
@@ -295,7 +323,7 @@ export function SettingsScreen() {
                   <p className="text-xs text-muted-foreground mt-1">{description}</p>
                 </div>
                 {conversationTone === label && (
-                  <div className="w-5 h-5 rounded-full bg-primary/80 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-primary/80 flex items-center justify-center shrink-0 mt-0.5">
                     <Check size={12} className="text-primary-foreground" />
                   </div>
                 )}

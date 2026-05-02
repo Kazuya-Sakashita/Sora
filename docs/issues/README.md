@@ -52,7 +52,7 @@
 | [044](ISSUE-044-milestone-share.md) | マイルストーン当日のSNSシェア強化 | 🟡 medium | open |
 | [045](ISSUE-045-weekly-push.md) | 週次リマインダープッシュ通知 | 🟡 medium | open |
 | [046](ISSUE-046-free-limit-countdown.md) | Free プラン上限カウントダウン表示 | 🟠 high | done |
-| [047](ISSUE-047-plus-features-page.md) | Settings内のSora+機能紹介セクション | 🟡 medium | open |
+| [047](ISSUE-047-plus-features-page.md) | Settings内のSora+機能紹介セクション | 🟡 medium | done |
 
 ---
 
