@@ -7,9 +7,10 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2 } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
+import { shareMemory } from "@/lib/share"
 
 const moodMap: Record<string, { emoji: string; label: string }> = {
   happy: { emoji: "🥰", label: "うれしい" },
@@ -47,6 +48,7 @@ export function TimelineScreen() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [view, setView] = useState<"list" | "calendar">("list")
@@ -67,6 +69,12 @@ export function TimelineScreen() {
       setScrollTarget(null)
     }
   }, [scrollTarget, view])
+
+  const handleShare = async (memoryId: string, title: string) => {
+    const result = await shareMemory(memoryId, title)
+    setShareToast(result)
+    setTimeout(() => setShareToast(null), 2500)
+  }
 
   const handleCalendarDayClick = (dateStr: string) => {
     setView("list")
@@ -296,12 +304,21 @@ export function TimelineScreen() {
                   <div className="p-4 space-y-2">
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-medium text-foreground/90 leading-snug">{memory.title}</h3>
-                      <span className="text-xs text-muted-foreground shrink-0 mt-0.5">
-                        {new Date(memory.date).toLocaleDateString("ja-JP", {
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-xs text-muted-foreground mt-0.5">
+                          {new Date(memory.date).toLocaleDateString("ja-JP", {
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </span>
+                        <button
+                          aria-label="シェアする"
+                          onClick={() => handleShare(memory.id, memory.title)}
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 transition-colors"
+                        >
+                          <Share2 size={15} />
+                        </button>
+                      </div>
                     </div>
 
                     {memory.moodTag && moodMap[memory.moodTag] && (
@@ -339,6 +356,18 @@ export function TimelineScreen() {
           </div>
         )}
       </main>
+
+      {/* シェアトースト */}
+      {shareToast && (
+        <div className="fixed bottom-8 inset-x-4 max-w-sm mx-auto z-50 animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
+          <div className="rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.10)] px-6 py-4 flex items-center gap-3">
+            <span className="text-xl">{shareToast === "shared" ? "✈️" : "🔗"}</span>
+            <p className="text-sm font-medium text-foreground/90">
+              {shareToast === "shared" ? "シェアしました" : "URLをコピーしました"}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 保存完了フィードバック */}
       {showFeedback && (

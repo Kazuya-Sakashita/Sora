@@ -15,8 +15,10 @@ function mem(overrides: Partial<Memory> = {}): Memory {
     date: "2026-04-15",
     title: "公園散歩",
     description: "",
+    category: "OTHER",
     photoUrls: [],
     moodTag: null,
+    createdAt: "2026-04-15T00:00:00Z",
     ...overrides,
   }
 }
