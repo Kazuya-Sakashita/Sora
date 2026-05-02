@@ -45,6 +45,14 @@
 | [036](ISSUE-036-milestone-card-download.md) | マイルストーン記念カードのPNG保存を実装する（Sora+） | 🟡 medium | done |
 | [038](ISSUE-038-openapi-typescript.md) | openapi-typescript導入 + 型自動生成 | 🟠 high | done |
 | [039](ISSUE-039-zod-validation.md) | zodバリデーション統一 | 🟡 medium | done |
+| [040](ISSUE-040-first-record-nudge.md) | 初回記録への強制誘導（First Record Nudge） | 🔴 critical | open |
+| [041](ISSUE-041-plus-preview.md) | Sora+ 機能プレビュー（価値の先見せ） | 🟠 high | open |
+| [042](ISSUE-042-billing-success-page.md) | 課金成功後のWelcome画面 | 🟠 high | open |
+| [043](ISSUE-043-home-plus-banner.md) | ホームにSora+誘引バナーを常設 | 🟠 high | open |
+| [044](ISSUE-044-milestone-share.md) | マイルストーン当日のSNSシェア強化 | 🟡 medium | open |
+| [045](ISSUE-045-weekly-push.md) | 週次リマインダープッシュ通知 | 🟡 medium | open |
+| [046](ISSUE-046-free-limit-countdown.md) | Free プラン上限カウントダウン表示 | 🟠 high | open |
+| [047](ISSUE-047-plus-features-page.md) | Settings内のSora+機能紹介セクション | 🟡 medium | open |
 
 ---
 
