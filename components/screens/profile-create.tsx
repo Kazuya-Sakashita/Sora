@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Camera, ArrowLeft } from "lucide-react"
+import { Camera, ArrowLeft, Loader2 } from "lucide-react"
+import { uploadPhoto } from "@/lib/storage"
 
 export function ProfileCreateScreen() {
   const { setCurrentScreen, createPet } = useApp()
@@ -17,7 +18,25 @@ export function ProfileCreateScreen() {
     broughtAt: "",
   })
   const [photo, setPhoto] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploading(true)
+    setUploadError(null)
+    try {
+      const url = await uploadPhoto(file, "pets")
+      setPhoto(url)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "写真のアップロードに失敗しました")
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const handleSubmit = async () => {
     if (!formData.name || isSubmitting) return
@@ -65,12 +84,23 @@ export function ProfileCreateScreen() {
 
         <GlassCard className="space-y-6">
           {/* Photo Upload */}
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoChange}
+            />
             <button
-              onClick={() => {/* Photo upload: ISSUE-013 */}}
-              className="w-28 h-28 rounded-3xl bg-gradient-to-br from-white/80 to-white/40 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/40 transition-colors overflow-hidden"
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="w-28 h-28 rounded-3xl bg-linear-to-br from-white/80 to-white/40 border-2 border-dashed border-primary/20 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/40 transition-colors overflow-hidden disabled:opacity-60"
             >
-              {photo ? (
+              {isUploading ? (
+                <Loader2 size={24} className="text-primary/50 animate-spin" />
+              ) : photo ? (
                 <img src={photo} alt="Pet" className="w-full h-full object-cover" />
               ) : (
                 <>
@@ -79,6 +109,9 @@ export function ProfileCreateScreen() {
                 </>
               )}
             </button>
+            {uploadError && (
+              <p className="text-xs text-destructive text-center">{uploadError}</p>
+            )}
           </div>
 
           {/* Form Fields */}
