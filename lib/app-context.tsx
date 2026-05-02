@@ -67,6 +67,24 @@ export type CreateFeelingInput = {
   date: string
 }
 
+export type ScheduleType = "hospital" | "trimming" | "vaccine" | "anniversary" | "other"
+
+export type Schedule = {
+  id: string
+  type: ScheduleType
+  title: string
+  date: string
+  memo: string | null
+  createdAt: string
+}
+
+export type CreateScheduleInput = {
+  type: ScheduleType
+  title: string
+  date: string
+  memo?: string
+}
+
 export type Screen =
   | "onboarding"
   | "profile-create"
@@ -74,6 +92,7 @@ export type Screen =
   | "timeline"
   | "feelings"
   | "settings"
+  | "schedule"
 
 type AppContextType = {
   currentScreen: Screen
@@ -81,9 +100,15 @@ type AppContextType = {
   pet: Pet | null
   createPet: (input: CreatePetInput) => Promise<void>
   memories: Memory[]
+  memoriesTotal: number
   addMemory: (input: CreateMemoryInput) => Promise<void>
+  loadMoreMemories: () => Promise<void>
+  isLoadingMore: boolean
   feelings: Feeling[]
   addFeeling: (input: CreateFeelingInput) => Promise<void>
+  schedules: Schedule[]
+  addSchedule: (input: CreateScheduleInput) => Promise<void>
+  deleteSchedule: (id: string) => Promise<void>
   isLoading: boolean
   conversationTone: string
   setConversationTone: (tone: string) => void
@@ -95,9 +120,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [currentScreen, setCurrentScreen] = useState<Screen>("onboarding")
   const [pet, setPet] = useState<Pet | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
+  const [memoriesTotal, setMemoriesTotal] = useState(0)
+  const [memoriesOffset, setMemoriesOffset] = useState(0)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [feelings, setFeelings] = useState<Feeling[]>([])
+  const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [conversationTone, setConversationTone] = useState("やさしく寄り添う")
+  const [currentPetId, setCurrentPetId] = useState<string | null>(null)
+
+  const MEMORY_PAGE_SIZE = 20
 
   useEffect(() => {
     fetch("/api/pets")
@@ -106,16 +138,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (data?.items?.length > 0) {
           const firstPet = data.items[0] as Pet
           setPet(firstPet)
-          const [memRes, feelRes] = await Promise.all([
-            fetch(`/api/pets/${firstPet.id}/memories`).then((r) =>
-              r.ok ? r.json() : { items: [] }
+          setCurrentPetId(firstPet.id)
+          const [memRes, feelRes, schRes] = await Promise.all([
+            fetch(`/api/pets/${firstPet.id}/memories?limit=${MEMORY_PAGE_SIZE}&offset=0`).then((r) =>
+              r.ok ? r.json() : { items: [], total: 0 }
             ),
             fetch(`/api/pets/${firstPet.id}/feelings`).then((r) =>
               r.ok ? r.json() : { items: [] }
             ),
+            fetch(`/api/pets/${firstPet.id}/schedules`).then((r) =>
+              r.ok ? r.json() : { items: [] }
+            ),
           ])
           setMemories(memRes.items ?? [])
+          setMemoriesTotal(memRes.total ?? 0)
+          setMemoriesOffset(MEMORY_PAGE_SIZE)
           setFeelings(feelRes.items ?? [])
+          setSchedules(schRes.items ?? [])
           setCurrentScreen("home")
         }
       })
@@ -145,6 +184,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error("思い出の保存に失敗しました")
     const memory = (await res.json()) as Memory
     setMemories((prev) => [memory, ...prev])
+    setMemoriesTotal((prev) => prev + 1)
+  }
+
+  const loadMoreMemories = async () => {
+    if (!currentPetId || isLoadingMore) return
+    setIsLoadingMore(true)
+    try {
+      const res = await fetch(
+        `/api/pets/${currentPetId}/memories?limit=${MEMORY_PAGE_SIZE}&offset=${memoriesOffset}`
+      )
+      if (!res.ok) return
+      const data = await res.json()
+      setMemories((prev) => [...prev, ...(data.items ?? [])])
+      setMemoriesTotal(data.total ?? memoriesTotal)
+      setMemoriesOffset((prev) => prev + MEMORY_PAGE_SIZE)
+    } finally {
+      setIsLoadingMore(false)
+    }
   }
 
   const addFeeling = async (input: CreateFeelingInput) => {
@@ -159,6 +216,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setFeelings((prev) => [feeling, ...prev])
   }
 
+  const addSchedule = async (input: CreateScheduleInput) => {
+    if (!pet) return
+    const res = await fetch(`/api/pets/${pet.id}/schedules`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    })
+    if (!res.ok) throw new Error("予定の保存に失敗しました")
+    const schedule = (await res.json()) as Schedule
+    setSchedules((prev) =>
+      [...prev, schedule].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      )
+    )
+  }
+
+  const deleteSchedule = async (id: string) => {
+    if (!pet) return
+    const res = await fetch(`/api/pets/${pet.id}/schedules/${id}`, {
+      method: "DELETE",
+    })
+    if (!res.ok) throw new Error("予定の削除に失敗しました")
+    setSchedules((prev) => prev.filter((s) => s.id !== id))
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -167,9 +249,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         pet,
         createPet,
         memories,
+        memoriesTotal,
         addMemory,
+        loadMoreMemories,
+        isLoadingMore,
         feelings,
         addFeeling,
+        schedules,
+        addSchedule,
+        deleteSchedule,
         isLoading,
         conversationTone,
         setConversationTone,
