@@ -1,6 +1,6 @@
 # ISSUE一覧
 
-最終更新: 2026-04-28
+最終更新: 2026-05-02
 
 ## 現在のISSUE
 
@@ -35,6 +35,13 @@
 | [027](ISSUE-027-share-memory.md) | 思い出シェア機能（OGP画像生成） | 🟠 high | done |
 | [028](ISSUE-028-milestone-notification.md) | 記念日・マイルストーン通知とお祝いカード | 🟠 high | done |
 | [029](ISSUE-029-mood-trend-graph.md) | 気持ちトレンドグラフ | 🟡 medium | done |
+| [030](ISSUE-030-stripe-billing.md) | Stripe サブスク課金基盤を実装する | 🔴 critical | open |
+| [031](ISSUE-031-free-plan-limit-gate.md) | 記録上限ゲートで Free→Plus 転換を促す | 🔴 critical | open |
+| [032](ISSUE-032-annual-memory-report.md) | 年次メモリーレポートを自動生成する（Sora+） | 🔴 critical | open |
+| [033](ISSUE-033-loss-care-mode.md) | ロスケアモード（Phase 3）をステータス変更で解放する | 🟠 high | open |
+| [034](ISSUE-034-family-sharing.md) | 家族共有（ペット共同オーナー）を実装する | 🟠 high | open |
+| [035](ISSUE-035-photobook-pdf.md) | フォトブックPDF出力を実装する（Sora+） | 🟠 high | open |
+| [036](ISSUE-036-milestone-card-download.md) | マイルストーン記念カードのPNG保存を実装する（Sora+） | 🟡 medium | open |
 
 ---
 
