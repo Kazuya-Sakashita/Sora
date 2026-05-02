@@ -2,12 +2,9 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
 import { validateLength, validatePhotoUrls } from "@/lib/validate"
+import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
-
-async function verifyPetOwner(petId: string, userId: string) {
-  return prisma.pet.findFirst({ where: { id: petId, userId } })
-}
 
 function toMemoryResponse(m: {
   id: string
@@ -36,8 +33,7 @@ export async function GET(request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const pet = await verifyPetOwner(petId, user.id)
-  if (!pet) return problem(404, "Not Found")
+  if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
   const url = new URL(request.url)
   const category = url.searchParams.get("category")
@@ -67,8 +63,7 @@ export async function POST(request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const pet = await verifyPetOwner(petId, user.id)
-  if (!pet) return problem(404, "Not Found")
+  if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
   // Free プランの上限チェック（ユーザー全ペット合計50件）
   const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { plan: true } })

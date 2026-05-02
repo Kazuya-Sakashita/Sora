@@ -2,12 +2,9 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
 import { validateLength } from "@/lib/validate"
+import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
-
-async function verifyPetOwner(petId: string, userId: string) {
-  return prisma.pet.findFirst({ where: { id: petId, userId } })
-}
 
 function toFeelingResponse(f: {
   id: string
@@ -30,8 +27,7 @@ export async function GET(request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const pet = await verifyPetOwner(petId, user.id)
-  if (!pet) return problem(404, "Not Found")
+  if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
   const url = new URL(request.url)
   const limit = Math.min(parseInt(url.searchParams.get("limit") ?? "30"), 100)
@@ -53,8 +49,7 @@ export async function POST(request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const pet = await verifyPetOwner(petId, user.id)
-  if (!pet) return problem(404, "Not Found")
+  if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
   const body = await request.json().catch(() => null)
   if (!body || !body.tag || !body.date) {

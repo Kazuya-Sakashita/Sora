@@ -18,6 +18,7 @@ model User {
   stripeSubscriptionId String?            @map("stripe_subscription_id")
   createdAt            DateTime           @default(now()) @map("created_at")
   pets                 Pet[]
+  petMembers           PetMember[]
   pushSubscriptions    PushSubscription[]
 
   @@map("users")
@@ -52,8 +53,42 @@ model Pet {
   memories  Memory[]
   feelings  Feeling[]
   schedules Schedule[]
+  members   PetMember[]
+  invites   PetInvite[]
 
   @@map("pets")
+}
+
+// -----------------------------------------------
+// ペット共同オーナー
+// -----------------------------------------------
+enum PetRole {
+  OWNER
+  MEMBER
+}
+
+model PetMember {
+  id        String   @id @default(uuid())
+  petId     String   @map("pet_id")
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      PetRole  @default(MEMBER)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([petId, userId])
+  @@map("pet_members")
+}
+
+model PetInvite {
+  id        String   @id @default(uuid())
+  petId     String   @map("pet_id")
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  token     String   @unique @default(uuid())
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("pet_invites")
 }
 
 enum PetStatus {

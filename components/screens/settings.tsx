@@ -12,7 +12,9 @@ import {
   deletePushSubscription,
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X } from "lucide-react"
+
+type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
 
 export function SettingsScreen() {
   const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus } = useApp()
@@ -23,6 +25,12 @@ export function SettingsScreen() {
   const [isOpeningPortal, setIsOpeningPortal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
+  const [showFamilySection, setShowFamilySection] = useState(false)
+  const [members, setMembers] = useState<Member[]>([])
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null)
+  const [isGeneratingInvite, setIsGeneratingInvite] = useState(false)
+  const [copiedInvite, setCopiedInvite] = useState(false)
+  const [isRemovingMember, setIsRemovingMember] = useState<string | null>(null)
   const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported" | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isTogglingNotif, setIsTogglingNotif] = useState(false)
@@ -88,6 +96,46 @@ export function SettingsScreen() {
       if (url) window.location.href = url
     } finally {
       setIsOpeningPortal(false)
+    }
+  }
+
+  const handleOpenFamily = async () => {
+    setShowFamilySection(true)
+    if (!pet) return
+    const res = await fetch(`/api/pets/${pet.id}/members`)
+    if (res.ok) {
+      const data = await res.json()
+      setMembers(data.items ?? [])
+    }
+  }
+
+  const handleGenerateInvite = async () => {
+    if (!pet || isGeneratingInvite) return
+    setIsGeneratingInvite(true)
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/invite`, { method: "POST" })
+      const data = await res.json()
+      setInviteUrl(data.url)
+    } finally {
+      setIsGeneratingInvite(false)
+    }
+  }
+
+  const handleCopyInvite = async () => {
+    if (!inviteUrl) return
+    await navigator.clipboard.writeText(inviteUrl)
+    setCopiedInvite(true)
+    setTimeout(() => setCopiedInvite(false), 2000)
+  }
+
+  const handleRemoveMember = async (memberId: string) => {
+    if (!pet || isRemovingMember) return
+    setIsRemovingMember(memberId)
+    try {
+      await fetch(`/api/pets/${pet.id}/members/${memberId}`, { method: "DELETE" })
+      setMembers((prev) => prev.filter((m) => m.id !== memberId))
+    } finally {
+      setIsRemovingMember(null)
     }
   }
 
@@ -312,6 +360,82 @@ export function SettingsScreen() {
             </GlassCard>
           ))}
         </section>
+
+        {/* Family Sharing — owner only */}
+        {pet?.role === "owner" && (
+          <section>
+            <GlassCard className="space-y-0 py-0 overflow-hidden">
+              <button
+                onClick={showFamilySection ? () => setShowFamilySection(false) : handleOpenFamily}
+                className="w-full flex items-center gap-4 py-4 px-5"
+              >
+                <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center">
+                  <Users size={20} className="text-sky-500" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-foreground/80 text-sm">家族を招待する</p>
+                  <p className="text-xs text-muted-foreground">一緒に思い出を残す</p>
+                </div>
+                <ArrowLeft size={14} className={`text-muted-foreground transition-transform ${showFamilySection ? "rotate-90" : "-rotate-90"}`} />
+              </button>
+
+              {showFamilySection && (
+                <div className="border-t border-white/40 px-5 py-4 space-y-4">
+                  {/* Invite link */}
+                  <div className="space-y-2">
+                    {inviteUrl ? (
+                      <div className="flex gap-2">
+                        <p className="flex-1 text-xs text-muted-foreground bg-muted/30 rounded-xl px-3 py-2 truncate font-mono">
+                          {inviteUrl}
+                        </p>
+                        <button
+                          onClick={handleCopyInvite}
+                          className="shrink-0 w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center"
+                        >
+                          {copiedInvite ? <Check size={14} className="text-sky-600" /> : <Copy size={14} className="text-sky-600" />}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={handleGenerateInvite}
+                        disabled={isGeneratingInvite}
+                        className="w-full h-10 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                      >
+                        {isGeneratingInvite ? <Loader2 size={14} className="animate-spin" /> : "招待リンクを作成"}
+                      </button>
+                    )}
+                    <p className="text-xs text-muted-foreground/60">リンクは24時間有効です</p>
+                  </div>
+
+                  {/* Members list */}
+                  {members.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">メンバー</p>
+                      {members.map((m) => (
+                        <div key={m.id} className="flex items-center gap-3">
+                          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary/70 text-xs font-medium">
+                            {m.email[0].toUpperCase()}
+                          </div>
+                          <p className="flex-1 text-xs text-foreground/70 truncate">{m.email}</p>
+                          <button
+                            onClick={() => handleRemoveMember(m.id)}
+                            disabled={isRemovingMember === m.id}
+                            className="w-6 h-6 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive/70 transition-colors disabled:opacity-50"
+                          >
+                            {isRemovingMember === m.id ? <Loader2 size={10} className="animate-spin" /> : <X size={10} />}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {members.length === 0 && (
+                    <p className="text-xs text-muted-foreground/60">まだメンバーがいません</p>
+                  )}
+                </div>
+              )}
+            </GlassCard>
+          </section>
+        )}
 
         {/* Pet Status */}
         {pet && (

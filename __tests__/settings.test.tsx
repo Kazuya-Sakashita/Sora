@@ -61,6 +61,8 @@ function mockAppContext() {
     conversationTone: "やさしく寄り添う",
     setConversationTone: vi.fn(),
     updatePetStatus: vi.fn(),
+    pets: [],
+    selectPet: vi.fn(),
   })
 }
 

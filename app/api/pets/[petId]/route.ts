@@ -2,10 +2,11 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
 import { toPetResponse } from "../route"
+import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
 
-async function findPet(petId: string, userId: string) {
+async function findOwnedPet(petId: string, userId: string) {
   return prisma.pet.findFirst({ where: { id: petId, userId } })
 }
 
@@ -14,10 +15,10 @@ export async function GET(_request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const pet = await findPet(petId, user.id)
-  if (!pet) return problem(404, "Not Found")
+  const access = await getPetAccess(petId, user.id)
+  if (!access) return problem(404, "Not Found")
 
-  return NextResponse.json(toPetResponse(pet))
+  return NextResponse.json({ ...toPetResponse(access.pet), role: access.role })
 }
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -25,7 +26,7 @@ export async function PATCH(request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const existing = await findPet(petId, user.id)
+  const existing = await findOwnedPet(petId, user.id)
   if (!existing) return problem(404, "Not Found")
 
   const body = await request.json().catch(() => ({}))
@@ -54,7 +55,7 @@ export async function DELETE(_request: Request, { params }: Params) {
   if (errorResponse) return errorResponse
 
   const { petId } = await params
-  const existing = await findPet(petId, user.id)
+  const existing = await findOwnedPet(petId, user.id)
   if (!existing) return problem(404, "Not Found")
 
   await prisma.pet.delete({ where: { id: petId } })

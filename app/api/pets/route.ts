@@ -6,12 +6,21 @@ export async function GET() {
   const { user, errorResponse } = await getAuthUser()
   if (errorResponse) return errorResponse
 
-  const pets = await prisma.pet.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "asc" },
-  })
+  const [ownedPets, memberships] = await Promise.all([
+    prisma.pet.findMany({ where: { userId: user.id }, orderBy: { createdAt: "asc" } }),
+    prisma.petMember.findMany({
+      where: { userId: user.id },
+      include: { pet: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ])
 
-  return NextResponse.json({ items: pets.map(toPetResponse) })
+  const items = [
+    ...ownedPets.map((p) => ({ ...toPetResponse(p), role: "owner" })),
+    ...memberships.map((m) => ({ ...toPetResponse(m.pet), role: "member" })),
+  ]
+
+  return NextResponse.json({ items })
 }
 
 export async function POST(request: Request) {

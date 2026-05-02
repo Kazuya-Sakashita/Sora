@@ -15,6 +15,7 @@ export type Pet = {
   personality: string | null
   favorites: string | null
   status: "alive" | "rainbow_bridge"
+  role: "owner" | "member"
   createdAt: string
   updatedAt: string
 }
@@ -99,7 +100,9 @@ export type Screen =
 type AppContextType = {
   currentScreen: Screen
   setCurrentScreen: (screen: Screen) => void
+  pets: Pet[]
   pet: Pet | null
+  selectPet: (id: string) => void
   createPet: (input: CreatePetInput) => Promise<void>
   updatePetStatus: (status: "alive" | "rainbow_bridge") => Promise<void>
   memories: Memory[]
@@ -121,6 +124,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined)
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentScreen, setCurrentScreen] = useState<Screen>("onboarding")
+  const [pets, setPets] = useState<Pet[]>([])
   const [pet, setPet] = useState<Pet | null>(null)
   const [memories, setMemories] = useState<Memory[]>([])
   const [memoriesTotal, setMemoriesTotal] = useState(0)
@@ -134,36 +138,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const MEMORY_PAGE_SIZE = 20
 
+  const loadPetData = async (petId: string) => {
+    const [memRes, feelRes, schRes] = await Promise.all([
+      fetch(`/api/pets/${petId}/memories?limit=${MEMORY_PAGE_SIZE}&offset=0`).then((r) =>
+        r.ok ? r.json() : { items: [], total: 0 }
+      ),
+      fetch(`/api/pets/${petId}/feelings`).then((r) =>
+        r.ok ? r.json() : { items: [] }
+      ),
+      fetch(`/api/pets/${petId}/schedules`).then((r) =>
+        r.ok ? r.json() : { items: [] }
+      ),
+    ])
+    setMemories(memRes.items ?? [])
+    setMemoriesTotal(memRes.total ?? 0)
+    setMemoriesOffset(MEMORY_PAGE_SIZE)
+    setFeelings(feelRes.items ?? [])
+    setSchedules(schRes.items ?? [])
+  }
+
   useEffect(() => {
     fetch("/api/pets")
       .then((r) => (r.ok ? r.json() : null))
       .then(async (data) => {
         if (data?.items?.length > 0) {
-          const firstPet = data.items[0] as Pet
+          const allPets = data.items as Pet[]
+          setPets(allPets)
+          const firstPet = allPets[0]
           setPet(firstPet)
           setCurrentPetId(firstPet.id)
-          const [memRes, feelRes, schRes] = await Promise.all([
-            fetch(`/api/pets/${firstPet.id}/memories?limit=${MEMORY_PAGE_SIZE}&offset=0`).then((r) =>
-              r.ok ? r.json() : { items: [], total: 0 }
-            ),
-            fetch(`/api/pets/${firstPet.id}/feelings`).then((r) =>
-              r.ok ? r.json() : { items: [] }
-            ),
-            fetch(`/api/pets/${firstPet.id}/schedules`).then((r) =>
-              r.ok ? r.json() : { items: [] }
-            ),
-          ])
-          setMemories(memRes.items ?? [])
-          setMemoriesTotal(memRes.total ?? 0)
-          setMemoriesOffset(MEMORY_PAGE_SIZE)
-          setFeelings(feelRes.items ?? [])
-          setSchedules(schRes.items ?? [])
+          await loadPetData(firstPet.id)
           setCurrentScreen("home")
         }
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
   }, [])
+
+  const selectPet = async (id: string) => {
+    const found = pets.find((p) => p.id === id)
+    if (!found) return
+    setPet(found)
+    setCurrentPetId(id)
+    await loadPetData(id)
+    setCurrentScreen("home")
+  }
 
   const createPet = async (input: CreatePetInput) => {
     const res = await fetch("/api/pets", {
@@ -173,6 +192,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
     if (!res.ok) throw new Error("ペットの登録に失敗しました")
     const newPet = (await res.json()) as Pet
+    setPets((prev) => [...prev, newPet])
     setPet(newPet)
     setCurrentScreen("home")
   }
@@ -187,6 +207,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!res.ok) throw new Error("ステータスの更新に失敗しました")
     const updated = (await res.json()) as Pet
     setPet(updated)
+    setPets((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
   }
 
   const addMemory = async (input: CreateMemoryInput) => {
@@ -262,7 +283,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         currentScreen,
         setCurrentScreen,
+        pets,
         pet,
+        selectPet,
         createPet,
         updatePetStatus,
         memories,
