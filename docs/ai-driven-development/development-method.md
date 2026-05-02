@@ -64,7 +64,7 @@
 ### 実装前
 
 1. 対象ISSUEのステータスを `in_progress` に更新
-2. APIの変更を伴う場合は `docs/api/openapi.yaml` を先に更新
+2. APIの変更を伴う場合は `openapi.yaml` を先に更新
 3. 変更するファイルと影響範囲を確認してから着手
 
 ### 実装中

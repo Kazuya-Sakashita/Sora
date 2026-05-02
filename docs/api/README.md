@@ -78,7 +78,8 @@
 ## ファイル構成
 
 ```
+openapi.yaml              # API定義（Single source of truth, プロジェクトルート）
 docs/api/
-├── README.md        # このファイル（運用ガイド）
-└── openapi.yaml     # API定義（Single source of truth）
+├── README.md             # このファイル（運用ガイド）
+└── API_DRIVEN_DEVELOPMENT.md  # API駆動開発ガイド
 ```

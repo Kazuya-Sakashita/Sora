@@ -2,7 +2,7 @@
 
 ## 原則
 
-`docs/api/openapi.yaml` がすべての仕様のソース・オブ・トゥルース。  
+`openapi.yaml` がすべての仕様のソース・オブ・トゥルース。  
 コードよりyamlが先。yamlがなければAPIは存在しない。
 
 ---

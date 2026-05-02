@@ -54,6 +54,6 @@ Sora/
 | ドキュメント | 内容 |
 |-------------|------|
 | [仕様書](./docs/specs/pet-memory-care-app-spec.md) | プロダクト全体の仕様 |
-| [OpenAPI](./docs/api/openapi.yaml) | API設計（MVP） |
+| [OpenAPI](./openapi.yaml) | API設計（MVP） |
 | [ISSUE一覧](./docs/issues/README.md) | 現在の課題と優先度 |
 | [評価フレームワーク](./docs/reviews/app-evaluation.md) | HEART / AARRR評価 |

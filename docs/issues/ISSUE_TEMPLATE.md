@@ -30,7 +30,7 @@ status: open
 ## API変更
 
 - あり / なし
-- あり の場合: `docs/api/openapi.yaml` を先に更新すること
+- あり の場合: `openapi.yaml` を先に更新すること
 
 ## 受け入れ条件
 

@@ -7,7 +7,7 @@
 
 - 仕様書: `docs/specs/pet-memory-care-app-spec.md`
 - ISSUE一覧: `docs/issues/README.md`
-- API定義: `docs/api/openapi.yaml`
+- API定義: `openapi.yaml`
 
 ---
 
@@ -31,7 +31,7 @@
 
 ### OpenAPI First
 
-- `docs/api/openapi.yaml` が唯一の仕様ソース（コードより先に更新）
+- `openapi.yaml` が唯一の仕様ソース（コードより先に更新）
 - フロント実装はOpenAPIの定義に従う
 - 定義なしにAPIを実装・呼び出さない
 - 詳細: `docs/api/API_DRIVEN_DEVELOPMENT.md`
@@ -42,7 +42,7 @@
 
 1. `docs/issues/README.md` で未対応ISSUEを確認する
 2. 対象ISSUEのステータスを `in_progress` に更新する
-3. API変更を伴う場合は `docs/api/openapi.yaml` を**先に**更新する
+3. API変更を伴う場合は `openapi.yaml` を**先に**更新する
 4. 変更するファイルと影響範囲を1〜2行で示してから着手する
 
 ## 実装後に必ずやること

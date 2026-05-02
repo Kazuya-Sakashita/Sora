@@ -1,6 +1,6 @@
 # api-design-prompt — API設計・変更時
 
-`docs/api/openapi.yaml` を変更するとき・新しいAPIを追加するときに使う。
+`openapi.yaml` を変更するとき・新しいAPIを追加するときに使う。
 
 ---
 
