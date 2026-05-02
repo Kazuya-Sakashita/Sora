@@ -11,6 +11,7 @@ import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, S
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
+import { UpgradeModal } from "@/components/upgrade-modal"
 
 const moodMap: Record<string, { emoji: string; label: string }> = {
   happy: { emoji: "🥰", label: "うれしい" },
@@ -48,6 +49,8 @@ export function TimelineScreen() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
+  const [showLimitWarning, setShowLimitWarning] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -109,6 +112,7 @@ export function TimelineScreen() {
   const handleAddMemory = async () => {
     if (!newMemory.title || isSubmitting) return
     setIsSubmitting(true)
+    const newTotal = memoriesTotal + 1
     try {
       await addMemory({
         title: newMemory.title,
@@ -121,8 +125,14 @@ export function TimelineScreen() {
       setIsAdding(false)
       setShowFeedback(true)
       setTimeout(() => setShowFeedback(false), 3000)
-    } catch {
-      // stay on form
+      if (newTotal === 49) {
+        setShowLimitWarning(true)
+        setTimeout(() => setShowLimitWarning(false), 4000)
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message === "PLAN_LIMIT") {
+        setShowUpgradeModal(true)
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -356,6 +366,19 @@ export function TimelineScreen() {
           </div>
         )}
       </main>
+
+      {/* Upgrade モーダル */}
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+
+      {/* 上限接近バナー */}
+      {showLimitWarning && (
+        <div className="fixed bottom-8 inset-x-4 max-w-sm mx-auto z-50 animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
+          <div className="rounded-2xl bg-amber-50/95 backdrop-blur-xl border border-amber-200 shadow-lg px-5 py-3.5 flex items-center gap-3">
+            <span className="text-lg">⚠️</span>
+            <p className="text-sm text-amber-800">あと1件で上限です。Sora+ で無制限に残せます</p>
+          </div>
+        </div>
+      )}
 
       {/* シェアトースト */}
       {shareToast && (

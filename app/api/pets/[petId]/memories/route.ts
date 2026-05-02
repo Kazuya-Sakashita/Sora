@@ -70,6 +70,13 @@ export async function POST(request: Request, { params }: Params) {
   const pet = await verifyPetOwner(petId, user.id)
   if (!pet) return problem(404, "Not Found")
 
+  // Free プランの上限チェック（ユーザー全ペット合計50件）
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { plan: true } })
+  if (dbUser?.plan === "FREE") {
+    const totalCount = await prisma.memory.count({ where: { pet: { userId: user.id } } })
+    if (totalCount >= 50) return problem(402, "Payment Required", "記録の上限（50件）に達しました。Sora+ で無制限に残せます")
+  }
+
   const body = await request.json().catch(() => null)
   if (!body || !body.title || !body.date) {
     return problem(400, "Bad Request", "title と date は必須です")

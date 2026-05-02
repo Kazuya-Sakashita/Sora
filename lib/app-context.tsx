@@ -181,6 +181,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(input),
     })
+    if (res.status === 402) throw new Error("PLAN_LIMIT")
     if (!res.ok) throw new Error("思い出の保存に失敗しました")
     const memory = (await res.json()) as Memory
     setMemories((prev) => [memory, ...prev])
