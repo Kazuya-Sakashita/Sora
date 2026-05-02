@@ -2,11 +2,12 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2 } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
 import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
+import { UpgradeModal } from "@/components/upgrade-modal"
 import { useState } from "react"
 
 export function HomeScreen() {
@@ -21,6 +22,38 @@ export function HomeScreen() {
   const milestoneMessage = getMilestoneMessage(streak)
   const todayMilestone = pet ? getTodayMilestone(pet) : null
   const [milestoneDissmissed, setMilestoneDismissed] = useState(false)
+  const [downloadingCard, setDownloadingCard] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+
+  async function handleDownloadMilestoneCard() {
+    if (!todayMilestone || !pet) return
+    setDownloadingCard(true)
+    try {
+      const planRes = await fetch("/api/billing/plan")
+      const { plan } = await planRes.json()
+      if (plan === "FREE") {
+        setShowUpgradeModal(true)
+        return
+      }
+      const params = new URLSearchParams({
+        type: "milestone",
+        label: todayMilestone.label,
+        emoji: todayMilestone.emoji,
+        petName: pet.name,
+      })
+      const res = await fetch(`/api/og?${params}`)
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `sora-milestone-${todayMilestone.label}.png`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setDownloadingCard(false)
+    }
+  }
 
   const monthlyRecap = isRecapWindow(today) ? buildMonthlyRecap(memories, feelings, today) : null
 
@@ -58,6 +91,18 @@ export function HomeScreen() {
             </div>
             <div className="space-y-2 pt-2">
               <button
+                onClick={handleDownloadMilestoneCard}
+                disabled={downloadingCard}
+                className="w-full h-11 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {downloadingCard ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Download size={15} />
+                )}
+                記念カードを保存する
+              </button>
+              <button
                 onClick={() => { setMilestoneDismissed(true); setCurrentScreen("timeline") }}
                 className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
               >
@@ -73,6 +118,8 @@ export function HomeScreen() {
           </div>
         </div>
       )}
+
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
 
       {/* Header */}
       <header className="px-6 pt-safe">

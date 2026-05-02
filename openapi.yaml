@@ -622,12 +622,17 @@ paths:
   /og:
     get:
       tags: [sharing]
-      summary: OGP 画像を生成する（認証不要）
+      summary: OGP / マイルストーン記念カード画像を生成する（認証不要）
       security: []
       parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [memory, milestone]
+            default: memory
         - name: title
           in: query
-          required: true
           schema:
             type: string
         - name: date
@@ -644,6 +649,16 @@ paths:
           schema:
             type: string
             format: uri
+        - name: label
+          in: query
+          description: "milestone タイプ時の記念日ラベル（例: 100日目）"
+          schema:
+            type: string
+        - name: emoji
+          in: query
+          description: "milestone タイプ時の絵文字"
+          schema:
+            type: string
       responses:
         "200":
           description: 画像生成成功
