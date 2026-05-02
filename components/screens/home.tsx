@@ -2,13 +2,13 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2 } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
 import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export function HomeScreen() {
   const { pet, memories, feelings, setCurrentScreen } = useApp()
@@ -24,6 +24,14 @@ export function HomeScreen() {
   const [milestoneDissmissed, setMilestoneDismissed] = useState(false)
   const [downloadingCard, setDownloadingCard] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
+
+  useEffect(() => {
+    fetch("/api/billing/plan")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.plan) setPlan(d.plan) })
+      .catch(() => {})
+  }, [])
 
   async function handleDownloadMilestoneCard() {
     if (!todayMilestone || !pet) return
@@ -152,6 +160,30 @@ export function HomeScreen() {
       </header>
 
       <main className="px-6 space-y-4 pb-8">
+        {/* First Record Nudge — memories が 0 件の時のみ */}
+        {pet && memories.length === 0 && (
+          <div
+            className="rounded-3xl p-6 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500"
+            style={{ background: "linear-gradient(135deg, #F5EEE4 0%, #EDD9B5 100%)" }}
+          >
+            <p className="text-2xl">🐾</p>
+            <div className="space-y-1">
+              <p className="font-semibold text-foreground/85">
+                {pet.name}との最初の思い出を残しましょう
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                小さな記録が、かけがえのない物語になります。
+              </p>
+            </div>
+            <button
+              onClick={() => setCurrentScreen("timeline")}
+              className="w-full h-11 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+            >
+              今すぐ残す
+            </button>
+          </div>
+        )}
+
         {/* Days Counter */}
         {pet && (
           <GlassCard className="text-center py-10 space-y-2">
@@ -326,6 +358,25 @@ export function HomeScreen() {
               </div>
             </GlassCard>
           </button>
+        )}
+
+        {/* Sora+ バナー（Free + 5件以上） */}
+        {plan === "FREE" && memories.length >= 5 && pet && (
+          <div className="relative rounded-3xl overflow-hidden border border-amber-100 bg-linear-to-br from-amber-50 to-orange-50 p-5 space-y-3">
+            <Lock size={14} className="absolute top-4 right-4 text-amber-400" />
+            <div className="space-y-1 pr-6">
+              <p className="font-semibold text-foreground/85 text-sm leading-snug">
+                {pet.name}の今月をフォトブックにまとめよう 📷
+              </p>
+              <p className="text-xs text-muted-foreground">Sora+ で毎月PDF保存できます</p>
+            </div>
+            <button
+              onClick={() => setShowUpgradeModal(true)}
+              className="h-9 px-4 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-medium text-xs transition-colors"
+            >
+              Sora+ を見る
+            </button>
+          </div>
         )}
 
         {/* Recent Memories */}
