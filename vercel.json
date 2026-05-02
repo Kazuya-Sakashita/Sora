@@ -7,6 +7,10 @@
     {
       "path": "/api/push/annual",
       "schedule": "0 0 1 1 *"
+    },
+    {
+      "path": "/api/push/weekly",
+      "schedule": "0 23 * * 0"
     }
   ]
 }
