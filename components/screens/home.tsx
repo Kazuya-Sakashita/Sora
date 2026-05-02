@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2 } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
@@ -109,6 +109,20 @@ export function HomeScreen() {
                   <Download size={15} />
                 )}
                 記念カードを保存する
+              </button>
+              <button
+                onClick={() => {
+                  const text = `${pet!.name}と今日で${todayMilestone.label} ${todayMilestone.emoji} #Sora #ペット記録`
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    navigator.share({ title: `${todayMilestone.label}`, text, url: window.location.origin }).catch(() => {})
+                  } else {
+                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank", "noopener")
+                  }
+                }}
+                className="w-full h-11 rounded-2xl bg-sky-100 hover:bg-sky-200 text-sky-700 font-medium text-sm transition-colors flex items-center justify-center gap-2"
+              >
+                <Share2 size={15} />
+                シェアする
               </button>
               <button
                 onClick={() => { setMilestoneDismissed(true); setCurrentScreen("timeline") }}
