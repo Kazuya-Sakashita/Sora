@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
-import { validateLength } from "@/lib/validate"
+import { parseBody } from "@/lib/validate"
+import { FeelingInputSchema } from "@/lib/schemas"
 import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
@@ -51,20 +52,14 @@ export async function POST(request: Request, { params }: Params) {
   const { petId } = await params
   if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
-  const body = await request.json().catch(() => null)
-  if (!body || !body.tag || !body.date) {
-    return problem(400, "Bad Request", "tag と date は必須です")
-  }
-
-  const validationError = validateLength(body.memo, "memo", 500)
-  if (validationError) {
-    return problem(400, "Bad Request", validationError.message)
-  }
+  const parsed = await parseBody(FeelingInputSchema, request)
+  if (parsed.error) return parsed.error
+  const body = parsed.data
 
   const feeling = await prisma.feeling.create({
     data: {
       petId,
-      tag: body.tag.toUpperCase(),
+      tag: body.tag.toUpperCase() as never,
       memo: body.memo ?? null,
       date: new Date(body.date),
     },

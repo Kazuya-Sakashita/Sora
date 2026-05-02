@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
-import { validateLength } from "@/lib/validate"
+import { parseBody } from "@/lib/validate"
+import { ScheduleInputSchema } from "@/lib/schemas"
 import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
@@ -65,22 +66,14 @@ export async function POST(request: Request, { params }: Params) {
   const { petId } = await params
   if (!await getPetAccess(petId, user.id)) return problem(404, "Not Found")
 
-  const body = await request.json().catch(() => null)
-  if (!body || !body.type || !body.title || !body.date) {
-    return problem(400, "Bad Request", "type, title, date は必須です")
-  }
-
-  const validationError =
-    validateLength(body.title, "title", 100) ??
-    validateLength(body.memo, "memo", 500)
-  if (validationError) {
-    return problem(400, "Bad Request", validationError.message)
-  }
+  const parsed = await parseBody(ScheduleInputSchema, request)
+  if (parsed.error) return parsed.error
+  const body = parsed.data
 
   const schedule = await prisma.schedule.create({
     data: {
       petId,
-      type: body.type.toUpperCase(),
+      type: body.type.toUpperCase() as never,
       title: body.title,
       date: new Date(body.date),
       memo: body.memo ?? null,

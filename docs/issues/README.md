@@ -44,7 +44,7 @@
 | [035](ISSUE-035-photobook-pdf.md) | フォトブックPDF出力を実装する（Sora+） | 🟠 high | done |
 | [036](ISSUE-036-milestone-card-download.md) | マイルストーン記念カードのPNG保存を実装する（Sora+） | 🟡 medium | done |
 | [038](ISSUE-038-openapi-typescript.md) | openapi-typescript導入 + 型自動生成 | 🟠 high | done |
-| [039](ISSUE-039-zod-validation.md) | zodバリデーション統一 | 🟡 medium | open |
+| [039](ISSUE-039-zod-validation.md) | zodバリデーション統一 | 🟡 medium | done |
 
 ---
 

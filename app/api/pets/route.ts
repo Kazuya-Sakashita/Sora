@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
+import { parseBody } from "@/lib/validate"
+import { PetInputSchema } from "@/lib/schemas"
 
 export async function GET() {
   const { user, errorResponse } = await getAuthUser()
@@ -27,21 +29,20 @@ export async function POST(request: Request) {
   const { user, errorResponse } = await getAuthUser()
   if (errorResponse) return errorResponse
 
-  const body = await request.json().catch(() => null)
-  if (!body || !body.name) {
-    return problem(400, "Bad Request", "name は必須です")
-  }
+  const parsed = await parseBody(PetInputSchema, request)
+  if (parsed.error) return parsed.error
+  const body = parsed.data
 
   const pet = await prisma.pet.create({
     data: {
       userId: user.id,
       name: body.name,
       nickname: body.nickname ?? null,
-      species: body.species?.toUpperCase() ?? null,
+      species: (body.species?.toUpperCase() ?? null) as never,
       breed: body.breed ?? null,
       birthDate: body.birthDate ? new Date(body.birthDate) : null,
       broughtAt: body.broughtAt ? new Date(body.broughtAt) : null,
-      gender: body.gender?.toUpperCase() ?? null,
+      gender: (body.gender?.toUpperCase() ?? null) as never,
       personality: body.personality ?? null,
       favorites: body.favorites ?? null,
       photoUrl: body.photoUrl ?? null,

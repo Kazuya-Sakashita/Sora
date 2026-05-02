@@ -1,4 +1,22 @@
+import { z } from "zod"
+import { problem } from "@/lib/auth"
+
 export type ValidationError = { field: string; message: string }
+
+export async function parseBody<T>(
+  schema: z.ZodType<T>,
+  request: Request
+): Promise<{ data: T; error?: never } | { data?: never; error: ReturnType<typeof problem> }> {
+  const raw = await request.json().catch(() => null)
+  const result = schema.safeParse(raw)
+  if (!result.success) {
+    const detail = result.error.errors
+      .map((e) => (e.path.length ? `${e.path.join(".")}: ${e.message}` : e.message))
+      .join(", ")
+    return { error: problem(400, "Bad Request", detail) }
+  }
+  return { data: result.data }
+}
 
 export function validateLength(
   value: string | undefined | null,

@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
 import { toPetResponse } from "../route"
 import { getPetAccess } from "@/lib/pet-access"
+import { parseBody } from "@/lib/validate"
+import { PetPatchSchema } from "@/lib/schemas"
 
 type Params = { params: Promise<{ petId: string }> }
 
@@ -29,17 +31,19 @@ export async function PATCH(request: Request, { params }: Params) {
   const existing = await findOwnedPet(petId, user.id)
   if (!existing) return problem(404, "Not Found")
 
-  const body = await request.json().catch(() => ({}))
+  const parsed = await parseBody(PetPatchSchema, request)
+  if (parsed.error) return parsed.error
+  const body = parsed.data
 
   const pet = await prisma.pet.update({
     where: { id: petId },
     data: {
       ...(body.name !== undefined && { name: body.name }),
       ...(body.nickname !== undefined && { nickname: body.nickname }),
-      ...(body.species !== undefined && { species: body.species?.toUpperCase() ?? null }),
+      ...(body.species !== undefined && { species: (body.species?.toUpperCase() ?? null) as never }),
       ...(body.breed !== undefined && { breed: body.breed }),
       ...(body.birthDate !== undefined && { birthDate: body.birthDate ? new Date(body.birthDate) : null }),
-      ...(body.gender !== undefined && { gender: body.gender?.toUpperCase() ?? null }),
+      ...(body.gender !== undefined && { gender: (body.gender?.toUpperCase() ?? null) as never }),
       ...(body.personality !== undefined && { personality: body.personality }),
       ...(body.favorites !== undefined && { favorites: body.favorites }),
       ...(body.photoUrl !== undefined && { photoUrl: body.photoUrl }),

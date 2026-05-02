@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getAuthUser, problem } from "@/lib/auth"
-import { validateLength, validatePhotoUrls } from "@/lib/validate"
+import { parseBody } from "@/lib/validate"
+import { MemoryInputSchema } from "@/lib/schemas"
 import { getPetAccess } from "@/lib/pet-access"
 
 type Params = { params: Promise<{ petId: string }> }
@@ -72,18 +73,9 @@ export async function POST(request: Request, { params }: Params) {
     if (totalCount >= 50) return problem(402, "Payment Required", "記録の上限（50件）に達しました。Sora+ で無制限に残せます")
   }
 
-  const body = await request.json().catch(() => null)
-  if (!body || !body.title || !body.date) {
-    return problem(400, "Bad Request", "title と date は必須です")
-  }
-
-  const validationError =
-    validateLength(body.title, "title", 100) ??
-    validateLength(body.description, "description", 2000) ??
-    validatePhotoUrls(body.photoUrls)
-  if (validationError) {
-    return problem(400, "Bad Request", validationError.message)
-  }
+  const parsed = await parseBody(MemoryInputSchema, request)
+  if (parsed.error) return parsed.error
+  const body = parsed.data
 
   const memory = await prisma.memory.create({
     data: {
@@ -91,8 +83,8 @@ export async function POST(request: Request, { params }: Params) {
       title: body.title,
       description: body.description ?? null,
       date: new Date(body.date),
-      category: body.category?.toUpperCase() ?? "OTHER",
-      moodTag: body.moodTag?.toUpperCase() ?? null,
+      category: (body.category?.toUpperCase() ?? "OTHER") as never,
+      moodTag: (body.moodTag?.toUpperCase() ?? null) as never,
       photoUrls: body.photoUrls ?? [],
     },
   })
