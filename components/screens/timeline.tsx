@@ -51,7 +51,6 @@ export function TimelineScreen() {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
-  const [showLimitWarning, setShowLimitWarning] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
@@ -63,6 +62,14 @@ export function TimelineScreen() {
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
+  const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
+
+  useEffect(() => {
+    fetch("/api/billing/plan")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.plan) setPlan(d.plan) })
+      .catch(() => {})
+  }, [])
 
   const recordedDates = new Set(memories.map((m) => m.date))
   const hasPhotoDates = new Set(
@@ -168,10 +175,6 @@ export function TimelineScreen() {
       setIsAdding(false)
       setShowFeedback(true)
       setTimeout(() => setShowFeedback(false), 3000)
-      if (newTotal === 49) {
-        setShowLimitWarning(true)
-        setTimeout(() => setShowLimitWarning(false), 4000)
-      }
     } catch (e) {
       if (e instanceof Error && e.message === "PLAN_LIMIT") {
         setShowUpgradeModal(true)
@@ -186,6 +189,34 @@ export function TimelineScreen() {
   return (
     <div className="min-h-screen pb-safe">
       {/* Header */}
+      {/* 上限カウントダウンバナー（Free + 20件以上使用時） */}
+      {plan === "FREE" && memoriesTotal >= 20 && (() => {
+        const remaining = 50 - memoriesTotal
+        if (remaining <= 0) return null
+        const isUrgent = remaining <= 10
+        const isWarning = remaining <= 20
+        return (
+          <div className={`px-4 py-2 flex items-center justify-between gap-3 ${isUrgent ? "bg-orange-50 border-b border-orange-200" : "bg-amber-50/80 border-b border-amber-100"}`}>
+            <p className={`text-xs font-medium ${isUrgent ? "text-orange-700" : "text-amber-700"}`}>
+              {isUrgent
+                ? `残り${remaining}件！記録が上限に近づいています`
+                : `残り${remaining}件 / Free プラン`}
+            </p>
+            {isUrgent && (
+              <button
+                onClick={() => setShowUpgradeModal(true)}
+                className="shrink-0 text-xs font-semibold text-orange-600 underline underline-offset-2"
+              >
+                アップグレード
+              </button>
+            )}
+            {isWarning && !isUrgent && (
+              <span className="shrink-0 text-xs text-amber-500">Sora+ で無制限に</span>
+            )}
+          </div>
+        )
+      })()}
+
       <header className="sticky top-0 z-10 bg-white/30 backdrop-blur-xl border-b border-white/40">
         <div className="px-4 pt-safe">
           <div className="h-14 flex items-center gap-4">
@@ -441,16 +472,6 @@ export function TimelineScreen() {
 
       {/* Upgrade モーダル */}
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
-
-      {/* 上限接近バナー */}
-      {showLimitWarning && (
-        <div className="fixed bottom-8 inset-x-4 max-w-sm mx-auto z-50 animate-in fade-in slide-in-from-bottom-4 duration-300 pointer-events-none">
-          <div className="rounded-2xl bg-amber-50/95 backdrop-blur-xl border border-amber-200 shadow-lg px-5 py-3.5 flex items-center gap-3">
-            <span className="text-lg">⚠️</span>
-            <p className="text-sm text-amber-800">あと1件で上限です。Sora+ で無制限に残せます</p>
-          </div>
-        </div>
-      )}
 
       {/* シェアトースト */}
       {shareToast && (
