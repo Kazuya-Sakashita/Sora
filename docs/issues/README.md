@@ -34,7 +34,7 @@
 | [026](ISSUE-026-monthly-recap.md) | 月次ふりかえりカードの自動生成 | 🟠 high | done |
 | [027](ISSUE-027-share-memory.md) | 思い出シェア機能（OGP画像生成） | 🟠 high | done |
 | [028](ISSUE-028-milestone-notification.md) | 記念日・マイルストーン通知とお祝いカード | 🟠 high | done |
-| [029](ISSUE-029-mood-trend-graph.md) | 気持ちトレンドグラフ | 🟡 medium | open |
+| [029](ISSUE-029-mood-trend-graph.md) | 気持ちトレンドグラフ | 🟡 medium | done |
 
 ---
 
