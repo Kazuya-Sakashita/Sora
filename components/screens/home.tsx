@@ -4,6 +4,7 @@ import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
 import { Settings, BookOpen, Heart, CalendarDays } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
+import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 
 export function HomeScreen() {
   const { pet, memories, setCurrentScreen } = useApp()
@@ -13,6 +14,8 @@ export function HomeScreen() {
   const today = new Date()
   const todayStr = today.toISOString().split("T")[0]
   const recordedToday = memories.find((m) => m.date === todayStr)
+  const streak = calcStreak(memories.map((m) => m.date))
+  const milestoneMessage = getMilestoneMessage(streak)
 
   const onThisDay = memories
     .filter((m) => {
@@ -81,6 +84,22 @@ export function HomeScreen() {
                 一緒にいる日々
               </p>
             )}
+
+            {/* Streak Badge */}
+            {streak > 0 && (
+              <div className="flex justify-center pt-1">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-xs font-medium text-orange-500">
+                  🔥 {streak}日連続記録中
+                </span>
+              </div>
+            )}
+
+            {/* Milestone Message */}
+            {milestoneMessage && (
+              <p className="text-xs text-primary/70 font-medium pt-1 animate-in fade-in duration-500">
+                {milestoneMessage}
+              </p>
+            )}
           </GlassCard>
         )}
 
@@ -106,11 +125,17 @@ export function HomeScreen() {
         ) : (
           <button
             onClick={() => setCurrentScreen("timeline")}
-            className="w-full h-16 rounded-2xl flex items-center justify-center gap-3 text-foreground/80 font-medium text-base active:scale-[0.98] transition-all shadow-md"
+            className="w-full rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-md"
             style={{ background: "linear-gradient(135deg, #F0E6D8, #EDD9B5)" }}
           >
-            <BookOpen size={20} />
-            今日の思い出を残す
+            <div className="h-16 flex items-center justify-center gap-3 text-foreground/80 font-medium text-base">
+              <BookOpen size={20} />
+              <span>
+                {streak > 0 && !recordedToday
+                  ? `${streak}日連続中 — 今日も残しませんか`
+                  : "今日の思い出を残す"}
+              </span>
+            </div>
           </button>
         )}
 
