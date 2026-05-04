@@ -252,11 +252,11 @@ export function SettingsScreen() {
           ))}
 
           {plan === "FREE" && (
-            <div className={`pt-1 ${process.env.NEXT_PUBLIC_PRICE_YEARLY ? "grid grid-cols-2 gap-2" : ""}`}>
+            <div className={`pt-1 ${process.env.NEXT_PUBLIC_PRICE_YEARLY ? "grid grid-cols-2 gap-2" : "flex"}`}>
               <button
                 onClick={() => handleCheckout("month")}
                 disabled={isCheckingOut}
-                className="h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
+                className="flex-1 h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
               >
                 {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : `月額 ¥${process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"}`}
               </button>
