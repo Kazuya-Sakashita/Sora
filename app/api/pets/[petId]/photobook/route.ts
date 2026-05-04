@@ -7,8 +7,27 @@ import { buildPhotobookData } from "@/lib/photobook"
 import { PhotobookDocument } from "@/lib/photobook-pdf"
 import { renderToBuffer } from "@react-pdf/renderer"
 import React from "react"
+import sharp from "sharp"
 
 type Params = { params: Promise<{ petId: string }> }
+
+async function fetchImageAsDataUri(url: string): Promise<{ uri: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) })
+    if (!res.ok) return null
+    const contentType = res.headers.get("content-type") ?? ""
+    if (!contentType.startsWith("image/")) return null
+    const raw = Buffer.from(await res.arrayBuffer())
+    const processed = await sharp(raw)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer()
+    const base64 = processed.toString("base64")
+    return { uri: `data:image/jpeg;base64,${base64}` }
+  } catch {
+    return null
+  }
+}
 
 export async function GET(request: NextRequest, { params }: Params) {
   const { user, errorResponse } = await getAuthUser()
@@ -32,7 +51,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   if (isNaN(month) || month < 1 || month > 12) return problem(400, "Bad Request", "month が不正です")
 
   const startDate = new Date(`${year}-${String(month).padStart(2, "0")}-01T00:00:00Z`)
-  const endDate = new Date(year, month, 1) // first day of next month
+  const endDate = new Date(year, month, 1)
 
   const memories = await prisma.memory.findMany({
     where: { petId, date: { gte: startDate, lt: endDate } },
@@ -54,7 +73,23 @@ export async function GET(request: NextRequest, { params }: Params) {
     month
   )
 
-  const element = React.createElement(PhotobookDocument, { data })
+  // Fetch images as data URIs — react-pdf's resolveImage handles { uri: 'data:...' } via resolveBase64Image
+  const allUrls = [data.petPhotoUrl, ...data.items.map((item) => item.photoUrl)]
+  const buffers = await Promise.all(
+    allUrls.map((url) => (url ? fetchImageAsDataUri(url) : Promise.resolve(null)))
+  )
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resolvedData: any = {
+    ...data,
+    petPhotoUrl: buffers[0] ?? null,
+    items: data.items.map((item, i) => ({
+      ...item,
+      photoUrl: buffers[i + 1] ?? null,
+    })),
+  }
+
+  const element = React.createElement(PhotobookDocument, { data: resolvedData })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buffer = await renderToBuffer(element as any)
 

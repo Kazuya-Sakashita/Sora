@@ -7,8 +7,29 @@ import { AnnualReportDocument } from "@/lib/report-pdf"
 import type { MemoryCategory, MoodTag, FeelingTag } from "@/lib/api-types"
 import { renderToBuffer } from "@react-pdf/renderer"
 import React from "react"
+import sharp from "sharp"
 
 type Params = { params: Promise<{ petId: string }> }
+
+// Fetch + re-encode via sharp: strips problematic EXIF metadata that jay-peg can't parse,
+// and resizes to a PDF-appropriate resolution to keep file size manageable.
+async function fetchImageAsDataUri(url: string): Promise<{ uri: string } | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) })
+    if (!res.ok) return null
+    const contentType = res.headers.get("content-type") ?? ""
+    if (!contentType.startsWith("image/")) return null
+    const raw = Buffer.from(await res.arrayBuffer())
+    const processed = await sharp(raw)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer()
+    const base64 = processed.toString("base64")
+    return { uri: `data:image/jpeg;base64,${base64}` }
+  } catch {
+    return null
+  }
+}
 
 export async function GET(request: NextRequest, { params }: Params) {
   const { user, errorResponse } = await getAuthUser()
@@ -66,8 +87,25 @@ export async function GET(request: NextRequest, { params }: Params) {
     year
   )
 
-  // renderToBuffer expects the Document root element directly
-  const element = React.createElement(AnnualReportDocument, { data })
+  // Fetch images as data URIs — react-pdf's resolveImage handles { uri: 'data:...' } via resolveBase64Image
+  const [petPhotoBuf, ...featuredPhotoBufs] = await Promise.all([
+    data.petPhotoUrl ? fetchImageAsDataUri(data.petPhotoUrl) : Promise.resolve(null),
+    ...data.featuredMemories.map((m) =>
+      m.photoUrl ? fetchImageAsDataUri(m.photoUrl) : Promise.resolve(null)
+    ),
+  ])
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const resolvedData: any = {
+    ...data,
+    petPhotoUrl: petPhotoBuf ?? null,
+    featuredMemories: data.featuredMemories.map((m, i) => ({
+      ...m,
+      photoUrl: featuredPhotoBufs[i] ?? null,
+    })),
+  }
+
+  const element = React.createElement(AnnualReportDocument, { data: resolvedData })
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buffer = await renderToBuffer(element as any)
 
