@@ -6,7 +6,7 @@ Font.register({
   family: "NotoSansJP",
   src: path.join(
     process.cwd(),
-    "node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-400-normal.woff2"
+    "node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-400-normal.woff"
   ),
 })
 
@@ -47,11 +47,11 @@ const s = StyleSheet.create({
 })
 
 const MOOD_LABELS: Record<string, string> = {
-  happy: "🥰 うれしい",
-  calm: "😌 おだやか",
-  fun: "😄 笑った",
-  worried: "😟 心配",
-  loving: "💝 愛おしい",
+  happy: "うれしい",
+  calm: "おだやか",
+  fun: "笑った",
+  worried: "心配",
+  loving: "愛おしい",
 }
 
 const ITEMS_PER_PAGE = 6
@@ -87,9 +87,7 @@ function GridPage({ items, pageNum }: { items: PhotobookData["items"]; pageNum: 
             {item.photoUrl ? (
               <Image src={item.photoUrl} style={s.gridPhoto} />
             ) : (
-              <View style={s.gridPlaceholder}>
-                <Text style={s.gridPlaceholderText}>🐾</Text>
-              </View>
+              <View style={s.gridPlaceholder} />
             )}
             <View style={s.gridInfo}>
               <Text style={s.gridTitle}>{item.title}</Text>

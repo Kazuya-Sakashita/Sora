@@ -1,11 +1,11 @@
 import type { Memory, Feeling } from "@/lib/app-context"
 
 const MOOD_LABEL: Record<string, string> = {
-  happy: "うれしい 🥰",
-  calm: "おだやか 😌",
-  fun: "笑った 😄",
-  worried: "心配 😟",
-  loving: "愛おしい 💝",
+  happy: "うれしい",
+  calm: "おだやか",
+  fun: "笑った",
+  worried: "心配",
+  loving: "愛おしい",
 }
 
 export type MonthSummary = {

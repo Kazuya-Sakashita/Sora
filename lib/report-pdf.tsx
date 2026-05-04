@@ -15,7 +15,7 @@ Font.register({
   family: "NotoSansJP",
   src: path.join(
     process.cwd(),
-    "node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-400-normal.woff2"
+    "node_modules/@fontsource/noto-sans-jp/files/noto-sans-jp-japanese-400-normal.woff"
   ),
 })
 
@@ -47,9 +47,10 @@ const s = StyleSheet.create({
   monthEmpty: { opacity: 0.4 },
   // Featured
   memoryRow: { flexDirection: "row", gap: 12, marginBottom: 16, alignItems: "flex-start" },
-  memoryPhoto: { width: 72, height: 72, borderRadius: 8, objectFit: "cover" },
-  memoryPhotoPlaceholder: { width: 72, height: 72, borderRadius: 8, backgroundColor: WARM_LIGHT, alignItems: "center", justifyContent: "center" },
-  memoryTitle: { fontSize: 12, color: DARK, fontWeight: 700, lineHeight: 1.4, flex: 1 },
+  memoryPhoto: { width: 72, height: 72, borderRadius: 8, objectFit: "cover", flexShrink: 0 },
+  memoryPhotoPlaceholder: { width: 72, height: 72, borderRadius: 8, backgroundColor: WARM_LIGHT, alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  memoryPhotoPlaceholderText: { fontSize: 24 },
+  memoryTitle: { fontSize: 12, color: DARK, fontWeight: 700, lineHeight: 1.4 },
   memoryDate: { fontSize: 10, color: MUTED, marginTop: 4 },
 })
 
@@ -109,7 +110,7 @@ function MonthlySummaryPage({ data }: { data: ReportData }) {
             ) : (
               <View style={s.memoryPhotoPlaceholder} />
             )}
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={s.memoryTitle}>{mem.title}</Text>
               <Text style={s.memoryDate}>{mem.date}</Text>
             </View>
