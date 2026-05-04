@@ -252,22 +252,24 @@ export function SettingsScreen() {
           ))}
 
           {plan === "FREE" && (
-            <div className="grid grid-cols-2 gap-2 pt-1">
+            <div className={`pt-1 ${process.env.NEXT_PUBLIC_PRICE_YEARLY ? "grid grid-cols-2 gap-2" : ""}`}>
               <button
                 onClick={() => handleCheckout("month")}
                 disabled={isCheckingOut}
                 className="h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
               >
-                {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : "月額 ¥480"}
+                {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : `月額 ¥${process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"}`}
               </button>
-              <button
-                onClick={() => handleCheckout("year")}
-                disabled={isCheckingOut}
-                className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
-              >
-                <span>年額 ¥4,300</span>
-                <span className="text-[10px] opacity-80">約25%お得</span>
-              </button>
+              {process.env.NEXT_PUBLIC_PRICE_YEARLY && (
+                <button
+                  onClick={() => handleCheckout("year")}
+                  disabled={isCheckingOut}
+                  className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
+                >
+                  <span>年額 ¥{process.env.NEXT_PUBLIC_PRICE_YEARLY}</span>
+                  <span className="text-[10px] opacity-80">年間まとめ払いでお得</span>
+                </button>
+              )}
             </div>
           )}
 

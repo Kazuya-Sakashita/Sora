@@ -38,8 +38,15 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // 認証不要パス
-  const publicPaths = ["/auth/login", "/auth/callback"]
+  // 認証不要パス（Stripe webhook + CRONは署名認証で保護済み）
+  const publicPaths = [
+    "/auth/login",
+    "/auth/callback",
+    "/api/billing/webhook",
+    "/api/push/send",
+    "/api/push/annual",
+    "/api/push/weekly",
+  ]
   if (publicPaths.some((p) => pathname.startsWith(p))) {
     return supabaseResponse
   }

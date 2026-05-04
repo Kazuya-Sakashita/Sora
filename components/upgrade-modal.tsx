@@ -79,16 +79,18 @@ export function UpgradeModal({ onClose, featureName }: Props) {
             disabled={isLoading}
             className="w-full h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {isLoading ? <Loader2 size={16} className="animate-spin" /> : "月額 ¥480 で始める"}
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : `月額 ¥${process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"} で始める`}
           </button>
-          <button
-            onClick={() => handleCheckout("year")}
-            disabled={isLoading}
-            className="w-full h-11 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
-          >
-            <span>年額 ¥4,300 で始める</span>
-            <span className="text-[10px] opacity-80">月額換算 ¥358 · 約25%お得</span>
-          </button>
+          {process.env.NEXT_PUBLIC_PRICE_YEARLY && (
+            <button
+              onClick={() => handleCheckout("year")}
+              disabled={isLoading}
+              className="w-full h-11 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
+            >
+              <span>年額 ¥{process.env.NEXT_PUBLIC_PRICE_YEARLY} で始める</span>
+              <span className="text-[10px] opacity-80">年間まとめ払いでお得</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
