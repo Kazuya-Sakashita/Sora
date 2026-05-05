@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2 } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2, Sparkles } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
@@ -11,7 +11,7 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { useState, useEffect } from "react"
 
 export function HomeScreen() {
-  const { pet, memories, feelings, setCurrentScreen } = useApp()
+  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
   const recentMemories = memories.slice(0, 3)
@@ -25,6 +25,7 @@ export function HomeScreen() {
   const [downloadingCard, setDownloadingCard] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
+  const [dailyQuestion, setDailyQuestion] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -32,6 +33,14 @@ export function HomeScreen() {
       .then((d) => { if (d?.plan) setPlan(d.plan) })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!pet) return
+    fetch(`/api/pets/${pet.id}/daily-question`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.question) setDailyQuestion(d.question) })
+      .catch(() => {})
+  }, [pet?.id])
 
   async function handleDownloadMilestoneCard() {
     if (!todayMilestone || !pet) return
@@ -233,6 +242,27 @@ export function HomeScreen() {
               </p>
             )}
           </GlassCard>
+        )}
+
+        {/* Daily Question Card */}
+        {pet && dailyQuestion && !recordedToday && (
+          <button
+            onClick={() => {
+              setPendingMemoryTitle(dailyQuestion.replace(/？$/, ""))
+              setCurrentScreen("timeline")
+            }}
+            className="w-full text-left active:scale-[0.98] transition-all"
+            aria-label="今日の問いかけ"
+          >
+            <GlassCard className="space-y-2">
+              <div className="flex items-center gap-2 text-primary/60">
+                <Sparkles size={14} />
+                <span className="text-xs font-medium">今日の問いかけ</span>
+              </div>
+              <p className="text-sm font-medium text-foreground/85 leading-snug">{dailyQuestion}</p>
+              <p className="text-xs text-muted-foreground">タップして記録する</p>
+            </GlassCard>
+          </button>
         )}
 
         {/* Primary CTA */}

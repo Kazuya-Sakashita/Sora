@@ -43,20 +43,31 @@ function groupByMonth(memories: Memory[]): { label: string; year: number; month:
 }
 
 export function TimelineScreen() {
-  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, loadMoreMemories, isLoadingMore } = useApp()
+  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, loadMoreMemories, isLoadingMore, pendingMemoryTitle, setPendingMemoryTitle } = useApp()
   const [isAdding, setIsAdding] = useState(false)
   const [newMemory, setNewMemory] = useState({ title: "", description: "" })
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showFeedback, setShowFeedback] = useState(false)
+  const [aiReaction, setAiReaction] = useState<string | null>(null)
+  const [isReactionLoading, setIsReactionLoading] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showPreview, setShowPreview] = useState<"photobook" | "report" | null>(null)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const [downloadingPhotobook, setDownloadingPhotobook] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (pendingMemoryTitle) {
+      setNewMemory((prev) => ({ ...prev, title: pendingMemoryTitle }))
+      setIsAdding(true)
+      setView("list")
+      setPendingMemoryTitle(null)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [view, setView] = useState<"list" | "calendar">("list")
   const today = new Date()
@@ -164,7 +175,7 @@ export function TimelineScreen() {
     if (!newMemory.title || isSubmitting) return
     setIsSubmitting(true)
     try {
-      await addMemory({
+      const saved = await addMemory({
         title: newMemory.title,
         description: newMemory.description || undefined,
         date: new Date().toISOString().split("T")[0],
@@ -173,8 +184,18 @@ export function TimelineScreen() {
       setNewMemory({ title: "", description: "" })
       setPhotoUrl(null)
       setIsAdding(false)
-      setShowFeedback(true)
-      setTimeout(() => setShowFeedback(false), 3000)
+      setIsReactionLoading(true)
+      setAiReaction("")
+      if (pet) {
+        fetch(`/api/pets/${pet.id}/memories/${saved.id}/reaction`, { method: "POST" })
+          .then((r) => r.ok ? r.json() : null)
+          .then((d) => setAiReaction(d?.reaction ?? null))
+          .catch(() => setAiReaction(""))
+          .finally(() => setIsReactionLoading(false))
+      } else {
+        setIsReactionLoading(false)
+        setAiReaction(null)
+      }
     } catch (e) {
       if (e instanceof Error && e.message === "PLAN_LIMIT") {
         setShowUpgradeModal(true)
@@ -525,23 +546,36 @@ export function TimelineScreen() {
         </div>
       )}
 
-      {/* 保存完了フィードバック */}
-      {showFeedback && (
-        <button
-          aria-label="フィードバックを閉じる"
-          onClick={() => setShowFeedback(false)}
-          className="fixed bottom-8 inset-x-4 max-w-sm mx-auto z-50 animate-in fade-in slide-in-from-bottom-4 duration-300"
+      {/* AIリアクションモーダル */}
+      {(isReactionLoading || aiReaction !== null) && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => { setAiReaction(null); setIsReactionLoading(false) }}
         >
-          <div className="rounded-2xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.10)] px-6 py-4 flex items-center gap-4">
-            <span className="text-2xl">✨</span>
-            <div className="text-left">
+          <div
+            className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-6 space-y-4 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">✨</span>
               <p className="font-medium text-foreground/90 text-sm">残せました</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {pet ? `${pet.name}との今日が、ここに残りました。` : "今日の思い出が、ずっとここにあります。"}
-              </p>
             </div>
+            {isReactionLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground text-sm py-1">
+                <Loader2 size={15} className="animate-spin shrink-0" />
+                <span>Soraが読んでいます...</span>
+              </div>
+            ) : aiReaction ? (
+              <p className="text-sm text-foreground/80 leading-relaxed">{aiReaction}</p>
+            ) : null}
+            <button
+              onClick={() => { setAiReaction(null); setIsReactionLoading(false) }}
+              className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+            >
+              閉じる
+            </button>
           </div>
-        </button>
+        </div>
       )}
     </div>
   )

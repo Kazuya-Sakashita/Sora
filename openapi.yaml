@@ -212,6 +212,58 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /pets/{petId}/daily-question:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [ai]
+      summary: 今日のAI問いかけを取得する（同日はキャッシュを返す）
+      responses:
+        "200":
+          description: 取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [question, generatedAt]
+                properties:
+                  question:
+                    type: string
+                    description: AI生成の問いかけ文（1文）
+                  generatedAt:
+                    type: string
+                    format: date
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /pets/{petId}/memories/{memoryId}/reaction:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+      - $ref: "#/components/parameters/memoryId"
+    post:
+      tags: [memories, ai]
+      summary: 記録に対するAIリアクションを生成する
+      responses:
+        "200":
+          description: 生成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reaction]
+                properties:
+                  reaction:
+                    type: string
+                    description: AIが生成した2〜3文の日本語リアクション
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   # === 気持ち記録 ===
 
   /pets/{petId}/feelings:

@@ -11,6 +11,7 @@ import { SettingsScreen } from "@/components/screens/settings"
 import { ScheduleScreen } from "@/components/screens/schedule"
 import { LetterScreen } from "@/components/screens/letter"
 import { ChatScreen } from "@/components/screens/chat"
+import { FirstRecordScreen } from "@/components/screens/first-record"
 
 function AppContent() {
   const { currentScreen, isLoading } = useApp()
@@ -29,6 +30,8 @@ function AppContent() {
         return <OnboardingScreen />
       case "profile-create":
         return <ProfileCreateScreen />
+      case "first-record":
+        return <FirstRecordScreen />
       case "home":
         return <HomeScreen />
       case "timeline":

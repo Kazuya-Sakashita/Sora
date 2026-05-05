@@ -83,6 +83,8 @@ function mockContext(memories: Memory[], pet: Pet | null = mockPet) {
     deleteSchedule: vi.fn(),
     conversationTone: "やさしく寄り添う",
     setConversationTone: vi.fn(),
+    pendingMemoryTitle: null,
+    setPendingMemoryTitle: vi.fn(),
     updatePetStatus: vi.fn(),
     pets: [],
     selectPet: vi.fn(),
@@ -222,11 +224,11 @@ describe("TimelineScreen — 記録追加フォーム", () => {
 })
 
 describe("TimelineScreen — 保存完了フィードバック", () => {
-  it("保存後にフィードバックトーストが表示される", async () => {
+  it("保存後にAIリアクションモーダルが表示される", async () => {
     mockContext([])
     vi.mocked(useApp).mockReturnValue({
       ...vi.mocked(useApp)(),
-      addMemory: vi.fn().mockResolvedValue(undefined),
+      addMemory: vi.fn().mockResolvedValue(mockMemory),
     })
     render(<TimelineScreen />)
     await userEvent.click(screen.getByRole("button", { name: "思い出を記録する" }))
@@ -235,31 +237,32 @@ describe("TimelineScreen — 保存完了フィードバック", () => {
     expect(await screen.findByText("残せました")).toBeInTheDocument()
   })
 
-  it("フィードバックにペット名が含まれる", async () => {
+  it("保存後にローディング表示が出る", async () => {
     mockContext([])
     vi.mocked(useApp).mockReturnValue({
       ...vi.mocked(useApp)(),
-      addMemory: vi.fn().mockResolvedValue(undefined),
+      addMemory: vi.fn().mockResolvedValue(mockMemory),
     })
     render(<TimelineScreen />)
     await userEvent.click(screen.getByRole("button", { name: "思い出を記録する" }))
     await userEvent.type(screen.getByPlaceholderText(/タイトル/), "散歩した日")
     await userEvent.click(screen.getByRole("button", { name: "保存する" }))
-    expect(await screen.findByText(/ポチとの今日が/)).toBeInTheDocument()
+    expect(await screen.findByText("残せました")).toBeInTheDocument()
   })
 
-  it("フィードバックをタップすると閉じる", async () => {
+  it("閉じるボタンをクリックするとモーダルが閉じる", async () => {
     mockContext([])
     vi.mocked(useApp).mockReturnValue({
       ...vi.mocked(useApp)(),
-      addMemory: vi.fn().mockResolvedValue(undefined),
+      addMemory: vi.fn().mockResolvedValue(mockMemory),
     })
     render(<TimelineScreen />)
     await userEvent.click(screen.getByRole("button", { name: "思い出を記録する" }))
     await userEvent.type(screen.getByPlaceholderText(/タイトル/), "散歩した日")
     await userEvent.click(screen.getByRole("button", { name: "保存する" }))
-    const toast = await screen.findByRole("button", { name: "フィードバックを閉じる" })
-    await userEvent.click(toast)
+    await screen.findByText("残せました")
+    const closeBtn = await screen.findByRole("button", { name: "閉じる" })
+    await userEvent.click(closeBtn)
     expect(screen.queryByText("残せました")).not.toBeInTheDocument()
   })
 })

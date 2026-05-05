@@ -13,6 +13,7 @@ export type CreateScheduleInput = ScheduleInput
 export type Screen =
   | "onboarding"
   | "profile-create"
+  | "first-record"
   | "home"
   | "timeline"
   | "feelings"
@@ -31,7 +32,7 @@ type AppContextType = {
   updatePetStatus: (status: "alive" | "rainbow_bridge") => Promise<void>
   memories: Memory[]
   memoriesTotal: number
-  addMemory: (input: CreateMemoryInput) => Promise<void>
+  addMemory: (input: CreateMemoryInput) => Promise<Memory>
   loadMoreMemories: () => Promise<void>
   isLoadingMore: boolean
   feelings: Feeling[]
@@ -42,6 +43,8 @@ type AppContextType = {
   isLoading: boolean
   conversationTone: string
   setConversationTone: (tone: string) => void
+  pendingMemoryTitle: string | null
+  setPendingMemoryTitle: (title: string | null) => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -59,6 +62,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [conversationTone, setConversationTone] = useState("やさしく寄り添う")
   const [currentPetId, setCurrentPetId] = useState<string | null>(null)
+  const [pendingMemoryTitle, setPendingMemoryTitle] = useState<string | null>(null)
 
   const MEMORY_PAGE_SIZE = 20
 
@@ -118,7 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const newPet = (await res.json()) as Pet
     setPets((prev) => [...prev, newPet])
     setPet(newPet)
-    setCurrentScreen("home")
+    setCurrentScreen("first-record")
   }
 
   const updatePetStatus = async (status: "alive" | "rainbow_bridge") => {
@@ -134,8 +138,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPets((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
   }
 
-  const addMemory = async (input: CreateMemoryInput) => {
-    if (!pet) return
+  const addMemory = async (input: CreateMemoryInput): Promise<Memory> => {
+    if (!pet) throw new Error("ペットが選択されていません")
     const res = await fetch(`/api/pets/${pet.id}/memories`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -146,6 +150,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const memory = (await res.json()) as Memory
     setMemories((prev) => [memory, ...prev])
     setMemoriesTotal((prev) => prev + 1)
+    return memory
   }
 
   const loadMoreMemories = async () => {
@@ -225,6 +230,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isLoading,
         conversationTone,
         setConversationTone,
+        pendingMemoryTitle,
+        setPendingMemoryTitle,
       }}
     >
       {children}
