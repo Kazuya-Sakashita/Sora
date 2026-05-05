@@ -1,6 +1,6 @@
 # ISSUE一覧
 
-最終更新: 2026-05-02
+最終更新: 2026-05-05
 
 ## 現在のISSUE
 
@@ -53,6 +53,12 @@
 | [045](ISSUE-045-weekly-push.md) | 週次リマインダープッシュ通知 | 🟡 medium | done |
 | [046](ISSUE-046-free-limit-countdown.md) | Free プラン上限カウントダウン表示 | 🟠 high | done |
 | [047](ISSUE-047-plus-features-page.md) | Settings内のSora+機能紹介セクション | 🟡 medium | done |
+| [048](ISSUE-048-ai-daily-question.md) | AIデイリー問いかけをホーム画面に実装する | 🔴 critical | open |
+| [049](ISSUE-049-ai-record-reaction.md) | 記録保存後にAIリアクションを返す | 🔴 critical | open |
+| [050](ISSUE-050-loss-care-auto-transition.md) | ロスケアへの自動移行フローを実装する | 🔴 critical | open |
+| [051](ISSUE-051-monthly-ai-letter.md) | 月次AIメモリーレターをSora+機能として実装する | 🟠 high | open |
+| [052](ISSUE-052-onboarding-first-record.md) | オンボーディング最後に初回記録を必須完走させる | 🟠 high | open |
+| [053](ISSUE-053-on-this-day-notification.md) | 「あの日のこと」AI通知を実装する | 🟠 high | open |
 
 ---
 
