@@ -7,6 +7,10 @@ import type { Memory, Pet } from "@/lib/app-context"
 // --- モック ---
 
 vi.mock("@/lib/app-context", () => ({ useApp: vi.fn() }))
+const mockGetNotificationStatus = vi.fn()
+vi.mock("@/lib/push-client", () => ({
+  getNotificationStatus: () => mockGetNotificationStatus(),
+}))
 vi.mock("@/lib/date", () => ({
   calcDaysWith: vi.fn((broughtAt: string) => {
     const start = new Date(broughtAt)
@@ -111,6 +115,11 @@ function mockContext(memories: Memory[], pet: Pet | null = mockPet) {
 }
 
 // --- テスト ---
+
+beforeEach(() => {
+  mockGetNotificationStatus.mockResolvedValue("unsupported")
+  localStorage.clear()
+})
 
 describe("HomeScreen — ペットなし", () => {
   beforeEach(() => mockContext([], null))
@@ -267,5 +276,39 @@ describe("HomeScreen — 最近の思い出", () => {
     mockContext([])
     render(<HomeScreen />)
     expect(screen.queryByText("最近の思い出")).not.toBeInTheDocument()
+  })
+})
+
+describe("HomeScreen — Push通知バナー", () => {
+  beforeEach(() => mockContext([]))
+
+  it("通知が default の場合にバナーが表示される", async () => {
+    mockGetNotificationStatus.mockResolvedValue("default")
+    render(<HomeScreen />)
+    expect(await screen.findByText("記録を忘れた日に、そっとお知らせします")).toBeInTheDocument()
+  })
+
+  it("通知が granted の場合にバナーが表示されない", async () => {
+    mockGetNotificationStatus.mockResolvedValue("granted")
+    render(<HomeScreen />)
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.queryByText("記録を忘れた日に、そっとお知らせします")).not.toBeInTheDocument()
+  })
+
+  it("バナーを閉じると非表示になり localStorage にフラグが立つ", async () => {
+    mockGetNotificationStatus.mockResolvedValue("default")
+    render(<HomeScreen />)
+    const closeBtn = await screen.findByRole("button", { name: "バナーを閉じる" })
+    await userEvent.click(closeBtn)
+    expect(screen.queryByText("記録を忘れた日に、そっとお知らせします")).not.toBeInTheDocument()
+    expect(localStorage.getItem("sora:push-banner-dismissed")).toBe("1")
+  })
+
+  it("localStorage にフラグがある場合は default でもバナーが表示されない", async () => {
+    localStorage.setItem("sora:push-banner-dismissed", "1")
+    mockGetNotificationStatus.mockResolvedValue("default")
+    render(<HomeScreen />)
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.queryByText("記録を忘れた日に、そっとお知らせします")).not.toBeInTheDocument()
   })
 })

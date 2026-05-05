@@ -2,13 +2,14 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2, Sparkles } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2, Sparkles, Bell, X } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
 import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { useState, useEffect } from "react"
+import { getNotificationStatus } from "@/lib/push-client"
 
 export function HomeScreen() {
   const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus } = useApp()
@@ -29,12 +30,21 @@ export function HomeScreen() {
   const [showPetSheet, setShowPetSheet] = useState(false)
   const [showLossCareConfirm, setShowLossCareConfirm] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [showPushBanner, setShowPushBanner] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.plan) setPlan(d.plan) })
       .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("sora:push-banner-dismissed")
+    if (dismissed) return
+    getNotificationStatus().then((status) => {
+      if (status === "default") setShowPushBanner(true)
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -223,6 +233,32 @@ export function HomeScreen() {
               className="w-full h-11 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
             >
               今すぐ残す
+            </button>
+          </div>
+        )}
+
+        {/* Push Notification Banner — 初回のみ、defaultの場合のみ */}
+        {showPushBanner && (
+          <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/40 px-4 py-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <Bell size={16} className="text-primary/60 shrink-0" />
+            <p className="text-xs text-muted-foreground flex-1">
+              記録を忘れた日に、そっとお知らせします
+            </p>
+            <button
+              onClick={() => setCurrentScreen("settings")}
+              className="text-xs text-primary/70 underline underline-offset-2 shrink-0"
+            >
+              設定する
+            </button>
+            <button
+              aria-label="バナーを閉じる"
+              onClick={() => {
+                localStorage.setItem("sora:push-banner-dismissed", "1")
+                setShowPushBanner(false)
+              }}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+            >
+              <X size={14} />
             </button>
           </div>
         )}

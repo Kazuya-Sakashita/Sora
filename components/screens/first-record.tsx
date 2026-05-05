@@ -5,8 +5,9 @@ import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Camera, Loader2 } from "lucide-react"
+import { Camera, Loader2, Bell } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
+import { getNotificationStatus, subscribePush, savePushSubscription } from "@/lib/push-client"
 
 const MOOD_OPTIONS = [
   { value: "happy", emoji: "🥰", label: "うれしい" },
@@ -29,6 +30,8 @@ export function FirstRecordScreen() {
   const [titleError, setTitleError] = useState<string | null>(null)
   const [aiReaction, setAiReaction] = useState<string | null>(null)
   const [isReactionLoading, setIsReactionLoading] = useState(false)
+  const [showPushStep, setShowPushStep] = useState(false)
+  const [isPushLoading, setIsPushLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +83,63 @@ export function FirstRecordScreen() {
     }
   }
 
+  const handleGoHome = async () => {
+    const status = await getNotificationStatus()
+    if (status === "default") {
+      setShowPushStep(true)
+    } else {
+      setCurrentScreen("home")
+    }
+  }
+
+  const handleEnablePush = async () => {
+    setIsPushLoading(true)
+    try {
+      const sub = await subscribePush()
+      if (sub) await savePushSubscription(sub)
+    } catch {
+      // ignore errors — user may deny
+    } finally {
+      setIsPushLoading(false)
+      setCurrentScreen("home")
+    }
+  }
+
   if (isReactionLoading || aiReaction !== null) {
+    if (showPushStep) {
+      return (
+        <div className="min-h-screen flex items-end sm:items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-6 space-y-5 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Bell size={20} className="text-primary/70" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground/90 text-sm">記録を忘れた日に、そっとお知らせします</p>
+                <p className="text-xs text-muted-foreground mt-0.5">いつでも設定から変更できます</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={handleEnablePush}
+                disabled={isPushLoading}
+                className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isPushLoading && <Loader2 size={15} className="animate-spin" />}
+                通知を受け取る
+              </button>
+              <button
+                onClick={() => setCurrentScreen("home")}
+                className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+              >
+                今は後で
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <div className="min-h-screen flex items-end sm:items-center justify-center p-4">
         <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-6 space-y-4 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
@@ -97,7 +156,7 @@ export function FirstRecordScreen() {
             <p className="text-sm text-foreground/80 leading-relaxed">{aiReaction}</p>
           ) : null}
           <button
-            onClick={() => setCurrentScreen("home")}
+            onClick={handleGoHome}
             className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
           >
             ホームへ
