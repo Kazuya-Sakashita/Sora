@@ -62,6 +62,8 @@ function mockAppContext() {
     setConversationTone: vi.fn(),
     pendingMemoryTitle: null,
     setPendingMemoryTitle: vi.fn(),
+    pendingHighlightMemoryId: null,
+    setPendingHighlightMemoryId: vi.fn(),
     updatePetStatus: vi.fn(),
     pets: [],
     selectPet: vi.fn(),

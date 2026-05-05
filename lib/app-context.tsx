@@ -45,6 +45,8 @@ type AppContextType = {
   setConversationTone: (tone: string) => void
   pendingMemoryTitle: string | null
   setPendingMemoryTitle: (title: string | null) => void
+  pendingHighlightMemoryId: string | null
+  setPendingHighlightMemoryId: (id: string | null) => void
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -63,6 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [conversationTone, setConversationTone] = useState("やさしく寄り添う")
   const [currentPetId, setCurrentPetId] = useState<string | null>(null)
   const [pendingMemoryTitle, setPendingMemoryTitle] = useState<string | null>(null)
+  const [pendingHighlightMemoryId, setPendingHighlightMemoryId] = useState<string | null>(null)
 
   const MEMORY_PAGE_SIZE = 20
 
@@ -96,7 +99,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
           setPet(firstPet)
           setCurrentPetId(firstPet.id)
           await loadPetData(firstPet.id)
-          setCurrentScreen("home")
+          const params = new URLSearchParams(window.location.search)
+          const deepMemoryId = params.get("memoryId")
+          if (deepMemoryId) {
+            setPendingHighlightMemoryId(deepMemoryId)
+            setCurrentScreen("timeline")
+          } else {
+            setCurrentScreen("home")
+          }
         }
       })
       .catch(() => {})
@@ -232,6 +242,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setConversationTone,
         pendingMemoryTitle,
         setPendingMemoryTitle,
+        pendingHighlightMemoryId,
+        setPendingHighlightMemoryId,
       }}
     >
       {children}

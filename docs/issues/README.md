@@ -62,7 +62,7 @@
 | [054](ISSUE-054-ai-chat.md) | 「はなす」画面をClaude APIで実際の対話に置き換える | 🟠 high | done |
 | [055](ISSUE-055-letter-screen-ai.md) | 「ことば」画面をAIレターに置き換える | 🟠 high | open |
 | [056](ISSUE-056-push-registration-timing.md) | Push通知登録タイミングをActivation時に前倒しする | 🟠 high | open |
-| [057](ISSUE-057-on-this-day-deeplink.md) | あの日通知タップで該当記録に直接遷移する | 🟡 medium | open |
+| [057](ISSUE-057-on-this-day-deeplink.md) | あの日通知タップで該当記録に直接遷移する | 🟡 medium | done |
 
 ---
 

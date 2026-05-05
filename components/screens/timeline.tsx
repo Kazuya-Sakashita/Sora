@@ -43,7 +43,7 @@ function groupByMonth(memories: Memory[]): { label: string; year: number; month:
 }
 
 export function TimelineScreen() {
-  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, loadMoreMemories, isLoadingMore, pendingMemoryTitle, setPendingMemoryTitle } = useApp()
+  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, loadMoreMemories, isLoadingMore, pendingMemoryTitle, setPendingMemoryTitle, pendingHighlightMemoryId, setPendingHighlightMemoryId } = useApp()
   const [isAdding, setIsAdding] = useState(false)
   const [newMemory, setNewMemory] = useState({ title: "", description: "" })
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
@@ -74,6 +74,7 @@ export function TimelineScreen() {
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
   const [scrollTarget, setScrollTarget] = useState<string | null>(null)
+  const [highlightMemoryId, setHighlightMemoryId] = useState<string | null>(null)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
 
   useEffect(() => {
@@ -95,6 +96,19 @@ export function TimelineScreen() {
       setScrollTarget(null)
     }
   }, [scrollTarget, view])
+
+  useEffect(() => {
+    if (!pendingHighlightMemoryId || memories.length === 0) return
+    const memoryId = pendingHighlightMemoryId
+    setPendingHighlightMemoryId(null)
+    setHighlightMemoryId(memoryId)
+    setTimeout(() => {
+      const el = document.querySelector(`[data-memory-id="${memoryId}"]`)
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+    }, 300)
+    setTimeout(() => setHighlightMemoryId(null), 2300)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingHighlightMemoryId, memories.length])
 
   const handleDownloadReport = async () => {
     if (!pet || isDownloadingReport) return
@@ -401,7 +415,12 @@ export function TimelineScreen() {
                 <div
                   key={memory.id}
                   id={`memory-${memory.date}`}
-                  className="rounded-3xl overflow-hidden bg-white/60 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04)]"
+                  data-memory-id={memory.id}
+                  className={`rounded-3xl overflow-hidden bg-white/60 backdrop-blur-xl border shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all duration-500 ${
+                    highlightMemoryId === memory.id
+                      ? "border-amber-300 shadow-amber-100/60 scale-[1.01]"
+                      : "border-white/40"
+                  }`}
                 >
                   {/* Photo */}
                   {memory.photoUrls?.[0] ? (

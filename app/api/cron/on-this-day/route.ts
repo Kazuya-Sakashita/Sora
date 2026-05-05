@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         subs.map((sub) =>
           webpush.sendNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            JSON.stringify({ title: "Sora", body, url: "/" })
+            JSON.stringify({ title: "Sora", body, url: `/?memoryId=${notif.memoryId}` })
           )
         )
       )
