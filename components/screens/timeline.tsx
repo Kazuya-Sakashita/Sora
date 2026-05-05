@@ -248,7 +248,9 @@ export function TimelineScreen() {
             >
               <ArrowLeft size={20} />
             </button>
-            <h1 className="flex-1 font-medium text-foreground/90">思い出</h1>
+            <h1 className="flex-1 font-medium text-foreground/90">
+              {pet?.status === "rainbow_bridge" ? "大切な思い出" : "思い出"}
+            </h1>
             {!isAdding && (
               <>
                 <button

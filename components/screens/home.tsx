@@ -11,7 +11,7 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { useState, useEffect } from "react"
 
 export function HomeScreen() {
-  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle } = useApp()
+  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
   const recentMemories = memories.slice(0, 3)
@@ -26,6 +26,9 @@ export function HomeScreen() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [dailyQuestion, setDailyQuestion] = useState<string | null>(null)
+  const [showPetSheet, setShowPetSheet] = useState(false)
+  const [showLossCareConfirm, setShowLossCareConfirm] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -41,6 +44,19 @@ export function HomeScreen() {
       .then((d) => { if (d?.question) setDailyQuestion(d.question) })
       .catch(() => {})
   }, [pet?.id])
+
+  const handleLossCareTransition = async () => {
+    setIsTransitioning(true)
+    try {
+      await updatePetStatus("rainbow_bridge")
+      setShowLossCareConfirm(false)
+      setShowPetSheet(false)
+    } catch {
+      // keep modal open on error
+    } finally {
+      setIsTransitioning(false)
+    }
+  }
 
   async function handleDownloadMilestoneCard() {
     if (!todayMilestone || !pet) return
@@ -163,13 +179,17 @@ export function HomeScreen() {
           </div>
           <div className="flex items-center gap-2">
             {pet && (
-              <div className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+              <button
+                aria-label="ペットのプロフィール"
+                onClick={() => setShowPetSheet(true)}
+                className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
                 {pet.photoUrl ? (
                   <img src={pet.photoUrl} alt={pet.name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-lg">🐾</span>
                 )}
-              </div>
+              </button>
             )}
             <button
               aria-label="設定"
@@ -293,9 +313,11 @@ export function HomeScreen() {
             <div className="h-16 flex items-center justify-center gap-3 text-foreground/80 font-medium text-base">
               <BookOpen size={20} />
               <span>
-                {streak > 0 && !recordedToday
-                  ? `${streak}日連続中 — 今日も残しませんか`
-                  : "今日の思い出を残す"}
+                {pet?.status === "rainbow_bridge"
+                  ? "思い出を振り返る"
+                  : streak > 0 && !recordedToday
+                    ? `${streak}日連続中 — 今日も残しませんか`
+                    : "今日の思い出を残す"}
               </span>
             </div>
           </button>
@@ -458,6 +480,81 @@ export function HomeScreen() {
           </section>
         )}
       </main>
+
+      {/* ペットプロフィールシート */}
+      {showPetSheet && pet && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowPetSheet(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-t-3xl bg-white/95 backdrop-blur-xl border-t border-white/60 shadow-2xl p-6 space-y-4 animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center shrink-0">
+                {pet.photoUrl ? (
+                  <img src={pet.photoUrl} alt={pet.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl">🐾</span>
+                )}
+              </div>
+              <div>
+                <p className="font-semibold text-foreground/90">{pet.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {pet.status === "rainbow_bridge" ? "虹の橋の向こうに" : "一緒に過ごしている"}
+                </p>
+              </div>
+            </div>
+
+            {pet.status === "alive" && (
+              <button
+                onClick={() => { setShowPetSheet(false); setShowLossCareConfirm(true) }}
+                className="w-full h-12 rounded-2xl border border-muted/60 text-sm text-muted-foreground hover:bg-muted/10 transition-colors flex items-center justify-center gap-2"
+              >
+                🌈 虹の橋を渡りました
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowPetSheet(false)}
+              className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+            >
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ロスケア移行確認モーダル */}
+      {showLossCareConfirm && pet && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center space-y-4">
+              <p className="text-5xl">🌈</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                {pet.name}のことを教えてくれてありがとう。<br />
+                これからも、ここに残していいですよ。
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={handleLossCareTransition}
+                disabled={isTransitioning}
+                className="w-full h-12 rounded-2xl bg-primary/10 hover:bg-primary/15 text-primary/80 font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isTransitioning ? <Loader2 size={16} className="animate-spin" /> : "はい、移行します"}
+              </button>
+              <button
+                onClick={() => setShowLossCareConfirm(false)}
+                className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+              >
+                まだ大丈夫です
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

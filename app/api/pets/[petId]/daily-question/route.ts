@@ -20,12 +20,16 @@ function todayJST(): string {
   return new Date().toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-")
 }
 
-async function getCachedQuestion(petId: string, date: string): Promise<string | null> {
+function cacheKey(petId: string, date: string, status: string) {
+  return `sora:dq:${petId}:${date}:${status}`
+}
+
+async function getCachedQuestion(petId: string, date: string, status: string): Promise<string | null> {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token) return null
   try {
-    const res = await fetch(`${url}/get/sora:dq:${petId}:${date}`, {
+    const res = await fetch(`${url}/get/${cacheKey(petId, date, status)}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     const data = await res.json()
@@ -35,13 +39,12 @@ async function getCachedQuestion(petId: string, date: string): Promise<string | 
   }
 }
 
-async function setCachedQuestion(petId: string, date: string, question: string): Promise<void> {
+async function setCachedQuestion(petId: string, date: string, status: string, question: string): Promise<void> {
   const url = process.env.UPSTASH_REDIS_REST_URL
   const token = process.env.UPSTASH_REDIS_REST_TOKEN
   if (!url || !token) return
   try {
-    // expire at end of day: 86400s is safe upper bound
-    await fetch(`${url}/set/sora:dq:${petId}:${date}/${encodeURIComponent(question)}?ex=86400`, {
+    await fetch(`${url}/set/${cacheKey(petId, date, status)}/${encodeURIComponent(question)}?ex=86400`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     })
@@ -58,13 +61,16 @@ export async function GET(_req: Request, { params }: Params) {
   const access = await getPetAccess(petId, user.id)
   if (!access) return problem(404, "Not Found")
 
+  const pet = access.pet
   const date = todayJST()
-  const cached = await getCachedQuestion(petId, date)
+  const isLossCare = pet.status === "RAINBOW_BRIDGE"
+  const statusKey = isLossCare ? "loss" : "alive"
+
+  const cached = await getCachedQuestion(petId, date, statusKey)
   if (cached) {
     return NextResponse.json({ question: cached, generatedAt: date })
   }
 
-  const pet = access.pet
   const speciesJa = pet.species ? (SPECIES_JA[pet.species] ?? "ペット") : "ペット"
   const month = new Date().getMonth() + 1
   const season = MONTH_SEASON[month] ?? ""
@@ -79,7 +85,22 @@ export async function GET(_req: Request, { params }: Params) {
   const recentTitles = recentMemories.map((m) => `・${m.title}`).join("\n")
   const recentSection = recentTitles ? `\n直近の記録：\n${recentTitles}` : ""
 
-  const prompt = `あなたはペット記録アプリ「Sora」のAIです。飼い主が今日の記録を残すきっかけを作る「今日の問いかけ」を1つ生成してください。
+  const prompt = isLossCare
+    ? `あなたはペット記録アプリ「Sora」のAIです。大切なペットを見送った飼い主が、思い出を穏やかに振り返るきっかけを作る「今日の問いかけ」を1つ生成してください。
+
+ペット名：${pet.name}
+種類：${speciesJa}
+季節：${season}${recentSection}
+
+ルール：
+- 1文のみ（20〜35文字）
+- 「あの頃の${pet.name}は〜」「${pet.name}との〜はどんな様子でしたか？」など過去を穏やかに振り返る問いかけ
+- 懐かしむ語り口・そっと寄り添う温かさ
+- 直近記録の繰り返しは避ける
+- 絵文字禁止
+- 日本語のみ
+- 文末は「？」で終わる`
+    : `あなたはペット記録アプリ「Sora」のAIです。飼い主が今日の記録を残すきっかけを作る「今日の問いかけ」を1つ生成してください。
 
 ペット名：${pet.name}
 種類：${speciesJa}
@@ -94,12 +115,14 @@ export async function GET(_req: Request, { params }: Params) {
 - 日本語のみ
 - 文末は「？」で終わる`
 
-  const defaultQuestion = `今日の${pet.name}はどんな様子でしたか？`
+  const defaultQuestion = isLossCare
+    ? `あの頃の${pet.name}はどんな様子でしたか？`
+    : `今日の${pet.name}はどんな様子でしたか？`
 
   try {
     const question = await generateText(prompt, 80)
     const finalQuestion = question || defaultQuestion
-    await setCachedQuestion(petId, date, finalQuestion)
+    await setCachedQuestion(petId, date, statusKey, finalQuestion)
     return NextResponse.json({ question: finalQuestion, generatedAt: date })
   } catch {
     return NextResponse.json({ question: defaultQuestion, generatedAt: date })
