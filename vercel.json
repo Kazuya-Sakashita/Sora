@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/monthly-letters",
       "schedule": "0 14 28-31 * *"
+    },
+    {
+      "path": "/api/cron/on-this-day",
+      "schedule": "0 13 * * *"
     }
   ]
 }

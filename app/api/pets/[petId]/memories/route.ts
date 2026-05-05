@@ -4,6 +4,7 @@ import { getAuthUser, problem } from "@/lib/auth"
 import { parseBody } from "@/lib/validate"
 import { MemoryInputSchema } from "@/lib/schemas"
 import { getPetAccess } from "@/lib/pet-access"
+import { scheduleMemoryNotifications } from "@/lib/on-this-day"
 
 type Params = { params: Promise<{ petId: string }> }
 
@@ -88,6 +89,9 @@ export async function POST(request: Request, { params }: Params) {
       photoUrls: body.photoUrls ?? [],
     },
   })
+
+  // あの日通知を非同期でスケジュール（失敗してもレスポンスに影響させない）
+  scheduleMemoryNotifications(memory.id, petId, memory.date).catch(() => {})
 
   return NextResponse.json(toMemoryResponse(memory), { status: 201 })
 }

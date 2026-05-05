@@ -42,6 +42,8 @@ export function SettingsScreen() {
   const [letters, setLetters] = useState<LetterIndex[]>([])
   const [openLetter, setOpenLetter] = useState<LetterDetail | null>(null)
   const [isLoadingLetter, setIsLoadingLetter] = useState(false)
+  const [onThisDayEnabled, setOnThisDayEnabled] = useState(true)
+  const [isTogglingOnThisDay, setIsTogglingOnThisDay] = useState(false)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -51,6 +53,9 @@ export function SettingsScreen() {
     fetch("/api/billing/plan").then((r) => r.json()).then(({ plan }) => setPlan(plan))
     getNotificationStatus().then(setNotifStatus)
     isCurrentlySubscribed().then(setIsSubscribed)
+    fetch("/api/settings/on-this-day").then((r) => r.ok ? r.json() : null).then((d) => {
+      if (d?.enabled !== undefined) setOnThisDayEnabled(d.enabled)
+    })
   }, [])
 
   useEffect(() => {
@@ -163,6 +168,22 @@ export function SettingsScreen() {
       // keep modal open on error
     } finally {
       setIsUpdatingStatus(false)
+    }
+  }
+
+  const handleToggleOnThisDay = async () => {
+    if (isTogglingOnThisDay) return
+    setIsTogglingOnThisDay(true)
+    const next = !onThisDayEnabled
+    try {
+      const res = await fetch("/api/settings/on-this-day", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: next }),
+      })
+      if (res.ok) setOnThisDayEnabled(next)
+    } finally {
+      setIsTogglingOnThisDay(false)
     }
   }
 
@@ -489,6 +510,37 @@ export function SettingsScreen() {
             </GlassCard>
           </section>
         )}
+
+        {/* On This Day Toggle */}
+        <section>
+          <GlassCard className="flex items-center gap-4 py-4">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Bell size={20} className="text-primary/70" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-foreground/80 text-sm">あの日の通知</p>
+              <p className="text-xs text-muted-foreground">1ヶ月・3ヶ月・1年後に記録を振り返るお知らせ</p>
+            </div>
+            <button
+              onClick={handleToggleOnThisDay}
+              disabled={isTogglingOnThisDay}
+              className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
+                onThisDayEnabled ? "bg-primary/70" : "bg-muted/50"
+              }`}
+              aria-label="あの日通知トグル"
+            >
+              {isTogglingOnThisDay ? (
+                <Loader2 size={12} className="absolute inset-0 m-auto animate-spin text-white" />
+              ) : (
+                <span
+                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                    onThisDayEnabled ? "translate-x-6" : "translate-x-0.5"
+                  }`}
+                />
+              )}
+            </button>
+          </GlassCard>
+        </section>
 
         {/* Other Settings */}
         <section className="space-y-3">

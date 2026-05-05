@@ -16,6 +16,7 @@ model User {
   plan                 Plan               @default(FREE)
   stripeCustomerId     String?            @map("stripe_customer_id")
   stripeSubscriptionId String?            @map("stripe_subscription_id")
+  onThisDayEnabled     Boolean            @default(true) @map("on_this_day_enabled")
   createdAt            DateTime           @default(now()) @map("created_at")
   pets                 Pet[]
   petMembers           PetMember[]
@@ -50,12 +51,13 @@ model Pet {
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
-  memories       Memory[]
-  feelings       Feeling[]
-  schedules      Schedule[]
-  members        PetMember[]
-  invites        PetInvite[]
-  monthlyLetters MonthlyLetter[]
+  memories            Memory[]
+  feelings            Feeling[]
+  schedules           Schedule[]
+  members             PetMember[]
+  invites             PetInvite[]
+  monthlyLetters      MonthlyLetter[]
+  memoryNotifications MemoryNotification[]
 
   @@map("pets")
 }
@@ -123,8 +125,9 @@ model Memory {
   date        DateTime
   category    MemoryCategory @default(OTHER)
   moodTag     MoodTag?       @map("mood_tag")
-  photoUrls   String[]       @default([]) @map("photo_urls")
-  createdAt   DateTime       @default(now()) @map("created_at")
+  photoUrls           String[]       @default([]) @map("photo_urls")
+  createdAt           DateTime       @default(now()) @map("created_at")
+  memoryNotifications MemoryNotification[]
 
   @@map("memories")
 }
@@ -191,6 +194,30 @@ enum ScheduleType {
   VACCINE
   ANNIVERSARY
   OTHER
+}
+
+// -----------------------------------------------
+// あの日のこと通知スケジュール
+// -----------------------------------------------
+model MemoryNotification {
+  id          String                   @id @default(uuid())
+  memoryId    String                   @map("memory_id")
+  memory      Memory                   @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+  petId       String                   @map("pet_id")
+  pet         Pet                      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  scheduledAt DateTime                 @map("scheduled_at")
+  type        MemoryNotificationType
+  sentAt      DateTime?                @map("sent_at")
+  createdAt   DateTime                 @default(now()) @map("created_at")
+
+  @@index([scheduledAt, sentAt])
+  @@map("memory_notifications")
+}
+
+enum MemoryNotificationType {
+  ONE_MONTH
+  THREE_MONTHS
+  ONE_YEAR
 }
 
 // -----------------------------------------------

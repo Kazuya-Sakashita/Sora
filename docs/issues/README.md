@@ -58,7 +58,7 @@
 | [050](ISSUE-050-loss-care-auto-transition.md) | ロスケアへの自動移行フローを実装する | 🔴 critical | done |
 | [051](ISSUE-051-monthly-ai-letter.md) | 月次AIメモリーレターをSora+機能として実装する | 🟠 high | done |
 | [052](ISSUE-052-onboarding-first-record.md) | オンボーディング最後に初回記録を必須完走させる | 🟠 high | done |
-| [053](ISSUE-053-on-this-day-notification.md) | 「あの日のこと」AI通知を実装する | 🟠 high | open |
+| [053](ISSUE-053-on-this-day-notification.md) | 「あの日のこと」AI通知を実装する | 🟠 high | done |
 | [054](ISSUE-054-ai-chat.md) | 「はなす」画面をClaude APIで実際の対話に置き換える | 🟠 high | done |
 
 ---
