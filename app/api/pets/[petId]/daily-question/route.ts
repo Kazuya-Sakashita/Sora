@@ -76,7 +76,7 @@ export async function GET(_req: Request, { params }: Params) {
   const season = MONTH_SEASON[month] ?? ""
 
   const recentMemories = await prisma.memory.findMany({
-    where: { petId, date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0] } },
+    where: { petId, date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
     orderBy: { date: "desc" },
     take: 5,
     select: { title: true },
