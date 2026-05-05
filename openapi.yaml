@@ -405,6 +405,38 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /pets/{petId}/letter/generate:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    post:
+      tags: [letters, ai]
+      summary: ことば画面用AIレター生成
+      description: |
+        ロスケアモード（RAINBOW_BRIDGE）専用。直近5件の思い出を元にClaudeが手紙を生成する。
+        1ユーザー・1分間に5回まで。
+      responses:
+        "200":
+          description: 生成された手紙本文
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [content]
+                properties:
+                  content:
+                    type: string
+                    description: 150〜200字の手紙本文
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   # === あの日通知設定 ===
 
   /settings/on-this-day:

@@ -52,6 +52,40 @@ export async function applyRateLimit(req: NextRequest): Promise<NextResponse | n
   return null
 }
 
+let letterLimiter: { limit: (id: string) => Promise<{ success: boolean }> } | null = null
+
+function getLetterLimiter() {
+  if (letterLimiter) return letterLimiter
+  const url = process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!url || !token) return null
+
+  const { Ratelimit } = require("@upstash/ratelimit")
+  const { Redis } = require("@upstash/redis")
+  letterLimiter = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(5, "1 m"),
+    prefix: "sora:letter:rl",
+  })
+  return letterLimiter
+}
+
+export async function applyLetterRateLimit(userId: string): Promise<NextResponse | null> {
+  if (process.env.NODE_ENV === "development") return null
+
+  const rl = getLetterLimiter()
+  if (!rl) return null
+
+  const { success } = await rl.limit(userId)
+  if (!success) {
+    return NextResponse.json(
+      { type: "https://sora.app/errors/too-many-requests", title: "少し待ってから、もう一度試してみてください", status: 429 },
+      { status: 429 }
+    )
+  }
+  return null
+}
+
 export async function applyChatRateLimit(userId: string): Promise<NextResponse | null> {
   if (process.env.NODE_ENV === "development") return null
 

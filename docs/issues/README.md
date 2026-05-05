@@ -60,7 +60,7 @@
 | [052](ISSUE-052-onboarding-first-record.md) | オンボーディング最後に初回記録を必須完走させる | 🟠 high | done |
 | [053](ISSUE-053-on-this-day-notification.md) | 「あの日のこと」AI通知を実装する | 🟠 high | done |
 | [054](ISSUE-054-ai-chat.md) | 「はなす」画面をClaude APIで実際の対話に置き換える | 🟠 high | done |
-| [055](ISSUE-055-letter-screen-ai.md) | 「ことば」画面をAIレターに置き換える | 🟠 high | open |
+| [055](ISSUE-055-letter-screen-ai.md) | 「ことば」画面をAIレターに置き換える | 🟠 high | done |
 | [056](ISSUE-056-push-registration-timing.md) | Push通知登録タイミングをActivation時に前倒しする | 🟠 high | open |
 | [057](ISSUE-057-on-this-day-deeplink.md) | あの日通知タップで該当記録に直接遷移する | 🟡 medium | done |
 
