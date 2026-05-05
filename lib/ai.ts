@@ -20,3 +20,19 @@ export async function generateText(prompt: string, maxTokens = 200): Promise<str
   const block = message.content[0]
   return block.type === "text" ? block.text.trim() : ""
 }
+
+export async function generateChat(
+  systemPrompt: string,
+  messages: { role: "user" | "assistant"; content: string }[],
+  maxTokens = 300
+): Promise<string> {
+  const client = getAIClient()
+  const message = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: maxTokens,
+    system: systemPrompt,
+    messages,
+  })
+  const block = message.content[0]
+  return block.type === "text" ? block.text.trim() : ""
+}

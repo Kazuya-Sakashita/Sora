@@ -264,6 +264,59 @@ paths:
         "500":
           $ref: "#/components/responses/InternalServerError"
 
+  /pets/{petId}/chat:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    post:
+      tags: [chat, ai]
+      summary: ロスケアモード専用AIチャット（Claude API）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  maxItems: 20
+                  description: 会話履歴（最大10往復=20件）
+                  items:
+                    type: object
+                    required: [role, content]
+                    properties:
+                      role:
+                        type: string
+                        enum: [user, assistant]
+                      content:
+                        type: string
+                        maxLength: 2000
+      responses:
+        "200":
+          description: AI返答
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reply]
+                properties:
+                  reply:
+                    type: string
+                    description: AIが生成した2〜4文の日本語返答
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   # === 気持ち記録 ===
 
   /pets/{petId}/feelings:

@@ -8,20 +8,9 @@ import { ArrowLeft, Send } from "lucide-react"
 type Message = {
   id: string
   content: string
-  isUser: boolean
+  role: "user" | "assistant"
   timestamp: Date
 }
-
-const aiResponses = [
-  "ここにいるよ。無理しなくて大丈夫。",
-  "その気持ち、ちゃんと受け止めているよ。",
-  "一緒に過ごした時間は、とても大切なものだったんだね。",
-  "辛いときは、辛いって言っていいんだよ。",
-  "あなたの思いは、ちゃんとここに届いているよ。",
-  "ゆっくり、自分のペースで大丈夫だから。",
-  "その子との思い出、もっと聞かせてくれる？",
-  "あなたがそんなに大切に思っていること、素敵なことだね。",
-]
 
 export function ChatScreen() {
   const { setCurrentScreen, pet } = useApp()
@@ -29,12 +18,13 @@ export function ChatScreen() {
     {
       id: "1",
       content: "ここにいるよ。無理しなくて大丈夫",
-      isUser: false,
+      role: "assistant",
       timestamp: new Date(),
-    }
+    },
   ])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const quickPrompts = [
@@ -52,31 +42,58 @@ export function ChatScreen() {
     scrollToBottom()
   }, [messages])
 
-  const sendMessage = (content: string) => {
-    if (!content.trim()) return
+  const sendMessage = async (content: string) => {
+    if (!content.trim() || isTyping || !pet) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       content,
-      isUser: true,
+      role: "user",
       timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    const nextMessages = [...messages, userMessage]
+    setMessages(nextMessages)
     setInputValue("")
     setIsTyping(true)
+    setError(null)
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiResponses[Math.floor(Math.random() * aiResponses.length)],
-        isUser: false,
-        timestamp: new Date(),
+    const apiMessages = nextMessages
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({ role: m.role, content: m.content }))
+      .slice(-20)
+
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: apiMessages }),
+      })
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          setError("少し待ってから、もう一度試してみてください")
+        } else {
+          setError("少し待ってから、もう一度試してみてください")
+        }
+        return
       }
-      setMessages(prev => [...prev, aiResponse])
+
+      const data = await res.json()
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          content: data.reply,
+          role: "assistant",
+          timestamp: new Date(),
+        },
+      ])
+    } catch {
+      setError("少し待ってから、もう一度試してみてください")
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -85,8 +102,9 @@ export function ChatScreen() {
       <header className="sticky top-0 z-10 bg-white/30 backdrop-blur-xl border-b border-white/40">
         <div className="px-4 pt-safe">
           <div className="h-14 flex items-center gap-4">
-            <button 
+            <button
               onClick={() => setCurrentScreen("home")}
+              aria-label="ホームに戻る"
               className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground"
             >
               <ArrowLeft size={20} />
@@ -106,11 +124,11 @@ export function ChatScreen() {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${message.isUser ? "justify-end" : "justify-start"}`}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
               className={`max-w-[80%] rounded-3xl px-5 py-3 ${
-                message.isUser
+                message.role === "user"
                   ? "bg-primary/80 text-primary-foreground rounded-br-lg"
                   : "bg-white/70 text-foreground/90 rounded-bl-lg backdrop-blur-sm border border-white/50"
               }`}
@@ -132,6 +150,10 @@ export function ChatScreen() {
           </div>
         )}
 
+        {error && (
+          <p className="text-center text-sm text-muted-foreground/70 px-4">{error}</p>
+        )}
+
         <div ref={messagesEndRef} />
       </main>
 
@@ -142,7 +164,8 @@ export function ChatScreen() {
             <button
               key={prompt}
               onClick={() => sendMessage(prompt)}
-              className="flex-shrink-0 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-white/50 text-sm text-foreground/70 hover:bg-white/80 transition-colors"
+              disabled={isTyping}
+              className="flex-shrink-0 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-white/50 text-sm text-foreground/70 hover:bg-white/80 transition-colors disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -157,7 +180,7 @@ export function ChatScreen() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault()
                 sendMessage(inputValue)
               }
@@ -169,7 +192,7 @@ export function ChatScreen() {
           />
           <button
             onClick={() => sendMessage(inputValue)}
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isTyping}
             className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center text-primary-foreground disabled:bg-muted disabled:text-muted-foreground transition-colors flex-shrink-0"
           >
             <Send size={18} />

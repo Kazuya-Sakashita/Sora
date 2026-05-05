@@ -39,3 +39,14 @@ export const ScheduleInputSchema = z.object({
   date: dateStr,
   memo: z.string().max(500).optional(),
 })
+
+export const ChatInputSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().min(1).max(2000, "メッセージは2000文字以内にしてください"),
+      })
+    )
+    .max(20, "会話履歴は20件以内にしてください"),
+})

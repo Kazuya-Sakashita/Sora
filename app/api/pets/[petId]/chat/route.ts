@@ -1,0 +1,80 @@
+import { NextResponse } from "next/server"
+import prisma from "@/lib/prisma"
+import { getAuthUser, problem } from "@/lib/auth"
+import { getPetAccess } from "@/lib/pet-access"
+import { generateChat } from "@/lib/ai"
+import { applyChatRateLimit } from "@/lib/ratelimit"
+import { parseBody } from "@/lib/validate"
+import { ChatInputSchema } from "@/lib/schemas"
+
+type Params = { params: Promise<{ petId: string }> }
+
+const SPECIES_JA: Record<string, string> = {
+  dog: "犬", cat: "猫", rabbit: "うさぎ", bird: "鳥", other: "ペット",
+}
+
+const MOOD_JA: Record<string, string> = {
+  HAPPY: "うれしそう", CALM: "おだやか", FUN: "楽しそう", WORRIED: "心配", LOVING: "愛おしい",
+}
+
+export async function POST(req: Request, { params }: Params) {
+  const { user, errorResponse } = await getAuthUser()
+  if (errorResponse) return errorResponse
+
+  const { petId } = await params
+  const access = await getPetAccess(petId, user.id)
+  if (!access) return problem(404, "Not Found")
+
+  if (access.pet.status !== "RAINBOW_BRIDGE") return problem(403, "Forbidden")
+
+  const rateLimitResponse = await applyChatRateLimit(user.id)
+  if (rateLimitResponse) return rateLimitResponse
+
+  const parsed = await parseBody(ChatInputSchema, req)
+  if (parsed.error) return parsed.error
+
+  const { messages } = parsed.data
+
+  const recentMemories = await prisma.memory.findMany({
+    where: { petId },
+    orderBy: { date: "desc" },
+    take: 5,
+    select: { title: true, description: true, moodTag: true },
+  })
+
+  const speciesJa = access.pet.species ? (SPECIES_JA[access.pet.species] ?? "ペット") : "ペット"
+
+  const memoryLines = recentMemories
+    .map((m) => {
+      const mood = m.moodTag ? ` (${MOOD_JA[m.moodTag] ?? ""})` : ""
+      const desc = m.description ? ` — ${m.description.slice(0, 50)}` : ""
+      return `・${m.title}${mood}${desc}`
+    })
+    .join("\n")
+
+  const recentSection = memoryLines
+    ? `\n直近の思い出（参考にしてください）：\n${memoryLines}`
+    : ""
+
+  const systemPrompt = `あなたはペット記録アプリ「Sora」のAIです。
+大切な${access.pet.name}を見送った飼い主が、思い出を穏やかに語れる場を作ってください。
+
+ペット名：${access.pet.name}
+種類：${speciesJa}${recentSection}
+
+会話ルール：
+- 穏やか・寄り添う語り口（です・ます調）
+- 絵文字・感嘆符禁止
+- 「素晴らしい」「すごい」など過度な褒め言葉禁止
+- ペット視点での発言禁止
+- 必要以上に深掘りせず、話してくれたことを受け止める
+- 2〜4文で返す
+- 日本語のみ`
+
+  try {
+    const reply = await generateChat(systemPrompt, messages.slice(-20))
+    return NextResponse.json({ reply })
+  } catch {
+    return problem(500, "Internal Server Error", "AIの応答の生成に失敗しました")
+  }
+}
