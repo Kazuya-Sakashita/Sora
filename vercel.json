@@ -11,6 +11,10 @@
     {
       "path": "/api/push/weekly",
       "schedule": "0 23 * * 0"
+    },
+    {
+      "path": "/api/cron/monthly-letters",
+      "schedule": "0 14 28-31 * *"
     }
   ]
 }

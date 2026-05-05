@@ -50,11 +50,12 @@ model Pet {
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
-  memories  Memory[]
-  feelings  Feeling[]
-  schedules Schedule[]
-  members   PetMember[]
-  invites   PetInvite[]
+  memories       Memory[]
+  feelings       Feeling[]
+  schedules      Schedule[]
+  members        PetMember[]
+  invites        PetInvite[]
+  monthlyLetters MonthlyLetter[]
 
   @@map("pets")
 }
@@ -190,6 +191,23 @@ enum ScheduleType {
   VACCINE
   ANNIVERSARY
   OTHER
+}
+
+// -----------------------------------------------
+// 月次AIメモリーレター
+// -----------------------------------------------
+model MonthlyLetter {
+  id          String    @id @default(uuid())
+  petId       String    @map("pet_id")
+  pet         Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  year        Int
+  month       Int
+  content     String
+  generatedAt DateTime  @default(now()) @map("generated_at")
+  notifiedAt  DateTime? @map("notified_at")
+
+  @@unique([petId, year, month])
+  @@map("monthly_letters")
 }
 
 // -----------------------------------------------

@@ -13,9 +13,11 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight } from "lucide-react"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
+type LetterIndex = { id: string; year: number; month: number; generatedAt: string }
+type LetterDetail = { id: string; year: number; month: number; content: string; generatedAt: string }
 
 export function SettingsScreen() {
   const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus } = useApp()
@@ -37,6 +39,9 @@ export function SettingsScreen() {
   const [notifStatus, setNotifStatus] = useState<"granted" | "denied" | "default" | "unsupported" | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [isTogglingNotif, setIsTogglingNotif] = useState(false)
+  const [letters, setLetters] = useState<LetterIndex[]>([])
+  const [openLetter, setOpenLetter] = useState<LetterDetail | null>(null)
+  const [isLoadingLetter, setIsLoadingLetter] = useState(false)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -47,6 +52,13 @@ export function SettingsScreen() {
     getNotificationStatus().then(setNotifStatus)
     isCurrentlySubscribed().then(setIsSubscribed)
   }, [])
+
+  useEffect(() => {
+    if (plan !== "PLUS" || !pet) return
+    fetch(`/api/pets/${pet.id}/letters`)
+      .then((r) => r.ok ? r.json() : { letters: [] })
+      .then(({ letters }) => setLetters(letters ?? []))
+  }, [plan, pet])
 
   const handleToggleNotification = async () => {
     if (isTogglingNotif) return
@@ -154,6 +166,19 @@ export function SettingsScreen() {
     }
   }
 
+  const handleOpenLetter = async (year: number, month: number) => {
+    if (!pet) return
+    setIsLoadingLetter(true)
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/letters/${year}/${month}`)
+      if (!res.ok) return
+      const { letter } = await res.json()
+      setOpenLetter(letter)
+    } finally {
+      setIsLoadingLetter(false)
+    }
+  }
+
   const handleLogout = async () => {
     setIsLoggingOut(true)
     const supabase = createSupabaseBrowserClient()
@@ -223,6 +248,7 @@ export function SettingsScreen() {
           </div>
 
           {[
+            { icon: Mail, label: "月次AIメモリーレター", desc: "毎月の記録をAIが手紙に", cta: "見てみる →" },
             { icon: BookOpen, label: "月別フォトブック", desc: "毎月の思い出をPDFに", cta: "作ってみる →" },
             { icon: FileText, label: "年次メモリーレポート", desc: "1年間の記録を自動まとめ", cta: "見てみる →" },
             { icon: Download, label: "記念日カード保存", desc: "100日・誕生日を画像に", cta: "保存してみる →" },
@@ -295,6 +321,97 @@ export function SettingsScreen() {
 
         {showUpgradeModal && (
           <UpgradeModal featureName={upgradeFeature} onClose={() => setShowUpgradeModal(false)} />
+        )}
+
+        {/* Monthly Letter Archive */}
+        {plan === "PLUS" && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Mail size={14} className="text-amber-500" />
+              <h2 className="text-sm font-semibold text-foreground/80">AIメモリーレター</h2>
+            </div>
+            {letters.length === 0 ? (
+              <GlassCard className="py-5 text-center space-y-1">
+                <p className="text-sm text-foreground/70">まだレターがありません</p>
+                <p className="text-xs text-muted-foreground">毎月末、記録が3件以上ある月に届きます</p>
+              </GlassCard>
+            ) : (
+              <div className="space-y-2">
+                {letters.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => handleOpenLetter(l.year, l.month)}
+                    className="w-full"
+                  >
+                    <GlassCard className="flex items-center gap-4 py-3.5 hover:bg-white/80 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                        <Mail size={18} className="text-amber-500" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="text-sm font-medium text-foreground/85">{l.year}年{l.month}月のレター</p>
+                        <p className="text-xs text-muted-foreground">{new Date(l.generatedAt).toLocaleDateString("ja-JP")} 生成</p>
+                      </div>
+                      <ChevronRight size={14} className="text-muted-foreground shrink-0" />
+                    </GlassCard>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {plan === "FREE" && (
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 px-1">
+              <Mail size={14} className="text-amber-500" />
+              <h2 className="text-sm font-semibold text-foreground/80">AIメモリーレター</h2>
+            </div>
+            <GlassCard className="space-y-3 py-4 relative overflow-hidden">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground/80">{new Date().getFullYear()}年{new Date().getMonth() + 1}月のレター</p>
+                <p className="text-xs text-muted-foreground leading-relaxed blur-sm select-none pointer-events-none">
+                  今月も〇〇とたくさんの時間を過ごしましたね。〇〇日の散歩の記録や、トリミングの日の様子…毎日の積み重ねがここにあります。Sora より
+                </p>
+              </div>
+              <button
+                onClick={() => { setUpgradeFeature("月次AIメモリーレター"); setShowUpgradeModal(true) }}
+                className="w-full h-9 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-xs transition-colors"
+              >
+                Sora+ でレターを受け取る
+              </button>
+            </GlassCard>
+          </section>
+        )}
+
+        {/* Letter Modal */}
+        {openLetter && (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 backdrop-blur-sm">
+            <div className="w-full max-w-lg rounded-t-3xl bg-white/97 backdrop-blur-xl border-t border-white/60 shadow-2xl p-6 space-y-5 animate-in slide-in-from-bottom-4 duration-300 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-foreground/90">{openLetter.year}年{openLetter.month}月のレター</p>
+                  <p className="text-xs text-muted-foreground">{pet?.name}へ</p>
+                </div>
+                <button
+                  onClick={() => setOpenLetter(null)}
+                  className="w-8 h-8 rounded-full bg-muted/40 flex items-center justify-center"
+                >
+                  <X size={14} className="text-muted-foreground" />
+                </button>
+              </div>
+              <div className="bg-amber-50/60 rounded-2xl p-5">
+                <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{openLetter.content}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isLoadingLetter && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
+            <div className="bg-white/90 rounded-2xl p-6">
+              <Loader2 size={24} className="animate-spin text-amber-500" />
+            </div>
+          </div>
         )}
 
         {/* Conversation Tone */}

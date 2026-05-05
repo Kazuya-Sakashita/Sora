@@ -209,3 +209,61 @@ describe("SettingsScreen — 会話トーン選択", () => {
     expect(setConversationTone).toHaveBeenCalledWith("少し前を向く言葉もほしい")
   })
 })
+
+describe("SettingsScreen — 月次AIメモリーレター", () => {
+  beforeEach(() => {
+    mockAppContext()
+    mockGetNotificationStatus.mockResolvedValue("default")
+    mockIsCurrentlySubscribed.mockResolvedValue(false)
+  })
+
+  it("Freeプランでは月次レターのティーザーと誘導ボタンが表示される", async () => {
+    render(<SettingsScreen />)
+    expect(await screen.findByText("Sora+ でレターを受け取る")).toBeInTheDocument()
+  })
+
+  it("Plusプランではレターアーカイブセクションが表示される", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+      if (url === "/api/billing/plan") {
+        return Promise.resolve({ json: () => Promise.resolve({ plan: "PLUS" }), ok: true })
+      }
+      if (typeof url === "string" && url.includes("/letters")) {
+        return Promise.resolve({ json: () => Promise.resolve({ letters: [] }), ok: true })
+      }
+      return Promise.resolve({ json: () => Promise.resolve({}), ok: true })
+    }))
+
+    render(<SettingsScreen />)
+    expect(await screen.findByText("まだレターがありません")).toBeInTheDocument()
+  })
+
+  it("Plusプランで過去レターが存在する場合は一覧に表示される", async () => {
+    vi.mocked(useApp).mockReturnValue({
+      ...vi.mocked(useApp)(),
+      pet: {
+        id: "pet-1", name: "ポチ", nickname: null, species: null, breed: null,
+        birthDate: null, broughtAt: "2021-01-01", gender: null, photoUrl: null,
+        personality: null, favorites: null, status: "alive", role: "owner",
+        createdAt: "2021-01-01T00:00:00Z", updatedAt: "2026-04-01T00:00:00Z",
+      },
+    })
+
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+      if (url === "/api/billing/plan") {
+        return Promise.resolve({ json: () => Promise.resolve({ plan: "PLUS" }), ok: true })
+      }
+      if (typeof url === "string" && url.includes("/letters")) {
+        return Promise.resolve({
+          json: () => Promise.resolve({
+            letters: [{ id: "l1", year: 2026, month: 4, generatedAt: "2026-04-30T14:00:00Z" }],
+          }),
+          ok: true,
+        })
+      }
+      return Promise.resolve({ json: () => Promise.resolve({}), ok: true })
+    }))
+
+    render(<SettingsScreen />)
+    expect(await screen.findByText("2026年4月のレター")).toBeInTheDocument()
+  })
+})
