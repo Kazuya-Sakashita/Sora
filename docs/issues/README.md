@@ -90,11 +90,11 @@
 | [082](ISSUE-082-plus-letter-home-notification.md) | Sora+月次レター生成後にホームで通知カードを表示する | 🔴 critical | done |
 | [083](ISSUE-083-record-accumulation-milestone.md) | alive期の記録30件達成時に「積み重なり実感」カードをホームに表示する | 🟠 high | done |
 | [084](ISSUE-084-letter-alive-cta.md) | ことば画面のalive期プレースホルダーを記録継続動機に接続する | 🟠 high | done |
-| [085](ISSUE-085-rainbow-bridge-timeline-care.md) | rainbow_bridge移行後の時間軸ケアカードを実装する | 🔴 critical | open |
-| [086](ISSUE-086-chat-framing-memory-tool.md) | 「はなす」のフレーミングをカウンセリングから思い出整理に修正する | 🔴 critical | open |
-| [087](ISSUE-087-plus-alive-monthly-summary-card.md) | alive期Sora+に月次記録サマリーカードを追加する | 🟠 high | open |
-| [088](ISSUE-088-onboarding-future-promise-slide.md) | オンボーディング最終画面に「記録の未来価値」スライドを追加する | 🟠 high | open |
-| [089](ISSUE-089-chat-tone-remove-forward.md) | チャットtoneから「少し前を向く言葉もほしい」を削除する | 🟠 high | open |
+| [085](ISSUE-085-rainbow-bridge-timeline-care.md) | rainbow_bridge移行後の時間軸ケアカードを実装する | 🔴 critical | done |
+| [086](ISSUE-086-chat-framing-memory-tool.md) | 「はなす」のフレーミングをカウンセリングから思い出整理に修正する | 🔴 critical | done |
+| [087](ISSUE-087-plus-alive-monthly-summary-card.md) | alive期Sora+に月次記録サマリーカードを追加する | 🟠 high | done |
+| [088](ISSUE-088-onboarding-future-promise-slide.md) | オンボーディング最終画面に「記録の未来価値」スライドを追加する | 🟠 high | done |
+| [089](ISSUE-089-chat-tone-remove-forward.md) | チャットtoneから「少し前を向く言葉もほしい」を削除する | 🟠 high | done |
 
 ---
 
