@@ -63,7 +63,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [conversationTone, setConversationToneState] = useState(
-    () => localStorage.getItem("sora:conversation-tone") ?? "やさしく寄り添う"
+    () => (typeof window !== "undefined" ? localStorage.getItem("sora:conversation-tone") : null) ?? "やさしく寄り添う"
   )
   const setConversationTone = (tone: string) => {
     try {
