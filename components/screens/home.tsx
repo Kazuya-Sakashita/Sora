@@ -38,6 +38,7 @@ export function HomeScreen() {
   const [showLossGuidance, setShowLossGuidance] = useState(false)
   const [showLetterCard, setShowLetterCard] = useState(false)
   const [showMilestone30Card, setShowMilestone30Card] = useState(false)
+  const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -87,6 +88,31 @@ export function HomeScreen() {
     } else {
       const elapsed = Date.now() - parseInt(stored, 10)
       if (elapsed < 72 * 60 * 60 * 1000) setShowLossWelcome(true)
+    }
+  }, [pet?.id, pet?.status])
+
+  useEffect(() => {
+    if (!pet || pet.status !== "rainbow_bridge") return
+    const transitionKey = `sora:loss-transition-${pet.id}`
+    const stored = localStorage.getItem(transitionKey)
+    if (!stored) return
+    const elapsed = Date.now() - parseInt(stored, 10)
+    const HOUR = 60 * 60 * 1000
+    const milestones: Array<{ day: 7 | 14 | 30; message: string }> = [
+      { day: 7,  message: `${pet.name}がいなくなって1週間。ゆっくりでいいですよ。` },
+      { day: 14, message: `2週間、ここに残し続けてくれてありがとう。` },
+      { day: 30, message: `1ヶ月経ちました。${pet.name}のこと、いつでも話せます。` },
+    ]
+    for (const m of [...milestones].reverse()) {
+      const windowStart = m.day * 24 * HOUR
+      const windowEnd = windowStart + 72 * HOUR
+      if (elapsed >= windowStart && elapsed < windowEnd) {
+        const dismissKey = `sora:care-card-${pet.id}-${m.day}`
+        if (!localStorage.getItem(dismissKey)) {
+          setTimelineCareCard(m)
+        }
+        break
+      }
     }
   }, [pet?.id, pet?.status])
 
@@ -417,6 +443,25 @@ export function HomeScreen() {
                 はなす
               </button>
             </div>
+          </div>
+        )}
+
+        {/* 時間軸ケアカード — rainbow_bridge後7/14/30日 (ISSUE-085) */}
+        {timelineCareCard && pet && (
+          <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/40 px-4 py-3 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <p className="text-xs text-foreground/80 leading-relaxed flex-1">
+              {timelineCareCard.message}
+            </p>
+            <button
+              aria-label="カードを閉じる"
+              onClick={() => {
+                localStorage.setItem(`sora:care-card-${pet.id}-${timelineCareCard.day}`, "1")
+                setTimelineCareCard(null)
+              }}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0 mt-0.5"
+            >
+              <X size={14} />
+            </button>
           </div>
         )}
 
