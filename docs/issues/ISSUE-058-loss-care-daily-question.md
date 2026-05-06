@@ -3,7 +3,7 @@
 name: ISSUE-058
 type: improvement
 priority: High
-status: open
+status: done
 
 ---
 

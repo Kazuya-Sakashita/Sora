@@ -63,8 +63,8 @@
 | [055](ISSUE-055-letter-screen-ai.md) | 「ことば」画面をAIレターに置き換える | 🟠 high | done |
 | [056](ISSUE-056-push-registration-timing.md) | Push通知登録タイミングをActivation時に前倒しする | 🟠 high | done |
 | [057](ISSUE-057-on-this-day-deeplink.md) | あの日通知タップで該当記録に直接遷移する | 🟡 medium | done |
-| [058](ISSUE-058-loss-care-daily-question.md) | ロスケア期の「今日の問いかけ」を毎日表示する | 🟠 high | open |
-| [059](ISSUE-059-home-on-this-day-highlight.md) | ホームのn日前カードタップで該当記録をハイライト遷移する | 🟡 medium | open |
+| [058](ISSUE-058-loss-care-daily-question.md) | ロスケア期の「今日の問いかけ」を毎日表示する | 🟠 high | done |
+| [059](ISSUE-059-home-on-this-day-highlight.md) | ホームのn日前カードタップで該当記録をハイライト遷移する | 🟡 medium | done |
 | [060](ISSUE-060-alive-monthly-ai-message.md) | alive期ユーザー向け「今月のひとこと」カードをホームに追加する | 🟠 high | open |
 
 ---

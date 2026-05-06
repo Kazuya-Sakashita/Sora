@@ -11,6 +11,14 @@ const mockGetNotificationStatus = vi.fn()
 vi.mock("@/lib/push-client", () => ({
   getNotificationStatus: () => mockGetNotificationStatus(),
 }))
+
+// fetch モック（billing/plan と daily-question）
+vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+  if (typeof url === "string" && url.includes("/daily-question")) {
+    return Promise.resolve({ ok: true, json: () => Promise.resolve({ question: "今日のポチはどうでしたか？" }) })
+  }
+  return Promise.resolve({ ok: true, json: () => Promise.resolve({ plan: "FREE" }) })
+}))
 vi.mock("@/lib/date", () => ({
   calcDaysWith: vi.fn((broughtAt: string) => {
     const start = new Date(broughtAt)
@@ -276,6 +284,77 @@ describe("HomeScreen — 最近の思い出", () => {
     mockContext([])
     render(<HomeScreen />)
     expect(screen.queryByText("最近の思い出")).not.toBeInTheDocument()
+  })
+})
+
+describe("HomeScreen — 今日の問いかけ（ISSUE-058）", () => {
+  // fake timers を使わず動的な今日の日付で制御する
+  const todayMemory: Memory = {
+    ...memoryToday,
+    date: new Date().toISOString().split("T")[0],
+  }
+
+  it("alive + 未記録なら問いかけカードが表示される", async () => {
+    mockContext([])
+    render(<HomeScreen />)
+    expect(await screen.findByText("今日のポチはどうでしたか？")).toBeInTheDocument()
+  })
+
+  it("alive + 記録済みなら問いかけカードが非表示", async () => {
+    mockContext([todayMemory])
+    render(<HomeScreen />)
+    await new Promise((r) => setTimeout(r, 100))
+    expect(screen.queryByText("今日のポチはどうでしたか？")).not.toBeInTheDocument()
+  })
+
+  it("rainbow_bridge + 記録済みでも問いかけカードが表示される", async () => {
+    const rbPet = { ...mockPet, status: "rainbow_bridge" as const }
+    mockContext([todayMemory], rbPet)
+    render(<HomeScreen />)
+    expect(await screen.findByText("今日のポチはどうでしたか？")).toBeInTheDocument()
+  })
+
+  it("rainbow_bridge 時のサブコピーが「今日も残しませんか」", async () => {
+    const rbPet = { ...mockPet, status: "rainbow_bridge" as const }
+    mockContext([], rbPet)
+    render(<HomeScreen />)
+    expect(await screen.findByText("今日も残しませんか")).toBeInTheDocument()
+  })
+
+  it("alive 未記録時のサブコピーが「タップして記録する」", async () => {
+    mockContext([])
+    render(<HomeScreen />)
+    expect(await screen.findByText("タップして記録する")).toBeInTheDocument()
+  })
+})
+
+describe("HomeScreen — n日前カードのハイライト遷移（ISSUE-059）", () => {
+  // on-this-day は同月同日の過去記録。ローカル日付コンポーネントで構築（UTC変換によるズレを防ぐ）
+  const now = new Date()
+  const lastYearStr = `${now.getFullYear() - 1}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+  const onThisDayMemory: Memory = {
+    ...memoryLastYear,
+    date: lastYearStr,
+  }
+
+  it("on-this-day カードタップで setPendingHighlightMemoryId が対象IDで呼ばれる", async () => {
+    mockContext([onThisDayMemory])
+    const setPendingHighlightMemoryId = vi.fn()
+    vi.mocked(useApp).mockReturnValue({ ...vi.mocked(useApp)(), setPendingHighlightMemoryId })
+    render(<HomeScreen />)
+    const label = await screen.findByText("1年前の今日")
+    await userEvent.click(label.closest("button")!)
+    expect(setPendingHighlightMemoryId).toHaveBeenCalledWith(onThisDayMemory.id)
+  })
+
+  it("on-this-day カードタップで timeline に遷移する", async () => {
+    mockContext([onThisDayMemory])
+    const setCurrentScreen = vi.fn()
+    vi.mocked(useApp).mockReturnValue({ ...vi.mocked(useApp)(), setCurrentScreen })
+    render(<HomeScreen />)
+    const label = await screen.findByText("1年前の今日")
+    await userEvent.click(label.closest("button")!)
+    expect(setCurrentScreen).toHaveBeenCalledWith("timeline")
   })
 })
 

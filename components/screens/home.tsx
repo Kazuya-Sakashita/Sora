@@ -12,7 +12,7 @@ import { useState, useEffect } from "react"
 import { getNotificationStatus } from "@/lib/push-client"
 
 export function HomeScreen() {
-  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus } = useApp()
+  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus, setPendingHighlightMemoryId } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
   const recentMemories = memories.slice(0, 3)
@@ -301,7 +301,7 @@ export function HomeScreen() {
         )}
 
         {/* Daily Question Card */}
-        {pet && dailyQuestion && !recordedToday && (
+        {pet && dailyQuestion && (pet.status === "rainbow_bridge" || !recordedToday) && (
           <button
             onClick={() => {
               setPendingMemoryTitle(dailyQuestion.replace(/？$/, ""))
@@ -316,7 +316,9 @@ export function HomeScreen() {
                 <span className="text-xs font-medium">今日の問いかけ</span>
               </div>
               <p className="text-sm font-medium text-foreground/85 leading-snug">{dailyQuestion}</p>
-              <p className="text-xs text-muted-foreground">タップして記録する</p>
+              <p className="text-xs text-muted-foreground">
+                {pet.status === "rainbow_bridge" ? "今日も残しませんか" : "タップして記録する"}
+              </p>
             </GlassCard>
           </button>
         )}
@@ -400,7 +402,10 @@ export function HomeScreen() {
         {/* On This Day */}
         {onThisDay && (
           <button
-            onClick={() => setCurrentScreen("timeline")}
+            onClick={() => {
+              setPendingHighlightMemoryId(onThisDay.id)
+              setCurrentScreen("timeline")
+            }}
             className="w-full text-left active:scale-[0.98] transition-all"
           >
             <GlassCard className="overflow-hidden p-0">
