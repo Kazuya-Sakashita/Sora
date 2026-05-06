@@ -39,6 +39,7 @@ export function HomeScreen() {
   const [showLetterCard, setShowLetterCard] = useState(false)
   const [showMilestone30Card, setShowMilestone30Card] = useState(false)
   const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
+  const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -143,6 +144,16 @@ export function HomeScreen() {
   }, [plan, pet?.id])
 
   useEffect(() => {
+    if (plan !== "PLUS" || !pet || pet.status !== "alive") return
+    const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+    const thisMonthCount = memories.filter((m) => m.date?.startsWith(currentMonthStr)).length
+    if (thisMonthCount === 0) return
+    const summaryKey = `sora:plus-summary-seen-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+    if (!localStorage.getItem(summaryKey)) setShowPlusSummaryCard(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan, pet?.id, pet?.status, memories.length])
+
+  useEffect(() => {
     if (!pet) return
     fetch(`/api/pets/${pet.id}/daily-question`)
       .then((r) => r.ok ? r.json() : null)
@@ -215,6 +226,18 @@ export function HomeScreen() {
   }
 
   const monthlyRecap = isRecapWindow(today) ? buildMonthlyRecap(memories, feelings, today) : null
+
+  const MOOD_JA_HOME: Record<string, string> = {
+    HAPPY: "うれしそう", CALM: "おだやか", FUN: "楽しそう", WORRIED: "心配", LOVING: "愛おしい",
+  }
+  const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+  const thisMonthMemories = memories.filter((m) => m.date?.startsWith(currentMonthStr))
+  const thisMonthPhotoCount = thisMonthMemories.filter((m) => m.photoUrls && m.photoUrls.length > 0).length
+  const moodCounts = thisMonthMemories.reduce<Record<string, number>>((acc, m) => {
+    if (m.moodTag) acc[m.moodTag] = (acc[m.moodTag] ?? 0) + 1
+    return acc
+  }, {})
+  const topMoodTag = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
 
   const onThisDay = memories
     .filter((m) => {
@@ -693,6 +716,43 @@ export function HomeScreen() {
               </div>
             </GlassCard>
           </button>
+        )}
+
+        {/* alive期 Sora+ 月次サマリーカード (ISSUE-087) */}
+        {showPlusSummaryCard && pet && pet.status === "alive" && thisMonthMemories.length > 0 && (
+          <GlassCard className="space-y-2">
+            <div className="flex items-start justify-between">
+              <div className="space-y-1 flex-1">
+                <p className="text-xs font-medium text-primary/70">
+                  📖 {today.getMonth() + 1}月の{pet.name}との記録
+                </p>
+                <p className="text-sm text-foreground/80">
+                  {thisMonthMemories.length}件の思い出を残しました
+                </p>
+                {topMoodTag && (
+                  <p className="text-xs text-muted-foreground">
+                    {MOOD_JA_HOME[topMoodTag] ?? topMoodTag}な瞬間が多かった月でした
+                  </p>
+                )}
+                {thisMonthPhotoCount > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {thisMonthPhotoCount}枚の写真とともに
+                  </p>
+                )}
+              </div>
+              <button
+                aria-label="カードを閉じる"
+                onClick={() => {
+                  const summaryKey = `sora:plus-summary-seen-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+                  localStorage.setItem(summaryKey, "1")
+                  setShowPlusSummaryCard(false)
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </GlassCard>
         )}
 
         {/* 今月のひとこと（alive + 月末5日間 + 記録3件以上） */}
