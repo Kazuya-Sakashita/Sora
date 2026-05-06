@@ -379,9 +379,15 @@ export function HomeScreen() {
             {/* Streak Badge */}
             {streak > 0 && (
               <div className="flex justify-center pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-xs font-medium text-orange-500">
-                  🔥 {streak}日連続記録中
-                </span>
+                {pet?.status === "rainbow_bridge" ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-xs font-medium text-primary/60">
+                    {streak}日分の思い出が残っています
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-100 text-xs font-medium text-orange-500">
+                    🔥 {streak}日連続記録中
+                  </span>
+                )}
               </div>
             )}
 

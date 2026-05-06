@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, Bookmark, RefreshCw, Loader2 } from "lucide-react"
+import { ArrowLeft, Bookmark, RefreshCw, Loader2, Trash2 } from "lucide-react"
 
 export function LetterScreen() {
   const { setCurrentScreen, pet } = useApp()
@@ -12,6 +12,21 @@ export function LetterScreen() {
   const [savedLetters, setSavedLetters] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!pet) return
+    try {
+      const saved = localStorage.getItem(`sora:letters-${pet.id}`)
+      if (saved) setSavedLetters(JSON.parse(saved))
+    } catch { /* ignore corrupt data */ }
+  }, [pet?.id])
+
+  const persistLetters = (letters: string[]) => {
+    if (!pet) return
+    try {
+      localStorage.setItem(`sora:letters-${pet.id}`, JSON.stringify(letters.slice(-20)))
+    } catch { /* ignore storage full */ }
+  }
 
   const generateLetter = async () => {
     if (!pet || isLoading) return
@@ -37,9 +52,16 @@ export function LetterScreen() {
   }
 
   const saveLetter = () => {
-    if (currentLetter && !savedLetters.includes(currentLetter)) {
-      setSavedLetters(prev => [...prev, currentLetter])
-    }
+    if (!currentLetter || savedLetters.includes(currentLetter)) return
+    const next = [...savedLetters, currentLetter]
+    setSavedLetters(next)
+    persistLetters(next)
+  }
+
+  const deleteLetter = (index: number) => {
+    const next = savedLetters.filter((_, i) => i !== index)
+    setSavedLetters(next)
+    persistLetters(next)
   }
 
   return (
@@ -102,11 +124,12 @@ export function LetterScreen() {
             <div className="flex gap-3">
               <Button
                 onClick={saveLetter}
+                disabled={savedLetters.includes(currentLetter)}
                 variant="outline"
-                className="flex-1 h-12 rounded-xl border-white/60 bg-white/50 hover:bg-white/70"
+                className="flex-1 h-12 rounded-xl border-white/60 bg-white/50 hover:bg-white/70 disabled:opacity-50"
               >
                 <Bookmark size={18} className="mr-2" />
-                保存する
+                {savedLetters.includes(currentLetter) ? "保存済み" : "保存する"}
               </Button>
               <Button
                 onClick={generateLetter}
@@ -152,8 +175,15 @@ export function LetterScreen() {
           <div className="space-y-4">
             <h3 className="text-sm font-medium text-foreground/70">保存した言葉</h3>
             {savedLetters.map((letter, index) => (
-              <GlassCard key={index} className="py-4">
-                <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-line">
+              <GlassCard key={index} className="py-4 relative">
+                <button
+                  onClick={() => deleteLetter(index)}
+                  aria-label="削除"
+                  className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground hover:bg-black/5 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+                <p className="text-sm text-foreground/70 leading-relaxed whitespace-pre-line pr-8">
                   {letter}
                 </p>
               </GlassCard>

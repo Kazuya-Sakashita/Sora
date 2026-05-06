@@ -3,7 +3,7 @@
 name: ISSUE-068
 type: bug
 priority: Critical
-status: open
+status: done
 
 ---
 

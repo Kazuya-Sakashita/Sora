@@ -24,7 +24,7 @@ function makeInitialMessage(petName?: string): Message {
 }
 
 export function ChatScreen() {
-  const { setCurrentScreen, pet, memories } = useApp()
+  const { setCurrentScreen, pet, memories, conversationTone } = useApp()
   const [messages, setMessages] = useState<Message[]>([makeInitialMessage(pet?.name)])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
@@ -102,7 +102,7 @@ export function ChatScreen() {
       const res = await fetch(`/api/pets/${pet.id}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: apiMessages }),
+        body: JSON.stringify({ messages: apiMessages, tone: conversationTone }),
       })
 
       if (!res.ok) {

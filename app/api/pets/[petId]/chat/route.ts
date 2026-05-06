@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: Params) {
   const parsed = await parseBody(ChatInputSchema, req)
   if (parsed.error) return parsed.error
 
-  const { messages } = parsed.data
+  const { messages, tone } = parsed.data
 
   const recentMemories = await prisma.memory.findMany({
     where: { petId },
@@ -56,6 +56,12 @@ export async function POST(req: Request, { params }: Params) {
     ? `\n直近の思い出（参考にしてください）：\n${memoryLines}`
     : ""
 
+  const toneInstruction = tone === "思い出を一緒に振り返る"
+    ? "- 思い出を一緒に振り返るように、具体的な記憶に寄り添いながら返す"
+    : tone === "少し前を向く言葉もほしい"
+    ? "- 悲しみを受け止めつつ、ごく穏やかに次の一歩を感じさせる言葉を添える（押しつけ禁止）"
+    : "- あたたかく、そっと支える語り口で返す"
+
   const systemPrompt = `あなたはペット記録アプリ「Sora」のAIです。
 大切な${access.pet.name}を見送った飼い主が、思い出を穏やかに語れる場を作ってください。
 
@@ -69,7 +75,8 @@ export async function POST(req: Request, { params }: Params) {
 - ペット視点での発言禁止
 - 必要以上に深掘りせず、話してくれたことを受け止める
 - 2〜4文で返す
-- 日本語のみ`
+- 日本語のみ
+${toneInstruction}`
 
   try {
     const reply = await generateChat(systemPrompt, messages.slice(-20))
