@@ -64,6 +64,27 @@ export function LetterScreen() {
     persistLetters(next)
   }
 
+  if (!pet || pet.status !== "rainbow_bridge") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center gap-6">
+        <p className="text-4xl">🌱</p>
+        <div className="space-y-2">
+          <h2 className="font-medium text-foreground/85">まだこのことばはないかもしれない</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            ことばは、記録を積み重ねた先に生まれます。<br />
+            今は、毎日のできごとを残していく時間です。
+          </p>
+        </div>
+        <button
+          onClick={() => setCurrentScreen("timeline")}
+          className="text-sm text-primary/70 underline underline-offset-4"
+        >
+          記録を見る
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen pb-safe">
       {/* Header */}

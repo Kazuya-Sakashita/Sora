@@ -3,7 +3,7 @@
 name: ISSUE-071
 type: bug
 priority: Critical
-status: open
+status: done
 
 ---
 
