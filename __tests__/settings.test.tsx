@@ -207,8 +207,8 @@ describe("SettingsScreen — 会話トーン選択", () => {
       setConversationTone,
     })
     render(<SettingsScreen />)
-    await userEvent.click(screen.getByText("少し前を向く言葉もほしい"))
-    expect(setConversationTone).toHaveBeenCalledWith("少し前を向く言葉もほしい")
+    await userEvent.click(screen.getByText("思い出を一緒に振り返る"))
+    expect(setConversationTone).toHaveBeenCalledWith("思い出を一緒に振り返る")
   })
 })
 

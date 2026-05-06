@@ -82,8 +82,6 @@ export async function POST(req: Request, { params }: Params) {
 
   const toneInstruction = tone === "思い出を一緒に振り返る"
     ? "- 思い出を一緒に振り返るように、具体的な記憶に寄り添いながら返す"
-    : tone === "少し前を向く言葉もほしい"
-    ? "- 悲しみを受け止めつつ、ごく穏やかに次の一歩を感じさせる言葉を添える（押しつけ禁止）"
     : "- あたたかく、そっと支える語り口で返す"
 
   const systemPrompt = `あなたはペット記録アプリ「Sora」のAIです。

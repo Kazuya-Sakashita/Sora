@@ -62,9 +62,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [feelings, setFeelings] = useState<Feeling[]>([])
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [conversationTone, setConversationToneState] = useState(
-    () => (typeof window !== "undefined" ? localStorage.getItem("sora:conversation-tone") : null) ?? "やさしく寄り添う"
-  )
+  const VALID_TONES = ["やさしく寄り添う", "思い出を一緒に振り返る"]
+  const [conversationTone, setConversationToneState] = useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("sora:conversation-tone") : null
+    return saved && VALID_TONES.includes(saved) ? saved : "やさしく寄り添う"
+  })
   const setConversationTone = (tone: string) => {
     try {
       localStorage.setItem("sora:conversation-tone", tone)

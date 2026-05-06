@@ -210,7 +210,6 @@ export function SettingsScreen() {
   const toneOptions = [
     { label: "やさしく寄り添う", description: "あたたかく、そっと支える言葉" },
     { label: "思い出を一緒に振り返る", description: "大切な時間を一緒に思い出す" },
-    { label: "少し前を向く言葉もほしい", description: "ゆっくりと、次の一歩へ" },
   ]
 
   const settingSections = [
