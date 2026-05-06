@@ -83,7 +83,7 @@
 | [075](ISSUE-075-chat-header-copy.md) | チャット「{pet.name}へ」ヘッダーコピーのペット語りかけ誤認を修正する | 🔴 critical | done |
 | [076](ISSUE-076-chat-session-safety.md) | チャット長時間セッションに休憩提案メッセージを挿入する | 🔴 critical | done |
 | [077](ISSUE-077-feelings-history-list.md) | 気持ち記録の時系列リストをfeelingsスクリーンに追加する | 🟠 high | open |
-| [078](ISSUE-078-losscare-guidance-modal.md) | ロスケア移行確認後に「これからのSora」案内モーダルを挿入する | 🟠 high | open |
+| [078](ISSUE-078-losscare-guidance-modal.md) | ロスケア移行確認後に「これからのSora」案内モーダルを挿入する | 🟠 high | done |
 | [079](ISSUE-079-chat-subtitle-copy.md) | チャットサブタイトル「いつでもそばにいるよ」をAI依存を助長しない表現に改める | 🔴 critical | done |
 
 ---

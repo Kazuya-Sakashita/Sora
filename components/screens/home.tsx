@@ -35,6 +35,7 @@ export function HomeScreen() {
   const [isLoadingMonthlyMessage, setIsLoadingMonthlyMessage] = useState(false)
   const [monthlyMessageGenerated, setMonthlyMessageGenerated] = useState(false)
   const [showLossWelcome, setShowLossWelcome] = useState(false)
+  const [showLossGuidance, setShowLossGuidance] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -101,6 +102,7 @@ export function HomeScreen() {
       await updatePetStatus("rainbow_bridge")
       setShowLossCareConfirm(false)
       setShowPetSheet(false)
+      setShowLossGuidance(true)
     } catch {
       // keep modal open on error
     } finally {
@@ -732,6 +734,35 @@ export function HomeScreen() {
                 className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
               >
                 まだ大丈夫です
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ロスケア移行後ガイダンスモーダル */}
+      {showLossGuidance && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
+            <div className="text-center space-y-4">
+              <p className="text-5xl">🌿</p>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                これからも、ここに残していいですよ。<br />
+                Soraには、今の気持ちを話せる「はなす」と、思い出から生まれる「ことば」があります。急がなくていい。気が向いたときに。
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={() => { setShowLossGuidance(false); setCurrentScreen("chat") }}
+                className="w-full h-12 rounded-2xl bg-primary/10 hover:bg-primary/15 text-primary/80 font-medium text-sm transition-colors"
+              >
+                話してみる
+              </button>
+              <button
+                onClick={() => setShowLossGuidance(false)}
+                className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+              >
+                ホームへ
               </button>
             </div>
           </div>
