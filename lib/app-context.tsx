@@ -62,7 +62,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [feelings, setFeelings] = useState<Feeling[]>([])
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [conversationTone, setConversationTone] = useState("やさしく寄り添う")
+  const [conversationTone, setConversationToneState] = useState(
+    () => localStorage.getItem("sora:conversation-tone") ?? "やさしく寄り添う"
+  )
+  const setConversationTone = (tone: string) => {
+    try {
+      localStorage.setItem("sora:conversation-tone", tone)
+    } catch { /* ignore storage full */ }
+    setConversationToneState(tone)
+  }
   const [currentPetId, setCurrentPetId] = useState<string | null>(null)
   const [pendingMemoryTitle, setPendingMemoryTitle] = useState<string | null>(null)
   const [pendingHighlightMemoryId, setPendingHighlightMemoryId] = useState<string | null>(null)
