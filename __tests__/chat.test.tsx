@@ -72,7 +72,7 @@ describe("ChatScreen", () => {
 
   it("ペット名がヘッダーに表示される", () => {
     render(<ChatScreen />)
-    expect(screen.getByText("ポチへ")).toBeInTheDocument()
+    expect(screen.getByText("ポチの思い出を話す")).toBeInTheDocument()
   })
 
   it("クイックプロンプトが表示される", () => {

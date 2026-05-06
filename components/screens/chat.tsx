@@ -171,9 +171,9 @@ export function ChatScreen() {
             </button>
             <div className="flex-1">
               <h1 className="font-medium text-foreground/90">
-                {pet ? `${pet.name}へ` : "お話しする"}
+                {pet ? `${pet.name}の思い出を話す` : "思い出を話す"}
               </h1>
-              <p className="text-xs text-muted-foreground">いつでもそばにいるよ</p>
+              <p className="text-xs text-muted-foreground">話せる場所があります</p>
             </div>
             <div className="flex items-center gap-1">
               {messages.length > 1 && (
