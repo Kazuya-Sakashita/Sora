@@ -72,6 +72,9 @@
 | [064](ISSUE-064-chat-alive-guard.md) | チャット画面のalive期ガードを追加する | 🔴 critical | done |
 | [065](ISSUE-065-chat-personalized-greeting.md) | チャット初期メッセージをペット名でパーソナライズする | 🟠 high | done |
 | [066](ISSUE-066-chat-memory-quick-prompt.md) | 直近記録をチャットのクイックプロンプトに反映する | 🟠 high | done |
+| [067](ISSUE-067-letter-persistence.md) | ことば画面の保存をlocalStorageで永続化する | 🔴 critical | open |
+| [068](ISSUE-068-conversation-tone-api.md) | conversationToneをチャットAPIのシステムプロンプトに反映する | 🔴 critical | open |
+| [069](ISSUE-069-streak-rainbow-bridge.md) | rainbow_bridge期のstreakバッジを「ともにいた日々」表示に変える | 🟠 high | open |
 
 ---
 
