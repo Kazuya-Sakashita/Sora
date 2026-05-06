@@ -112,10 +112,11 @@ export function FirstRecordScreen() {
         <div className="min-h-screen flex items-end sm:items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-6 space-y-5 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
             <div className="text-center space-y-3">
-              <p className="text-4xl">✨</p>
-              <h2 className="font-medium text-foreground/90 text-sm">記録が、Soraとのつながりになります</h2>
+              <h2 className="font-medium text-foreground/90 text-sm">記録は、いつかあなたを支えます</h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                記録が積み重なると、Soraがその子との日々を振り返り、あなたに語りかけます。
+                {pet?.name}との時間を残すことは、今の喜びになります。<br />
+                そしてその積み重ねが、いつかSoraの言葉になります。<br />
+                急がなくていい。ただ、残していくだけでいい。
               </p>
             </div>
             <button
