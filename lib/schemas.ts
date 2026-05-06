@@ -50,4 +50,5 @@ export const ChatInputSchema = z.object({
     )
     .max(20, "会話履歴は20件以内にしてください"),
   tone: z.string().max(50).optional(),
+  recentFeelings: z.array(z.string()).max(5).optional(),
 })

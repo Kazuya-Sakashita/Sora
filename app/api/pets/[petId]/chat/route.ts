@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: Params) {
   const parsed = await parseBody(ChatInputSchema, req)
   if (parsed.error) return parsed.error
 
-  const { messages, tone } = parsed.data
+  const { messages, tone, recentFeelings } = parsed.data
 
   const recentMemories = await prisma.memory.findMany({
     where: { petId },
@@ -56,6 +56,10 @@ export async function POST(req: Request, { params }: Params) {
     ? `\n直近の思い出（参考にしてください）：\n${memoryLines}`
     : ""
 
+  const feelingsSection = recentFeelings && recentFeelings.length > 0
+    ? `\nユーザーの最近の気持ち: ${recentFeelings.join("、")}\n（これらを背景として自然に踏まえてください。感情を直接言及しなくてよい）`
+    : ""
+
   const toneInstruction = tone === "思い出を一緒に振り返る"
     ? "- 思い出を一緒に振り返るように、具体的な記憶に寄り添いながら返す"
     : tone === "少し前を向く言葉もほしい"
@@ -66,7 +70,7 @@ export async function POST(req: Request, { params }: Params) {
 大切な${access.pet.name}を見送った飼い主が、思い出を穏やかに語れる場を作ってください。
 
 ペット名：${access.pet.name}
-種類：${speciesJa}${recentSection}
+種類：${speciesJa}${recentSection}${feelingsSection}
 
 会話ルール：
 - 穏やか・寄り添う語り口（です・ます調）

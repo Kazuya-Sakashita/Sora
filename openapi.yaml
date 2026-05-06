@@ -292,6 +292,16 @@ paths:
                       content:
                         type: string
                         maxLength: 2000
+                tone:
+                  type: string
+                  maxLength: 50
+                  description: AIの語り口設定（settings画面で選択した値）
+                recentFeelings:
+                  type: array
+                  maxItems: 5
+                  description: 直近の気持ちタグ（AIコンテキスト用）
+                  items:
+                    type: string
       responses:
         "200":
           description: AI返答

@@ -77,7 +77,7 @@
 | [069](ISSUE-069-streak-rainbow-bridge.md) | rainbow_bridge期のstreakバッジを「ともにいた日々」表示に変える | 🟠 high | done |
 | [070](ISSUE-070-conversation-tone-persistence.md) | conversationToneをlocalStorageで永続化する | 🔴 critical | done |
 | [071](ISSUE-071-letter-alive-guard.md) | ことば画面にalive期ガードを追加する | 🔴 critical | done |
-| [072](ISSUE-072-feelings-chat-context.md) | 直近の気持ち記録をチャットAPIのコンテキストに渡す | 🟠 high | open |
+| [072](ISSUE-072-feelings-chat-context.md) | 直近の気持ち記録をチャットAPIのコンテキストに渡す | 🟠 high | done |
 | [073](ISSUE-073-onboarding-ai-value.md) | オンボーディングにAI機能の価値訴求を追加する | 🟠 high | open |
 | [074](ISSUE-074-alive-monthly-message-relaxation.md) | alive期「今月のひとこと」の表示条件を緩和する | 🟠 high | open |
 
