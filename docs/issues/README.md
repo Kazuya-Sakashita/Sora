@@ -85,7 +85,7 @@
 | [077](ISSUE-077-feelings-history-list.md) | 気持ち記録の時系列リストをfeelingsスクリーンに追加する | 🟠 high | done |
 | [078](ISSUE-078-losscare-guidance-modal.md) | ロスケア移行確認後に「これからのSora」案内モーダルを挿入する | 🟠 high | done |
 | [079](ISSUE-079-chat-subtitle-copy.md) | チャットサブタイトル「いつでもそばにいるよ」をAI依存を助長しない表現に改める | 🔴 critical | done |
-| [080](ISSUE-080-chat-crisis-detection.md) | チャットAPIに危機フレーズ検出と専門サポート誘導を実装する | 🔴 critical | open |
+| [080](ISSUE-080-chat-crisis-detection.md) | チャットAPIに危機フレーズ検出と専門サポート誘導を実装する | 🔴 critical | done |
 | [081](ISSUE-081-chat-break-support-cta.md) | チャット休憩メッセージに専門サポートへのCTAを添える | 🔴 critical | open |
 | [082](ISSUE-082-plus-letter-home-notification.md) | Sora+月次レター生成後にホームで通知カードを表示する | 🔴 critical | open |
 | [083](ISSUE-083-record-accumulation-milestone.md) | alive期の記録30件達成時に「積み重なり実感」カードをホームに表示する | 🟠 high | open |

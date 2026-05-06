@@ -3,7 +3,7 @@
 name: ISSUE-080
 type: bug
 priority: Critical
-status: open
+status: done
 
 ---
 

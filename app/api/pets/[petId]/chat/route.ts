@@ -17,6 +17,21 @@ const MOOD_JA: Record<string, string> = {
   HAPPY: "うれしそう", CALM: "おだやか", FUN: "楽しそう", WORRIED: "心配", LOVING: "愛おしい",
 }
 
+export const CRISIS_KEYWORDS = [
+  "死にたい", "死にたくなった", "死にたくなる",
+  "消えてしまいたい", "消えたい", "消えてしまいたくなった",
+  "もう生きていたくない", "生きていたくない", "生きたくない",
+  "自分を傷つけたい", "傷つけたい", "自傷",
+  "自殺",
+]
+
+const CRISIS_REPLY =
+  "今、とても辛い気持ちなんですね。一人で抱えないでください。\nよりそいホットライン（0120-279-338）は24時間つながります。"
+
+function containsCrisisKeyword(text: string): boolean {
+  return CRISIS_KEYWORDS.some((kw) => text.includes(kw))
+}
+
 export async function POST(req: Request, { params }: Params) {
   const { user, errorResponse } = await getAuthUser()
   if (errorResponse) return errorResponse
@@ -34,6 +49,11 @@ export async function POST(req: Request, { params }: Params) {
   if (parsed.error) return parsed.error
 
   const { messages, tone, recentFeelings } = parsed.data
+
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")
+  if (lastUserMessage && containsCrisisKeyword(lastUserMessage.content)) {
+    return NextResponse.json({ reply: CRISIS_REPLY })
+  }
 
   const recentMemories = await prisma.memory.findMany({
     where: { petId },
