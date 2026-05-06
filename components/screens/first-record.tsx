@@ -32,6 +32,7 @@ export function FirstRecordScreen() {
   const [isReactionLoading, setIsReactionLoading] = useState(false)
   const [showPushStep, setShowPushStep] = useState(false)
   const [isPushLoading, setIsPushLoading] = useState(false)
+  const [showAiValueStep, setShowAiValueStep] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +107,28 @@ export function FirstRecordScreen() {
   }
 
   if (isReactionLoading || aiReaction !== null) {
+    if (showAiValueStep) {
+      return (
+        <div className="min-h-screen flex items-end sm:items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-6 space-y-5 animate-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+            <div className="text-center space-y-3">
+              <p className="text-4xl">✨</p>
+              <h2 className="font-medium text-foreground/90 text-sm">記録が、Soraとのつながりになります</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                記録が積み重なると、Soraがその子との日々を振り返り、あなたに語りかけます。
+              </p>
+            </div>
+            <button
+              onClick={handleGoHome}
+              className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+            >
+              はじめる
+            </button>
+          </div>
+        </div>
+      )
+    }
+
     if (showPushStep) {
       return (
         <div className="min-h-screen flex items-end sm:items-center justify-center p-4">
@@ -156,7 +179,7 @@ export function FirstRecordScreen() {
             <p className="text-sm text-foreground/80 leading-relaxed">{aiReaction}</p>
           ) : null}
           <button
-            onClick={handleGoHome}
+            onClick={() => setShowAiValueStep(true)}
             className="w-full h-12 rounded-2xl bg-primary/80 text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
           >
             ホームへ
