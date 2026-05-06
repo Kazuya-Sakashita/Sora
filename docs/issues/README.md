@@ -69,6 +69,9 @@
 | [061](ISSUE-061-chat-history-persistence.md) | チャット履歴をlocalStorageで永続化する | 🔴 critical | done |
 | [062](ISSUE-062-loss-transition-welcome.md) | ロスケア移行後72時間の「そばにいます」カードを表示する | 🔴 critical | done |
 | [063](ISSUE-063-chat-support-link.md) | チャット画面に専門サポートへの控えめな導線を追加する | 🔴 critical | done |
+| [064](ISSUE-064-chat-alive-guard.md) | チャット画面のalive期ガードを追加する | 🔴 critical | done |
+| [065](ISSUE-065-chat-personalized-greeting.md) | チャット初期メッセージをペット名でパーソナライズする | 🟠 high | done |
+| [066](ISSUE-066-chat-memory-quick-prompt.md) | 直近記録をチャットのクイックプロンプトに反映する | 🟠 high | done |
 
 ---
 

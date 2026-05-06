@@ -67,7 +67,7 @@ beforeEach(() => {
 describe("ChatScreen", () => {
   it("初期表示でウェルカムメッセージが表示される", () => {
     render(<ChatScreen />)
-    expect(screen.getByText("ここにいるよ。無理しなくて大丈夫")).toBeInTheDocument()
+    expect(screen.getByText("ポチのことを話せる場所です。ゆっくりでいいですよ。")).toBeInTheDocument()
   })
 
   it("ペット名がヘッダーに表示される", () => {
@@ -184,7 +184,7 @@ describe("ChatScreen", () => {
       const body = JSON.parse(call[1].body)
       expect(body.messages).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ role: "assistant", content: "ここにいるよ。無理しなくて大丈夫" }),
+          expect.objectContaining({ role: "assistant", content: "ポチのことを話せる場所です。ゆっくりでいいですよ。" }),
           expect.objectContaining({ role: "user", content: "散歩の思い出" }),
         ])
       )

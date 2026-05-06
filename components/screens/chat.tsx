@@ -12,23 +12,33 @@ type Message = {
   timestamp: Date
 }
 
-const INITIAL_MESSAGE: Message = {
-  id: "1",
-  content: "ここにいるよ。無理しなくて大丈夫",
-  role: "assistant",
-  timestamp: new Date(),
+function makeInitialMessage(petName?: string): Message {
+  return {
+    id: "1",
+    content: petName
+      ? `${petName}のことを話せる場所です。ゆっくりでいいですよ。`
+      : "ここにいるよ。ゆっくりでいいですよ。",
+    role: "assistant",
+    timestamp: new Date(),
+  }
 }
 
 export function ChatScreen() {
-  const { setCurrentScreen, pet } = useApp()
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
+  const { setCurrentScreen, pet, memories } = useApp()
+  const [messages, setMessages] = useState<Message[]>([makeInitialMessage(pet?.name)])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSupportSheet, setShowSupportSheet] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
+  const latestMemory = memories[0] ?? null
+  const dynamicPrompt = latestMemory
+    ? `「${latestMemory.title.slice(0, 20)}${latestMemory.title.length > 20 ? "…" : ""}」のこと、話してもいい？`
+    : null
+
   const quickPrompts = [
+    ...(dynamicPrompt ? [dynamicPrompt] : []),
     "会いたいな",
     "今日は少しつらい",
     "思い出を話したい",
@@ -64,7 +74,7 @@ export function ChatScreen() {
   const handleReset = () => {
     if (!pet) return
     localStorage.removeItem(`sora:chat-${pet.id}`)
-    setMessages([{ ...INITIAL_MESSAGE, timestamp: new Date() }])
+    setMessages([makeInitialMessage(pet.name)])
   }
 
   const sendMessage = async (content: string) => {
@@ -119,6 +129,27 @@ export function ChatScreen() {
     } finally {
       setIsTyping(false)
     }
+  }
+
+  if (!pet || pet.status !== "rainbow_bridge") {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-8 text-center gap-6">
+        <p className="text-4xl">🌿</p>
+        <div className="space-y-2">
+          <h2 className="font-medium text-foreground/85">まだここではなせる日ではないかもしれない</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            「はなす」は、ロスケアモードに移行してから使える場所です。<br />
+            今は、記録を積み重ねることが大切な時間です。
+          </p>
+        </div>
+        <button
+          onClick={() => setCurrentScreen("home")}
+          className="px-6 py-3 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 text-sm text-muted-foreground hover:bg-white/80 transition-colors"
+        >
+          ホームへ戻る
+        </button>
+      </div>
+    )
   }
 
   return (
