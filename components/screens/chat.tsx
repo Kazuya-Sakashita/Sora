@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { ArrowLeft, Send } from "lucide-react"
+import { ArrowLeft, HeartHandshake, RotateCcw, Send, X } from "lucide-react"
 
 type Message = {
   id: string
@@ -12,19 +12,20 @@ type Message = {
   timestamp: Date
 }
 
+const INITIAL_MESSAGE: Message = {
+  id: "1",
+  content: "ここにいるよ。無理しなくて大丈夫",
+  role: "assistant",
+  timestamp: new Date(),
+}
+
 export function ChatScreen() {
   const { setCurrentScreen, pet } = useApp()
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "ここにいるよ。無理しなくて大丈夫",
-      role: "assistant",
-      timestamp: new Date(),
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSupportSheet, setShowSupportSheet] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const quickPrompts = [
@@ -41,6 +42,30 @@ export function ChatScreen() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (!pet) return
+    try {
+      const saved = localStorage.getItem(`sora:chat-${pet.id}`)
+      if (saved) {
+        const parsed = JSON.parse(saved) as (Omit<Message, "timestamp"> & { timestamp: string })[]
+        setMessages(parsed.map((m) => ({ ...m, timestamp: new Date(m.timestamp) })))
+      }
+    } catch { /* ignore corrupt data */ }
+  }, [pet?.id])
+
+  useEffect(() => {
+    if (!pet || messages.length <= 1) return
+    try {
+      localStorage.setItem(`sora:chat-${pet.id}`, JSON.stringify(messages.slice(-20)))
+    } catch { /* ignore storage full */ }
+  }, [messages, pet?.id])
+
+  const handleReset = () => {
+    if (!pet) return
+    localStorage.removeItem(`sora:chat-${pet.id}`)
+    setMessages([{ ...INITIAL_MESSAGE, timestamp: new Date() }])
+  }
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isTyping || !pet) return
@@ -114,6 +139,24 @@ export function ChatScreen() {
                 {pet ? `${pet.name}へ` : "お話しする"}
               </h1>
               <p className="text-xs text-muted-foreground">いつでもそばにいるよ</p>
+            </div>
+            <div className="flex items-center gap-1">
+              {messages.length > 1 && (
+                <button
+                  onClick={handleReset}
+                  aria-label="会話をリセット"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
+                  <RotateCcw size={16} />
+                </button>
+              )}
+              <button
+                onClick={() => setShowSupportSheet(true)}
+                aria-label="専門サポート情報"
+                className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors"
+              >
+                <HeartHandshake size={18} />
+              </button>
             </div>
           </div>
         </div>
@@ -199,6 +242,47 @@ export function ChatScreen() {
           </button>
         </GlassCard>
       </div>
+
+      {/* Support Sheet (ISSUE-063) */}
+      {showSupportSheet && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setShowSupportSheet(false)}
+          />
+          <div className="relative w-full max-w-lg bg-white/90 backdrop-blur-xl rounded-t-3xl px-6 pt-6 pb-safe border-t border-white/50">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-2 text-foreground/80">
+                <HeartHandshake size={18} className="text-primary/60" />
+                <span className="font-medium text-sm">専門家に話す</span>
+              </div>
+              <button
+                onClick={() => setShowSupportSheet(false)}
+                aria-label="閉じる"
+                className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-foreground/70 leading-relaxed mb-5">
+              つらくなったとき、専門家に話すことも選択肢のひとつです。
+            </p>
+            <a
+              href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/hukushi_kaigo/seikatsuhogo/jisatsu/soudan_tel.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between w-full px-4 py-3 rounded-2xl bg-primary/10 text-primary/80 text-sm font-medium hover:bg-primary/15 transition-colors"
+            >
+              <span>厚生労働省 こころの健康相談窓口</span>
+              <span className="text-xs text-muted-foreground">→</span>
+            </a>
+            <p className="mt-3 text-xs text-center text-muted-foreground/60">
+              このアプリはいつもここにいます
+            </p>
+            <div className="h-4" />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

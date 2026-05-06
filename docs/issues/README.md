@@ -66,6 +66,9 @@
 | [058](ISSUE-058-loss-care-daily-question.md) | ロスケア期の「今日の問いかけ」を毎日表示する | 🟠 high | done |
 | [059](ISSUE-059-home-on-this-day-highlight.md) | ホームのn日前カードタップで該当記録をハイライト遷移する | 🟡 medium | done |
 | [060](ISSUE-060-alive-monthly-ai-message.md) | alive期ユーザー向け「今月のひとこと」カードをホームに追加する | 🟠 high | done |
+| [061](ISSUE-061-chat-history-persistence.md) | チャット履歴をlocalStorageで永続化する | 🔴 critical | done |
+| [062](ISSUE-062-loss-transition-welcome.md) | ロスケア移行後72時間の「そばにいます」カードを表示する | 🔴 critical | done |
+| [063](ISSUE-063-chat-support-link.md) | チャット画面に専門サポートへの控えめな導線を追加する | 🔴 critical | done |
 
 ---
 

@@ -34,6 +34,7 @@ export function HomeScreen() {
   const [monthlyMessage, setMonthlyMessage] = useState<string | null>(null)
   const [isLoadingMonthlyMessage, setIsLoadingMonthlyMessage] = useState(false)
   const [monthlyMessageGenerated, setMonthlyMessageGenerated] = useState(false)
+  const [showLossWelcome, setShowLossWelcome] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -68,6 +69,21 @@ export function HomeScreen() {
       if (status === "default") setShowPushBanner(true)
     }).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!pet || pet.status !== "rainbow_bridge") return
+    const dismissKey = `sora:loss-welcome-dismissed-${pet.id}`
+    if (localStorage.getItem(dismissKey)) return
+    const transitionKey = `sora:loss-transition-${pet.id}`
+    const stored = localStorage.getItem(transitionKey)
+    if (!stored) {
+      localStorage.setItem(transitionKey, Date.now().toString())
+      setShowLossWelcome(true)
+    } else {
+      const elapsed = Date.now() - parseInt(stored, 10)
+      if (elapsed < 72 * 60 * 60 * 1000) setShowLossWelcome(true)
+    }
+  }, [pet?.id, pet?.status])
 
   useEffect(() => {
     if (!pet) return
@@ -302,6 +318,42 @@ export function HomeScreen() {
             >
               <X size={14} />
             </button>
+          </div>
+        )}
+
+        {/* Loss Welcome Card — 72h post-transition (ISSUE-062) */}
+        {showLossWelcome && (
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 px-5 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <div className="flex items-start justify-between">
+              <p className="text-sm font-medium text-foreground/85 leading-relaxed flex-1 pr-3">
+                急がなくていい。ゆっくりでいい。<br />
+                Soraはここにいます。
+              </p>
+              <button
+                aria-label="カードを閉じる"
+                onClick={() => {
+                  if (pet) localStorage.setItem(`sora:loss-welcome-dismissed-${pet.id}`, "1")
+                  setShowLossWelcome(false)
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setCurrentScreen("letter")}
+                className="flex-1 text-xs text-primary/70 py-2 rounded-xl bg-primary/8 hover:bg-primary/12 transition-colors"
+              >
+                ことば
+              </button>
+              <button
+                onClick={() => setCurrentScreen("chat")}
+                className="flex-1 text-xs text-primary/70 py-2 rounded-xl bg-primary/8 hover:bg-primary/12 transition-colors"
+              >
+                はなす
+              </button>
+            </div>
           </div>
         )}
 
