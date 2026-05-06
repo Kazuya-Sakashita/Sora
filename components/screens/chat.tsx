@@ -10,6 +10,7 @@ type Message = {
   content: string
   role: "user" | "assistant"
   timestamp: Date
+  isBreakMessage?: boolean
 }
 
 function makeInitialMessage(petName?: string): Message {
@@ -68,7 +69,7 @@ export function ChatScreen() {
   useEffect(() => {
     if (!pet || messages.length <= 1) return
     try {
-      localStorage.setItem(`sora:chat-${pet.id}`, JSON.stringify(messages.slice(-20)))
+      localStorage.setItem(`sora:chat-${pet.id}`, JSON.stringify(messages.filter((m) => !m.isBreakMessage).slice(-20)))
     } catch { /* ignore storage full */ }
   }, [messages, pet?.id])
 
@@ -138,6 +139,7 @@ export function ChatScreen() {
             content: "今日はたくさん話してくれましたね。少し休んで、また話しましょう。",
             role: "assistant",
             timestamp: new Date(),
+            isBreakMessage: true,
           })
         }
         return updated
@@ -217,7 +219,7 @@ export function ChatScreen() {
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
           >
             <div
               className={`max-w-[80%] rounded-3xl px-5 py-3 ${
@@ -228,6 +230,14 @@ export function ChatScreen() {
             >
               <p className="text-sm leading-relaxed">{message.content}</p>
             </div>
+            {message.isBreakMessage && (
+              <button
+                onClick={() => setShowSupportSheet(true)}
+                className="mt-1 ml-1 text-xs text-primary/50 underline underline-offset-2 hover:text-primary/70 transition-colors"
+              >
+                専門家に話してみる
+              </button>
+            )}
           </div>
         ))}
 

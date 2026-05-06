@@ -36,6 +36,8 @@ export function HomeScreen() {
   const [monthlyMessageGenerated, setMonthlyMessageGenerated] = useState(false)
   const [showLossWelcome, setShowLossWelcome] = useState(false)
   const [showLossGuidance, setShowLossGuidance] = useState(false)
+  const [showLetterCard, setShowLetterCard] = useState(false)
+  const [showMilestone30Card, setShowMilestone30Card] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -87,6 +89,32 @@ export function HomeScreen() {
       if (elapsed < 72 * 60 * 60 * 1000) setShowLossWelcome(true)
     }
   }, [pet?.id, pet?.status])
+
+  useEffect(() => {
+    if (!pet || pet.status !== "alive" || memories.length < 30) return
+    const milestoneKey = `sora:milestone-30-records-${pet.id}`
+    if (!localStorage.getItem(milestoneKey)) setShowMilestone30Card(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, pet?.status, memories.length])
+
+  useEffect(() => {
+    if (plan !== "PLUS" || !pet) return
+    const year = today.getFullYear()
+    const month = today.getMonth() + 1
+    const notifyKey = `sora:plus-letter-notified-${pet.id}-${year}-${month}`
+    if (localStorage.getItem(notifyKey)) return
+    fetch(`/api/pets/${pet.id}/letters`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (!d?.letters) return
+        const hasThisMonth = d.letters.some(
+          (l: { year: number; month: number }) => l.year === year && l.month === month
+        )
+        if (hasThisMonth) setShowLetterCard(true)
+      })
+      .catch(() => {})
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan, pet?.id])
 
   useEffect(() => {
     if (!pet) return
@@ -325,6 +353,37 @@ export function HomeScreen() {
           </div>
         )}
 
+        {/* Sora+ 月次レター通知カード (ISSUE-082) */}
+        {showLetterCard && pet && (
+          <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 px-4 py-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <span className="text-lg shrink-0">✉️</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-foreground/85">今月の手紙が届いています</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {pet.name}との{today.getMonth() + 1}月の記録から、Soraが手紙を書きました
+              </p>
+            </div>
+            <button
+              onClick={() => setCurrentScreen("settings")}
+              className="text-xs text-primary/70 underline underline-offset-2 shrink-0"
+            >
+              読む
+            </button>
+            <button
+              aria-label="通知を閉じる"
+              onClick={() => {
+                const year = today.getFullYear()
+                const month = today.getMonth() + 1
+                localStorage.setItem(`sora:plus-letter-notified-${pet.id}-${year}-${month}`, "1")
+                setShowLetterCard(false)
+              }}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         {/* Loss Welcome Card — 72h post-transition (ISSUE-062) */}
         {showLossWelcome && (
           <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 px-5 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
@@ -402,6 +461,26 @@ export function HomeScreen() {
               </p>
             )}
           </GlassCard>
+        )}
+
+        {/* 30件達成マイルストーンカード (ISSUE-083) */}
+        {showMilestone30Card && pet && (
+          <div className="rounded-2xl bg-white/60 backdrop-blur-xl border border-white/40 px-4 py-3 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <span className="text-lg shrink-0 mt-0.5">🌿</span>
+            <p className="text-xs text-foreground/80 leading-relaxed flex-1">
+              {pet.name}との30件の思い出が残っています。この記録が、いつかSoraの言葉になります。
+            </p>
+            <button
+              aria-label="閉じる"
+              onClick={() => {
+                localStorage.setItem(`sora:milestone-30-records-${pet.id}`, "1")
+                setShowMilestone30Card(false)
+              }}
+              className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0 mt-0.5"
+            >
+              <X size={14} />
+            </button>
+          </div>
         )}
 
         {/* Daily Question Card */}

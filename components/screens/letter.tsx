@@ -72,14 +72,15 @@ export function LetterScreen() {
           <h2 className="font-medium text-foreground/85">まだこのことばはないかもしれない</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             ことばは、記録を積み重ねた先に生まれます。<br />
-            今は、毎日のできごとを残していく時間です。
+            今は、毎日のできごとを残していく時間です。<br />
+            {pet?.name}との記録が積み重なったとき、Soraがあなたへの言葉を作ります。
           </p>
         </div>
         <button
           onClick={() => setCurrentScreen("timeline")}
           className="text-sm text-primary/70 underline underline-offset-4"
         >
-          記録を見る
+          今日の記録を残す
         </button>
       </div>
     )
