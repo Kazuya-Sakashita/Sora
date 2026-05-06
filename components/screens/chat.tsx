@@ -30,6 +30,7 @@ export function ChatScreen() {
   const [isTyping, setIsTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSupportSheet, setShowSupportSheet] = useState(false)
+  const [breakSuggested, setBreakSuggested] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const latestMemory = memories[0] ?? null
@@ -119,15 +120,29 @@ export function ChatScreen() {
       }
 
       const data = await res.json()
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          content: data.reply,
-          role: "assistant",
-          timestamp: new Date(),
-        },
-      ])
+      const userCount = nextMessages.filter((m) => m.role === "user").length
+      const shouldSuggestBreak = !breakSuggested && userCount >= 8
+      setMessages((prev) => {
+        const updated: Message[] = [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            content: data.reply,
+            role: "assistant",
+            timestamp: new Date(),
+          },
+        ]
+        if (shouldSuggestBreak) {
+          updated.push({
+            id: (Date.now() + 2).toString(),
+            content: "今日はたくさん話してくれましたね。少し休んで、また話しましょう。",
+            role: "assistant",
+            timestamp: new Date(),
+          })
+        }
+        return updated
+      })
+      if (shouldSuggestBreak) setBreakSuggested(true)
     } catch {
       setError("少し待ってから、もう一度試してみてください")
     } finally {
