@@ -44,7 +44,9 @@ export function HomeScreen() {
   }, [])
 
   useEffect(() => {
-    if (!pet || pet.status !== "alive" || today.getDate() < 26 || memories.length < 3) return
+    const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+    const currentMonthCount = memories.filter((m) => m.date?.startsWith(currentMonthStr)).length
+    if (!pet || pet.status !== "alive" || currentMonthCount < 3) return
     const cacheKey = `sora:monthly-message-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
     const cached = localStorage.getItem(cacheKey)
     if (cached) { setMonthlyMessage(cached); return }

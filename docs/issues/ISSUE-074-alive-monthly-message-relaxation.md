@@ -3,7 +3,7 @@
 name: ISSUE-074
 type: bug
 priority: High
-status: open
+status: done
 
 ---
 
