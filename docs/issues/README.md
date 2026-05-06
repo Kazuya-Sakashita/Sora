@@ -65,7 +65,7 @@
 | [057](ISSUE-057-on-this-day-deeplink.md) | あの日通知タップで該当記録に直接遷移する | 🟡 medium | done |
 | [058](ISSUE-058-loss-care-daily-question.md) | ロスケア期の「今日の問いかけ」を毎日表示する | 🟠 high | done |
 | [059](ISSUE-059-home-on-this-day-highlight.md) | ホームのn日前カードタップで該当記録をハイライト遷移する | 🟡 medium | done |
-| [060](ISSUE-060-alive-monthly-ai-message.md) | alive期ユーザー向け「今月のひとこと」カードをホームに追加する | 🟠 high | open |
+| [060](ISSUE-060-alive-monthly-ai-message.md) | alive期ユーザー向け「今月のひとこと」カードをホームに追加する | 🟠 high | done |
 
 ---
 

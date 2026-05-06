@@ -405,6 +405,38 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  /pets/{petId}/ai-message:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    post:
+      tags: [ai]
+      summary: 今月のひとこと生成（alive期ユーザー向け）
+      description: |
+        alive / rainbow_bridge 両対応。直近5件の記録を元にClaudeが50〜80字の短文を生成。
+        記録が3件未満の場合は 422 を返す。1ユーザー・1分5回のレート制限。
+      responses:
+        "200":
+          description: 生成されたひとこと
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+                    description: 50〜80字のひとこと
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
   /pets/{petId}/letter/generate:
     parameters:
       - $ref: "#/components/parameters/petId"

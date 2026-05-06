@@ -31,6 +31,9 @@ export function HomeScreen() {
   const [showLossCareConfirm, setShowLossCareConfirm] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [showPushBanner, setShowPushBanner] = useState(false)
+  const [monthlyMessage, setMonthlyMessage] = useState<string | null>(null)
+  const [isLoadingMonthlyMessage, setIsLoadingMonthlyMessage] = useState(false)
+  const [monthlyMessageGenerated, setMonthlyMessageGenerated] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -38,6 +41,25 @@ export function HomeScreen() {
       .then((d) => { if (d?.plan) setPlan(d.plan) })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!pet || pet.status !== "alive" || today.getDate() < 26 || memories.length < 3) return
+    const cacheKey = `sora:monthly-message-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+    const cached = localStorage.getItem(cacheKey)
+    if (cached) { setMonthlyMessage(cached); return }
+    setIsLoadingMonthlyMessage(true)
+    fetch(`/api/pets/${pet.id}/ai-message`, { method: "POST" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (d?.message) {
+          setMonthlyMessage(d.message)
+          localStorage.setItem(cacheKey, d.message)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoadingMonthlyMessage(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, memories.length])
 
   useEffect(() => {
     const dismissed = localStorage.getItem("sora:push-banner-dismissed")
@@ -95,6 +117,26 @@ export function HomeScreen() {
       URL.revokeObjectURL(url)
     } finally {
       setDownloadingCard(false)
+    }
+  }
+
+  const handleRegenerateMonthlyMessage = async () => {
+    if (!pet || isLoadingMonthlyMessage || monthlyMessageGenerated) return
+    setIsLoadingMonthlyMessage(true)
+    setMonthlyMessageGenerated(true)
+    try {
+      const r = await fetch(`/api/pets/${pet.id}/ai-message`, { method: "POST" })
+      if (!r.ok) return
+      const d = await r.json()
+      if (d?.message) {
+        setMonthlyMessage(d.message)
+        const cacheKey = `sora:monthly-message-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+        localStorage.setItem(cacheKey, d.message)
+      }
+    } catch {
+      // silent
+    } finally {
+      setIsLoadingMonthlyMessage(false)
     }
   }
 
@@ -465,6 +507,45 @@ export function HomeScreen() {
               </div>
             </GlassCard>
           </button>
+        )}
+
+        {/* 今月のひとこと（alive + 月末5日間 + 記録3件以上） */}
+        {pet?.status === "alive" && (monthlyMessage || isLoadingMonthlyMessage) && (
+          <GlassCard className="space-y-3">
+            <div className="flex items-center gap-2 text-primary/60">
+              <Sparkles size={14} />
+              <span className="text-xs font-medium">
+                {today.getMonth() + 1}月の{pet.name}へのひとこと
+              </span>
+            </div>
+            {isLoadingMonthlyMessage ? (
+              <div className="flex items-center gap-2 text-muted-foreground text-sm py-1">
+                <Loader2 size={14} className="animate-spin shrink-0" />
+                <span>Soraが読んでいます...</span>
+              </div>
+            ) : (
+              <p className="text-sm text-foreground/80 leading-relaxed">{monthlyMessage}</p>
+            )}
+            <div className="flex items-center justify-between">
+              {!monthlyMessageGenerated && (
+                <button
+                  onClick={handleRegenerateMonthlyMessage}
+                  disabled={isLoadingMonthlyMessage}
+                  className="text-xs text-muted-foreground underline underline-offset-2 disabled:opacity-50"
+                >
+                  もう一度生成
+                </button>
+              )}
+              {plan === "FREE" && (
+                <button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="text-xs text-primary/60 ml-auto"
+                >
+                  毎月の手紙は Sora+ →
+                </button>
+              )}
+            </div>
+          </GlassCard>
         )}
 
         {/* Sora+ バナー（Free + 5件以上） */}
