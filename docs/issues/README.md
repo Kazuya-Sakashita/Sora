@@ -1,6 +1,6 @@
 # ISSUE一覧
 
-最終更新: 2026-05-05
+最終更新: 2026-05-07
 
 ## 現在のISSUE
 
@@ -86,10 +86,15 @@
 | [078](ISSUE-078-losscare-guidance-modal.md) | ロスケア移行確認後に「これからのSora」案内モーダルを挿入する | 🟠 high | done |
 | [079](ISSUE-079-chat-subtitle-copy.md) | チャットサブタイトル「いつでもそばにいるよ」をAI依存を助長しない表現に改める | 🔴 critical | done |
 | [080](ISSUE-080-chat-crisis-detection.md) | チャットAPIに危機フレーズ検出と専門サポート誘導を実装する | 🔴 critical | done |
-| [081](ISSUE-081-chat-break-support-cta.md) | チャット休憩メッセージに専門サポートへのCTAを添える | 🔴 critical | open |
-| [082](ISSUE-082-plus-letter-home-notification.md) | Sora+月次レター生成後にホームで通知カードを表示する | 🔴 critical | open |
-| [083](ISSUE-083-record-accumulation-milestone.md) | alive期の記録30件達成時に「積み重なり実感」カードをホームに表示する | 🟠 high | open |
-| [084](ISSUE-084-letter-alive-cta.md) | ことば画面のalive期プレースホルダーを記録継続動機に接続する | 🟠 high | open |
+| [081](ISSUE-081-chat-break-support-cta.md) | チャット休憩メッセージに専門サポートへのCTAを添える | 🔴 critical | done |
+| [082](ISSUE-082-plus-letter-home-notification.md) | Sora+月次レター生成後にホームで通知カードを表示する | 🔴 critical | done |
+| [083](ISSUE-083-record-accumulation-milestone.md) | alive期の記録30件達成時に「積み重なり実感」カードをホームに表示する | 🟠 high | done |
+| [084](ISSUE-084-letter-alive-cta.md) | ことば画面のalive期プレースホルダーを記録継続動機に接続する | 🟠 high | done |
+| [085](ISSUE-085-rainbow-bridge-timeline-care.md) | rainbow_bridge移行後の時間軸ケアカードを実装する | 🔴 critical | open |
+| [086](ISSUE-086-chat-framing-memory-tool.md) | 「はなす」のフレーミングをカウンセリングから思い出整理に修正する | 🔴 critical | open |
+| [087](ISSUE-087-plus-alive-monthly-summary-card.md) | alive期Sora+に月次記録サマリーカードを追加する | 🟠 high | open |
+| [088](ISSUE-088-onboarding-future-promise-slide.md) | オンボーディング最終画面に「記録の未来価値」スライドを追加する | 🟠 high | open |
+| [089](ISSUE-089-chat-tone-remove-forward.md) | チャットtoneから「少し前を向く言葉もほしい」を削除する | 🟠 high | open |
 
 ---
 
