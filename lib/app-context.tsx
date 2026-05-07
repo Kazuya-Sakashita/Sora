@@ -30,9 +30,11 @@ type AppContextType = {
   selectPet: (id: string) => void
   createPet: (input: CreatePetInput) => Promise<void>
   updatePetStatus: (status: "alive" | "rainbow_bridge") => Promise<void>
+  updatePet: (input: Partial<Omit<CreatePetInput, "status">>) => Promise<void>
   memories: Memory[]
   memoriesTotal: number
   addMemory: (input: CreateMemoryInput) => Promise<Memory>
+  updateMemory: (id: string, input: Partial<Pick<CreateMemoryInput, "title" | "description" | "date" | "moodTag">>) => Promise<void>
   loadMoreMemories: () => Promise<void>
   isLoadingMore: boolean
   feelings: Feeling[]
@@ -158,6 +160,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPets((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
   }
 
+  const updatePet = async (input: Partial<Omit<CreatePetInput, "status">>) => {
+    if (!pet) return
+    const res = await fetch(`/api/pets/${pet.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    })
+    if (!res.ok) throw new Error("プロフィールの更新に失敗しました")
+    const updated = (await res.json()) as Pet
+    setPet(updated)
+    setPets((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
+  }
+
   const addMemory = async (input: CreateMemoryInput): Promise<Memory> => {
     if (!pet) throw new Error("ペットが選択されていません")
     const res = await fetch(`/api/pets/${pet.id}/memories`, {
@@ -171,6 +186,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMemories((prev) => [memory, ...prev])
     setMemoriesTotal((prev) => prev + 1)
     return memory
+  }
+
+  const updateMemory = async (
+    id: string,
+    input: Partial<Pick<CreateMemoryInput, "title" | "description" | "date" | "moodTag">>
+  ) => {
+    if (!pet) throw new Error("ペットが選択されていません")
+    const res = await fetch(`/api/pets/${pet.id}/memories/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    })
+    if (!res.ok) throw new Error("記録の更新に失敗しました")
+    const updated = (await res.json()) as Memory
+    setMemories((prev) => prev.map((m) => (m.id === id ? updated : m)))
   }
 
   const loadMoreMemories = async () => {
@@ -237,9 +267,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         selectPet,
         createPet,
         updatePetStatus,
+        updatePet,
         memories,
         memoriesTotal,
         addMemory,
+        updateMemory,
         loadMoreMemories,
         isLoadingMore,
         feelings,

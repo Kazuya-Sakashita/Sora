@@ -40,6 +40,7 @@ export function HomeScreen() {
   const [showMilestone30Card, setShowMilestone30Card] = useState(false)
   const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
   const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
+  const [comebackDays, setComebackDays] = useState<number | null>(null)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -204,6 +205,18 @@ export function HomeScreen() {
       setDownloadingCard(false)
     }
   }
+
+  useEffect(() => {
+    if (!pet || pet.status !== "alive" || memories.length === 0 || recordedToday) return
+    const lastDate = memories.reduce((latest, m) => m.date > latest ? m.date : latest, "")
+    if (!lastDate) return
+    const diffMs = new Date(todayStr).getTime() - new Date(lastDate).getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    if (diffDays < 7) return
+    const dismissKey = `sora:comeback-dismissed-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+    if (localStorage.getItem(dismissKey)) return
+    setComebackDays(diffDays)
+  }, [pet?.id, memories.length, todayStr])
 
   const handleRegenerateMonthlyMessage = async () => {
     if (!pet || isLoadingMonthlyMessage || monthlyMessageGenerated) return
@@ -400,6 +413,37 @@ export function HomeScreen() {
               <X size={14} />
             </button>
           </div>
+        )}
+
+        {/* おかえりカード (ISSUE-092) */}
+        {comebackDays !== null && pet && (
+          <GlassCard className="flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <div className="flex-1 space-y-1">
+              <p className="font-medium text-foreground/85 text-sm">{comebackDays}日ぶりですね</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                ゆっくりでいいですよ。{pet.name}のこと、また話しましょう。
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={() => setCurrentScreen("timeline")}
+                className="text-xs text-primary/70 underline underline-offset-2"
+              >
+                記録する
+              </button>
+              <button
+                aria-label="閉じる"
+                onClick={() => {
+                  const key = `sora:comeback-dismissed-${pet.id}-${today.getFullYear()}-${today.getMonth() + 1}`
+                  localStorage.setItem(key, "1")
+                  setComebackDays(null)
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          </GlassCard>
         )}
 
         {/* Sora+ 月次レター通知カード (ISSUE-082) */}

@@ -16,6 +16,8 @@ export function ProfileCreateScreen() {
     personality: "",
     favorites: "",
     broughtAt: "",
+    birthDate: "",
+    species: "",
   })
   const [photo, setPhoto] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -48,6 +50,8 @@ export function ProfileCreateScreen() {
         personality: formData.personality || undefined,
         favorites: formData.favorites || undefined,
         broughtAt: formData.broughtAt || undefined,
+        birthDate: formData.birthDate || undefined,
+        species: (formData.species || undefined) as "dog" | "cat" | "rabbit" | "bird" | "other" | undefined,
         photoUrl: photo || undefined,
       })
     } catch {
@@ -174,6 +178,43 @@ export function ProfileCreateScreen() {
                 onChange={(e) => setFormData((prev) => ({ ...prev, broughtAt: e.target.value }))}
                 className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20"
               />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                誕生日（任意）
+              </label>
+              <Input
+                type="date"
+                value={formData.birthDate}
+                onChange={(e) => setFormData((prev) => ({ ...prev, birthDate: e.target.value }))}
+                className="h-12 rounded-xl bg-white/50 border-white/60 focus:border-primary/30 focus:ring-primary/20"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm text-foreground/70 font-medium">
+                種類（任意）
+              </label>
+              <div className="flex gap-2 flex-wrap">
+                {(["dog", "cat", "rabbit", "bird", "other"] as const).map((s) => {
+                  const labels: Record<string, string> = { dog: "犬", cat: "猫", rabbit: "うさぎ", bird: "鳥", other: "その他" }
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, species: prev.species === s ? "" : s }))}
+                      className={`px-4 py-2 rounded-full text-sm transition-colors ${
+                        formData.species === s
+                          ? "bg-primary/20 text-primary/80 border border-primary/30"
+                          : "bg-white/50 text-muted-foreground border border-white/60 hover:bg-white/80"
+                      }`}
+                    >
+                      {labels[s]}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </GlassCard>

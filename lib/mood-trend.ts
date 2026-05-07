@@ -1,14 +1,17 @@
 import type { Feeling } from "@/lib/app-context"
 
-export const MOOD_TAGS = ["happy", "calm", "fun", "worried", "loving"] as const
+export const MOOD_TAGS = ["happy", "calm", "fun", "worried", "loving", "sad", "hard", "numb"] as const
 export type MoodTag = (typeof MOOD_TAGS)[number]
 
 export const MOOD_INFO: Record<MoodTag, { label: string; emoji: string; color: string }> = {
-  happy:   { label: "うれしい", emoji: "🥰", color: "#F09090" },
-  calm:    { label: "おだやか", emoji: "😌", color: "#90B4E8" },
-  fun:     { label: "笑った",   emoji: "😄", color: "#F0C870" },
-  worried: { label: "心配",     emoji: "😟", color: "#B890E0" },
-  loving:  { label: "愛おしい", emoji: "💝", color: "#F090B8" },
+  happy:   { label: "うれしい",       emoji: "🥰", color: "#F09090" },
+  calm:    { label: "おだやか",       emoji: "😌", color: "#90B4E8" },
+  fun:     { label: "笑った",         emoji: "😄", color: "#F0C870" },
+  worried: { label: "心配",           emoji: "😟", color: "#B890E0" },
+  loving:  { label: "愛おしい",       emoji: "💝", color: "#F090B8" },
+  sad:     { label: "悲しい",         emoji: "😢", color: "#7EB8D8" },
+  hard:    { label: "つらい",         emoji: "😔", color: "#A890C8" },
+  numb:    { label: "よくわからない", emoji: "😶", color: "#B0B8C0" },
 }
 
 export type TrendPoint = {
@@ -19,6 +22,9 @@ export type TrendPoint = {
   fun: number
   worried: number
   loving: number
+  sad: number
+  hard: number
+  numb: number
 }
 
 function toDateKey(d: Date): string {
@@ -47,6 +53,9 @@ export function buildDailyTrend(feelings: Feeling[], today: Date = new Date()): 
       fun:     dayFeelings.filter((f) => f.tag === "fun").length,
       worried: dayFeelings.filter((f) => f.tag === "worried").length,
       loving:  dayFeelings.filter((f) => f.tag === "loving").length,
+      sad:     dayFeelings.filter((f) => f.tag === "sad").length,
+      hard:    dayFeelings.filter((f) => f.tag === "hard").length,
+      numb:    dayFeelings.filter((f) => f.tag === "numb").length,
     })
   }
   return points

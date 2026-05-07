@@ -3,7 +3,7 @@
 name: ISSUE-094
 type: improvement
 priority: Medium
-status: open
+status: done
 
 ---
 

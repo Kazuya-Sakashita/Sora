@@ -1238,7 +1238,7 @@ components:
     # --- 気持ち記録 ---
     FeelingTag:
       type: string
-      enum: [happy, calm, fun, worried, loving]
+      enum: [happy, calm, fun, worried, loving, sad, hard, numb]
 
     Feeling:
       type: object

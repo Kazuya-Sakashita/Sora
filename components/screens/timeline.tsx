@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen, Pencil, Check } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
@@ -43,13 +43,16 @@ function groupByMonth(memories: Memory[]): { label: string; year: number; month:
 }
 
 export function TimelineScreen() {
-  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, loadMoreMemories, isLoadingMore, pendingMemoryTitle, setPendingMemoryTitle, pendingHighlightMemoryId, setPendingHighlightMemoryId } = useApp()
+  const { setCurrentScreen, pet, memories, memoriesTotal, addMemory, updateMemory, loadMoreMemories, isLoadingMore, pendingMemoryTitle, setPendingMemoryTitle, pendingHighlightMemoryId, setPendingHighlightMemoryId } = useApp()
   const [isAdding, setIsAdding] = useState(false)
   const [newMemory, setNewMemory] = useState({ title: "", description: "" })
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState({ title: "", description: "", date: "", moodTag: "" })
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
   const [aiReaction, setAiReaction] = useState<string | null>(null)
   const [isReactionLoading, setIsReactionLoading] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
@@ -153,6 +156,34 @@ export function TimelineScreen() {
     const result = await shareMemory(memoryId, title)
     setShareToast(result)
     setTimeout(() => setShareToast(null), 2500)
+  }
+
+  const handleEditStart = (memory: Memory) => {
+    setEditingId(memory.id)
+    setEditForm({
+      title: memory.title,
+      description: memory.description ?? "",
+      date: memory.date,
+      moodTag: memory.moodTag ?? "",
+    })
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editingId || isSavingEdit) return
+    setIsSavingEdit(true)
+    try {
+      await updateMemory(editingId, {
+        title: editForm.title || undefined,
+        description: editForm.description || undefined,
+        date: editForm.date || undefined,
+        moodTag: editForm.moodTag ? (editForm.moodTag as "happy" | "calm" | "fun" | "worried" | "loving") : undefined,
+      })
+      setEditingId(null)
+    } catch {
+      // stay in edit mode on error
+    } finally {
+      setIsSavingEdit(false)
+    }
   }
 
   const handleCalendarDayClick = (dateStr: string) => {
@@ -439,35 +470,102 @@ export function TimelineScreen() {
 
                   {/* Content */}
                   <div className="p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-foreground/90 leading-snug">{memory.title}</h3>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <span className="text-xs text-muted-foreground mt-0.5">
-                          {new Date(memory.date).toLocaleDateString("ja-JP", {
-                            month: "long",
-                            day: "numeric",
-                          })}
-                        </span>
-                        <button
-                          aria-label="シェアする"
-                          onClick={() => handleShare(memory.id, memory.title)}
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 transition-colors"
-                        >
-                          <Share2 size={15} />
-                        </button>
+                    {editingId === memory.id ? (
+                      /* Inline Edit Form */
+                      <div className="space-y-3">
+                        <Input
+                          value={editForm.title}
+                          onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))}
+                          placeholder="タイトル"
+                          className="h-10 rounded-xl bg-white/50 border-white/60 text-sm"
+                        />
+                        <Textarea
+                          value={editForm.description}
+                          onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                          placeholder="説明（任意）"
+                          rows={2}
+                          className="rounded-xl bg-white/50 border-white/60 text-sm resize-none"
+                        />
+                        <Input
+                          type="date"
+                          value={editForm.date}
+                          onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))}
+                          className="h-10 rounded-xl bg-white/50 border-white/60 text-sm"
+                        />
+                        <div className="flex gap-2 flex-wrap">
+                          {Object.entries(moodMap).map(([tag, { emoji, label }]) => (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={() => setEditForm((p) => ({ ...p, moodTag: p.moodTag === tag ? "" : tag }))}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs transition-colors ${
+                                editForm.moodTag === tag
+                                  ? "bg-primary/20 text-primary/80 border border-primary/30"
+                                  : "bg-white/50 text-muted-foreground border border-white/50 hover:bg-white/80"
+                              }`}
+                            >
+                              {emoji} {label}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <button
+                            onClick={handleSaveEdit}
+                            disabled={!editForm.title.trim() || isSavingEdit}
+                            className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-primary/80 text-primary-foreground text-xs font-medium disabled:opacity-50 transition-colors"
+                          >
+                            {isSavingEdit ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                            保存
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-3 h-9 rounded-xl bg-white/50 text-muted-foreground text-xs border border-white/50 hover:bg-white/80 transition-colors"
+                          >
+                            キャンセル
+                          </button>
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      /* Normal View */
+                      <>
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-medium text-foreground/90 leading-snug">{memory.title}</h3>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <span className="text-xs text-muted-foreground mt-0.5">
+                              {new Date(memory.date).toLocaleDateString("ja-JP", {
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </span>
+                            <button
+                              aria-label="編集する"
+                              onClick={() => handleEditStart(memory)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 transition-colors"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button
+                              aria-label="シェアする"
+                              onClick={() => handleShare(memory.id, memory.title)}
+                              className="w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 transition-colors"
+                            >
+                              <Share2 size={15} />
+                            </button>
+                          </div>
+                        </div>
 
-                    {memory.moodTag && moodMap[memory.moodTag] && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/30 text-xs text-foreground/60">
-                        {moodMap[memory.moodTag].emoji} {moodMap[memory.moodTag].label}
-                      </span>
-                    )}
+                        {memory.moodTag && moodMap[memory.moodTag] && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/30 text-xs text-foreground/60">
+                            {moodMap[memory.moodTag].emoji} {moodMap[memory.moodTag].label}
+                          </span>
+                        )}
 
-                    {memory.description && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {memory.description}
-                      </p>
+                        {memory.description && (
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {memory.description}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

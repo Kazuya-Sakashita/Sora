@@ -78,6 +78,7 @@ function mockContext(memories: Memory[], pet: Pet | null = mockPet) {
     isLoading: false,
     createPet: vi.fn(),
     addMemory: vi.fn().mockResolvedValue(undefined),
+    updateMemory: vi.fn().mockResolvedValue(undefined),
     addFeeling: vi.fn(),
     addSchedule: vi.fn(),
     deleteSchedule: vi.fn(),
@@ -88,6 +89,7 @@ function mockContext(memories: Memory[], pet: Pet | null = mockPet) {
     pendingHighlightMemoryId: null,
     setPendingHighlightMemoryId: vi.fn(),
     updatePetStatus: vi.fn(),
+    updatePet: vi.fn(),
     pets: [],
     selectPet: vi.fn(),
   })

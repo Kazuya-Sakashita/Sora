@@ -8,7 +8,7 @@ import { MoodTrendChart } from "@/components/mood-trend-chart"
 import { ArrowLeft, Check, TrendingUp } from "lucide-react"
 import { buildDailyTrend, buildWeeklySummary, MOOD_TAGS, MOOD_INFO } from "@/lib/mood-trend"
 
-const feelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
+const aliveFeelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
   { emoji: "🥰", label: "うれしい", tag: "happy" },
   { emoji: "😌", label: "おだやか", tag: "calm" },
   { emoji: "😄", label: "笑った", tag: "fun" },
@@ -16,8 +16,17 @@ const feelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
   { emoji: "💝", label: "愛おしい", tag: "loving" },
 ]
 
+const rainbowFeelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
+  { emoji: "😢", label: "悲しい", tag: "sad" },
+  { emoji: "😔", label: "つらい", tag: "hard" },
+  { emoji: "😌", label: "おだやか", tag: "calm" },
+  { emoji: "💝", label: "愛おしい", tag: "loving" },
+  { emoji: "😶", label: "よくわからない", tag: "numb" },
+]
+
 export function FeelingsScreen() {
-  const { setCurrentScreen, feelings, addFeeling } = useApp()
+  const { setCurrentScreen, feelings, addFeeling, pet } = useApp()
+  const feelingOptions = pet?.status === "rainbow_bridge" ? rainbowFeelingOptions : aliveFeelingOptions
   const [tab, setTab] = useState<"record" | "trend">("record")
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)

@@ -27,8 +27,15 @@ export const MemoryInputSchema = z.object({
   photoUrls: z.array(z.string().url()).max(10, "写真は10枚以内にしてください").optional(),
 })
 
+export const MemoryPatchSchema = z.object({
+  title: z.string().min(1).max(100).optional(),
+  description: z.string().max(2000).optional(),
+  date: dateStr.optional(),
+  moodTag: z.enum(["happy", "calm", "worried", "fun", "loving"]).nullable().optional(),
+})
+
 export const FeelingInputSchema = z.object({
-  tag: z.enum(["happy", "calm", "fun", "worried", "loving"]),
+  tag: z.enum(["happy", "calm", "fun", "worried", "loving", "sad", "hard", "numb"]),
   memo: z.string().max(500).optional(),
   date: dateStr,
 })

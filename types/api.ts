@@ -1202,7 +1202,7 @@ export interface components {
             photoUrls?: string[];
         };
         /** @enum {string} */
-        FeelingTag: "happy" | "calm" | "fun" | "worried" | "loving";
+        FeelingTag: "happy" | "calm" | "fun" | "worried" | "loving" | "sad" | "hard" | "numb";
         Feeling: {
             /** Format: uuid */
             id: string;

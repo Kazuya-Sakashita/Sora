@@ -13,14 +13,15 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight, Pencil } from "lucide-react"
+import { Input } from "@/components/ui/input"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
 type LetterIndex = { id: string; year: number; month: number; generatedAt: string }
 type LetterDetail = { id: string; year: number; month: number; content: string; generatedAt: string }
 
 export function SettingsScreen() {
-  const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus } = useApp()
+  const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus, updatePet } = useApp()
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -44,6 +45,10 @@ export function SettingsScreen() {
   const [isLoadingLetter, setIsLoadingLetter] = useState(false)
   const [onThisDayEnabled, setOnThisDayEnabled] = useState(true)
   const [isTogglingOnThisDay, setIsTogglingOnThisDay] = useState(false)
+  const [showPetEdit, setShowPetEdit] = useState(false)
+  const [petEditForm, setPetEditForm] = useState({ name: "", birthDate: "", broughtAt: "", species: "" })
+  const [isSavingPet, setIsSavingPet] = useState(false)
+  const [petEditError, setPetEditError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -257,6 +262,117 @@ export function SettingsScreen() {
                 </span>
               )}
             </GlassCard>
+          </section>
+        )}
+
+        {/* Pet Profile Edit */}
+        {pet && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-sm font-semibold text-foreground/80">{pet.name}のプロフィール</h2>
+              <button
+                onClick={() => {
+                  setPetEditForm({
+                    name: pet.name ?? "",
+                    birthDate: pet.birthDate ? new Date(pet.birthDate).toISOString().split("T")[0] : "",
+                    broughtAt: pet.broughtAt ?? "",
+                    species: pet.species ?? "",
+                  })
+                  setPetEditError(null)
+                  setShowPetEdit((v) => !v)
+                }}
+                className="flex items-center gap-1 text-xs text-primary/60 hover:text-primary/80 transition-colors"
+              >
+                <Pencil size={12} />
+                編集
+              </button>
+            </div>
+            {showPetEdit && (
+              <GlassCard className="space-y-4 py-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">お名前</label>
+                  <Input
+                    value={petEditForm.name}
+                    onChange={(e) => setPetEditForm((p) => ({ ...p, name: e.target.value }))}
+                    className="h-10 rounded-xl bg-white/50 border-white/60 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">誕生日</label>
+                  <Input
+                    type="date"
+                    value={petEditForm.birthDate}
+                    onChange={(e) => setPetEditForm((p) => ({ ...p, birthDate: e.target.value }))}
+                    className="h-10 rounded-xl bg-white/50 border-white/60 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">一緒に暮らし始めた日</label>
+                  <Input
+                    type="date"
+                    value={petEditForm.broughtAt}
+                    onChange={(e) => setPetEditForm((p) => ({ ...p, broughtAt: e.target.value }))}
+                    className="h-10 rounded-xl bg-white/50 border-white/60 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs text-muted-foreground">種類</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {(["dog", "cat", "rabbit", "bird", "other"] as const).map((s) => {
+                      const labels: Record<string, string> = { dog: "犬", cat: "猫", rabbit: "うさぎ", bird: "鳥", other: "その他" }
+                      return (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setPetEditForm((p) => ({ ...p, species: p.species === s ? "" : s }))}
+                          className={`px-3 py-1.5 rounded-full text-xs transition-colors ${
+                            petEditForm.species === s
+                              ? "bg-primary/20 text-primary/80 border border-primary/30"
+                              : "bg-white/50 text-muted-foreground border border-white/60 hover:bg-white/80"
+                          }`}
+                        >
+                          {labels[s]}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                {petEditError && <p className="text-xs text-destructive">{petEditError}</p>}
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={async () => {
+                      if (!petEditForm.name.trim() || isSavingPet) return
+                      setIsSavingPet(true)
+                      setPetEditError(null)
+                      try {
+                        await updatePet({
+                          name: petEditForm.name.trim(),
+                          birthDate: petEditForm.birthDate || undefined,
+                          broughtAt: petEditForm.broughtAt || undefined,
+                          species: (petEditForm.species || undefined) as "dog" | "cat" | "rabbit" | "bird" | "other" | undefined,
+                        })
+                        setShowPetEdit(false)
+                      } catch {
+                        setPetEditError("更新に失敗しました")
+                      } finally {
+                        setIsSavingPet(false)
+                      }
+                    }}
+                    disabled={!petEditForm.name.trim() || isSavingPet}
+                    className="flex items-center gap-1.5 px-4 h-9 rounded-xl bg-primary/80 text-primary-foreground text-xs font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {isSavingPet ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                    保存する
+                  </button>
+                  <button
+                    onClick={() => setShowPetEdit(false)}
+                    className="px-4 h-9 rounded-xl bg-white/50 text-muted-foreground text-xs border border-white/50 hover:bg-white/80 transition-colors"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </GlassCard>
+            )}
           </section>
         )}
 
