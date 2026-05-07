@@ -1,6 +1,6 @@
 # ISSUE一覧
 
-最終更新: 2026-05-07
+最終更新: 2026-05-08
 
 ## 現在のISSUE
 
@@ -95,6 +95,11 @@
 | [087](ISSUE-087-plus-alive-monthly-summary-card.md) | alive期Sora+に月次記録サマリーカードを追加する | 🟠 high | done |
 | [088](ISSUE-088-onboarding-future-promise-slide.md) | オンボーディング最終画面に「記録の未来価値」スライドを追加する | 🟠 high | done |
 | [089](ISSUE-089-chat-tone-remove-forward.md) | チャットtoneから「少し前を向く言葉もほしい」を削除する | 🟠 high | done |
+| [090](ISSUE-090-profile-create-birthdate-species.md) | ペット登録フォームに誕生日・種類フィールドを追加する | 🔴 critical | open |
+| [091](ISSUE-091-memory-edit.md) | 記録の編集機能を実装する | 🟠 high | open |
+| [092](ISSUE-092-comeback-card.md) | 長期未記録後の「おかえり」カードをホームに実装する | 🟠 high | open |
+| [093](ISSUE-093-pet-profile-edit.md) | ペットプロフィールを設定画面から編集できるようにする | 🟡 medium | open |
+| [094](ISSUE-094-rainbow-bridge-feelings.md) | rainbow_bridge期の気持ち記録選択肢をグリーフケアに特化する | 🟡 medium | open |
 
 ---
 
