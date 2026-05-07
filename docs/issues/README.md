@@ -95,11 +95,21 @@
 | [087](ISSUE-087-plus-alive-monthly-summary-card.md) | alive期Sora+に月次記録サマリーカードを追加する | 🟠 high | done |
 | [088](ISSUE-088-onboarding-future-promise-slide.md) | オンボーディング最終画面に「記録の未来価値」スライドを追加する | 🟠 high | done |
 | [089](ISSUE-089-chat-tone-remove-forward.md) | チャットtoneから「少し前を向く言葉もほしい」を削除する | 🟠 high | done |
-| [090](ISSUE-090-profile-create-birthdate-species.md) | ペット登録フォームに誕生日・種類フィールドを追加する | 🔴 critical | open |
-| [091](ISSUE-091-memory-edit.md) | 記録の編集機能を実装する | 🟠 high | open |
-| [092](ISSUE-092-comeback-card.md) | 長期未記録後の「おかえり」カードをホームに実装する | 🟠 high | open |
-| [093](ISSUE-093-pet-profile-edit.md) | ペットプロフィールを設定画面から編集できるようにする | 🟡 medium | open |
-| [094](ISSUE-094-rainbow-bridge-feelings.md) | rainbow_bridge期の気持ち記録選択肢をグリーフケアに特化する | 🟡 medium | open |
+| [090](ISSUE-090-profile-create-birthdate-species.md) | ペット登録フォームに誕生日・種類フィールドを追加する | 🔴 critical | done |
+| [091](ISSUE-091-memory-edit.md) | 記録の編集機能を実装する | 🟠 high | done |
+| [092](ISSUE-092-comeback-card.md) | 長期未記録後の「おかえり」カードをホームに実装する | 🟠 high | done |
+| [093](ISSUE-093-pet-profile-edit.md) | ペットプロフィールを設定画面から編集できるようにする | 🟡 medium | done |
+| [094](ISSUE-094-rainbow-bridge-feelings.md) | rainbow_bridge期の気持ち記録選択肢をグリーフケアに特化する | 🟡 medium | done |
+| [095](ISSUE-095-pmf-survey.md) | アプリ内PMFサーベイを実装する | 🟠 high | open |
+| [096](ISSUE-096-home-quick-record.md) | ホームのFABからクイック記録を1画面で完結させる | 🟠 high | open |
+| [097](ISSUE-097-third-record-milestone.md) | 3件記録達成後に「蓄積実感」メッセージを表示する | 🟡 medium | open |
+| [098](ISSUE-098-monthly-share-card-redesign.md) | 「うちの子●日目」月次シェアカードをInstagramストーリー対応にする | 🔴 critical | open |
+| [099](ISSUE-099-pet-public-profile-page.md) | ペットの公開プロフィールページを実装する | 🟠 high | open |
+| [100](ISSUE-100-tiktok-video-export.md) | 記録スライドショーの縦型動画（TikTok/Reels対応）を出力する | 🟠 high | open |
+| [101](ISSUE-101-referral-invite.md) | 友人招待・リファラルリンク機能を実装する | 🟠 high | open |
+| [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | open |
+| [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
+| [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | open |
 
 ---
 
