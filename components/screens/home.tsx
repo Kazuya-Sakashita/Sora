@@ -8,6 +8,7 @@ import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
 import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
 import { UpgradeModal } from "@/components/upgrade-modal"
+import { MonthlyShareCardModal } from "@/components/monthly-share-card-modal"
 import { useState, useEffect } from "react"
 import { getNotificationStatus } from "@/lib/push-client"
 
@@ -41,6 +42,7 @@ export function HomeScreen() {
   const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
   const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
   const [comebackDays, setComebackDays] = useState<number | null>(null)
+  const [showShareCardModal, setShowShareCardModal] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -725,41 +727,50 @@ export function HomeScreen() {
 
         {/* Monthly Recap Card */}
         {monthlyRecap && (
-          <button
-            onClick={() => setCurrentScreen("timeline")}
-            className="w-full text-left active:scale-[0.98] transition-all"
-            aria-label="先月のふりかえり"
-          >
-            <GlassCard className="overflow-hidden p-0">
-              {monthlyRecap.coverPhotoUrl && (
-                <img
-                  src={monthlyRecap.coverPhotoUrl}
-                  alt="先月のカバー写真"
-                  className="w-full h-28 object-cover"
-                />
-              )}
-              <div className="px-4 py-3 space-y-2">
-                <p className="text-xs font-medium text-primary/70">
-                  {monthlyRecap.label}のふりかえり
-                </p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-sm text-foreground/80">
-                    📝 {monthlyRecap.memoryCount}件の思い出
-                  </span>
-                  {monthlyRecap.photoCount > 0 && (
+          <div className="space-y-2">
+            <button
+              onClick={() => setCurrentScreen("timeline")}
+              className="w-full text-left active:scale-[0.98] transition-all"
+              aria-label="先月のふりかえり"
+            >
+              <GlassCard className="overflow-hidden p-0">
+                {monthlyRecap.coverPhotoUrl && (
+                  <img
+                    src={monthlyRecap.coverPhotoUrl}
+                    alt="先月のカバー写真"
+                    className="w-full h-28 object-cover"
+                  />
+                )}
+                <div className="px-4 py-3 space-y-2">
+                  <p className="text-xs font-medium text-primary/70">
+                    {monthlyRecap.label}のふりかえり
+                  </p>
+                  <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-sm text-foreground/80">
-                      📷 {monthlyRecap.photoCount}枚
+                      📝 {monthlyRecap.memoryCount}件の思い出
                     </span>
-                  )}
-                  {monthlyRecap.topMoodTag && (
-                    <span className="text-sm text-foreground/80">
-                      ✨ {monthlyRecap.topMoodTag}が多かった月
-                    </span>
-                  )}
+                    {monthlyRecap.photoCount > 0 && (
+                      <span className="text-sm text-foreground/80">
+                        📷 {monthlyRecap.photoCount}枚
+                      </span>
+                    )}
+                    {monthlyRecap.topMoodTag && (
+                      <span className="text-sm text-foreground/80">
+                        ✨ {monthlyRecap.topMoodTag}が多かった月
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </GlassCard>
-          </button>
+              </GlassCard>
+            </button>
+            <button
+              onClick={() => setShowShareCardModal(true)}
+              className="w-full h-10 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 flex items-center justify-center gap-2 text-sm text-foreground/70 font-medium active:scale-[0.98] transition-all"
+            >
+              <Share2 size={15} />
+              シェアカードを作る
+            </button>
+          </div>
         )}
 
         {/* alive期 Sora+ 月次サマリーカード (ISSUE-087) */}
@@ -969,6 +980,22 @@ export function HomeScreen() {
       )}
 
       {/* ロスケア移行後ガイダンスモーダル */}
+      {/* Monthly Share Card Modal (ISSUE-098) */}
+      {showShareCardModal && monthlyRecap && pet && (
+        <MonthlyShareCardModal
+          data={{
+            petName: pet.name,
+            daysCount: days,
+            label: monthlyRecap.label,
+            memoryCount: monthlyRecap.memoryCount,
+            photoCount: monthlyRecap.photoCount,
+            topMoodLabel: monthlyRecap.topMoodTag,
+            coverPhotoUrl: monthlyRecap.coverPhotoUrl,
+          }}
+          onClose={() => setShowShareCardModal(false)}
+        />
+      )}
+
       {showLossGuidance && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
