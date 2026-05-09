@@ -46,8 +46,14 @@ export async function middleware(request: NextRequest) {
     "/api/push/send",
     "/api/push/annual",
     "/api/push/weekly",
+    // 公開ページ・公開API（未ログインでもアクセス可）
+    "/for-clinics",
+    "/p/",
+    "/api/contact/clinic",
   ]
-  if (publicPaths.some((p) => pathname.startsWith(p))) {
+  // /api/pets/{petId}/public のみ認証不要（他のペットAPIは認証必須）
+  const isPublicPetProfile = /^\/api\/pets\/[^/]+\/public/.test(pathname)
+  if (publicPaths.some((p) => pathname.startsWith(p)) || isPublicPetProfile) {
     return supabaseResponse
   }
 
