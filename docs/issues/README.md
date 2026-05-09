@@ -111,7 +111,7 @@
 | [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
 | [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | done |
 | [105](ISSUE-105-home-pet-photo-hero.md) | ホーム画面をペット写真ヒーローデザインに刷新する | 🔴 critical | done |
-| [106](ISSUE-106-ai-reaction-quality.md) | AI反応品質を改善する（記録・チャット・手紙） | 🔴 critical | 未対応 |
+| [106](ISSUE-106-ai-reaction-quality.md) | AI反応品質を改善する（記録・チャット・手紙） | 🔴 critical | done |
 | [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | 未対応 |
 | [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | 未対応 |
 | [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | 未対応 |

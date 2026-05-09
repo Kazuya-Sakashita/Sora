@@ -2,7 +2,7 @@
 title: AI反応の品質を根本から作り直す
 type: feature
 priority: critical
-status: 未対応
+status: done
 ---
 
 # 概要
