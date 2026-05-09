@@ -104,10 +104,10 @@
 | [096](ISSUE-096-home-quick-record.md) | ホームのFABからクイック記録を1画面で完結させる | 🟠 high | open |
 | [097](ISSUE-097-third-record-milestone.md) | 3件記録達成後に「蓄積実感」メッセージを表示する | 🟡 medium | open |
 | [098](ISSUE-098-monthly-share-card-redesign.md) | 「うちの子●日目」月次シェアカードをInstagramストーリー対応にする | 🔴 critical | done |
-| [099](ISSUE-099-pet-public-profile-page.md) | ペットの公開プロフィールページを実装する | 🟠 high | open |
-| [100](ISSUE-100-tiktok-video-export.md) | 記録スライドショーの縦型動画（TikTok/Reels対応）を出力する | 🟠 high | open |
-| [101](ISSUE-101-referral-invite.md) | 友人招待・リファラルリンク機能を実装する | 🟠 high | open |
-| [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | open |
+| [099](ISSUE-099-pet-public-profile-page.md) | ペットの公開プロフィールページを実装する | 🟠 high | done |
+| [100](ISSUE-100-tiktok-video-export.md) | 記録スライドショーの縦型動画（TikTok/Reels対応）を出力する | 🟠 high | done |
+| [101](ISSUE-101-referral-invite.md) | 友人招待・リファラルリンク機能を実装する | 🟠 high | done |
+| [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | done |
 | [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
 | [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | open |
 

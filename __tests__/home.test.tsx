@@ -46,6 +46,7 @@ const mockPet: Pet = {
   favorites: null,
   status: "alive",
   role: "owner",
+  publicProfile: false,
   createdAt: "2026-01-01T00:00:00Z",
   updatedAt: "2026-01-01T00:00:00Z",
 }

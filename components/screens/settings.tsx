@@ -13,7 +13,7 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight, Pencil } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight, Pencil, Share2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
@@ -21,7 +21,7 @@ type LetterIndex = { id: string; year: number; month: number; generatedAt: strin
 type LetterDetail = { id: string; year: number; month: number; content: string; generatedAt: string }
 
 export function SettingsScreen() {
-  const { setCurrentScreen, conversationTone, setConversationTone, pet, updatePetStatus, updatePet } = useApp()
+  const { setCurrentScreen, conversationTone, setConversationTone, pet, memories, updatePetStatus, updatePet } = useApp()
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [plan, setPlan] = useState<"FREE" | "PLUS" | null>(null)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -49,6 +49,12 @@ export function SettingsScreen() {
   const [petEditForm, setPetEditForm] = useState({ name: "", birthDate: "", broughtAt: "", species: "" })
   const [isSavingPet, setIsSavingPet] = useState(false)
   const [petEditError, setPetEditError] = useState<string | null>(null)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [invitedCount, setInvitedCount] = useState(0)
+  const [isCopiedReferral, setIsCopiedReferral] = useState(false)
+  const [publicProfile, setPublicProfile] = useState(false)
+  const [isTogglingPublicProfile, setIsTogglingPublicProfile] = useState(false)
+  const [isCopiedPublicUrl, setIsCopiedPublicUrl] = useState(false)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -56,12 +62,19 @@ export function SettingsScreen() {
       setUserEmail(data.user?.email ?? null)
     })
     fetch("/api/billing/plan").then((r) => r.json()).then(({ plan }) => setPlan(plan))
+    fetch("/api/users/referral").then((r) => r.ok ? r.json() : null).then((d) => {
+      if (d) { setReferralCode(d.referralCode); setInvitedCount(d.invitedCount) }
+    }).catch(() => {})
     getNotificationStatus().then(setNotifStatus)
     isCurrentlySubscribed().then(setIsSubscribed)
     fetch("/api/settings/on-this-day").then((r) => r.ok ? r.json() : null).then((d) => {
       if (d?.enabled !== undefined) setOnThisDayEnabled(d.enabled)
     })
   }, [])
+
+  useEffect(() => {
+    if (pet) setPublicProfile(pet.publicProfile ?? false)
+  }, [pet?.id])
 
   useEffect(() => {
     if (plan !== "PLUS" || !pet) return
@@ -192,6 +205,20 @@ export function SettingsScreen() {
     }
   }
 
+  const handleTogglePublicProfile = async () => {
+    if (!pet || isTogglingPublicProfile) return
+    setIsTogglingPublicProfile(true)
+    const next = !publicProfile
+    try {
+      await updatePet({ publicProfile: next })
+      setPublicProfile(next)
+    } catch {
+      // revert on error
+    } finally {
+      setIsTogglingPublicProfile(false)
+    }
+  }
+
   const handleOpenLetter = async (year: number, month: number) => {
     if (!pet) return
     setIsLoadingLetter(true)
@@ -269,7 +296,14 @@ export function SettingsScreen() {
         {pet && (
           <section className="space-y-3">
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-sm font-semibold text-foreground/80">{pet.name}のプロフィール</h2>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground/80">{pet.name}のプロフィール</h2>
+                {memories.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    📝 {memories.length.toLocaleString("ja-JP")}件の思い出を記録中
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => {
                   setPetEditForm({
@@ -840,6 +874,69 @@ export function SettingsScreen() {
           </div>
         )}
 
+        {/* Public Profile */}
+        {pet && (
+          <section>
+            <GlassCard className="space-y-0 py-0 overflow-hidden">
+              <div className="flex items-center gap-4 py-4 px-5">
+                <div className="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center shrink-0">
+                  <ExternalLink size={18} className="text-sky-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-foreground/80 text-sm">公開プロフィール</p>
+                  <p className="text-xs text-muted-foreground">
+                    {publicProfile ? "URLで誰でも閲覧できます" : "オンにするとURLで共有できます"}
+                  </p>
+                </div>
+                <button
+                  onClick={handleTogglePublicProfile}
+                  disabled={isTogglingPublicProfile}
+                  className={`relative w-12 h-6 rounded-full transition-colors disabled:opacity-50 shrink-0 ${
+                    publicProfile ? "bg-sky-400" : "bg-muted/50"
+                  }`}
+                  aria-label="公開プロフィールトグル"
+                >
+                  {isTogglingPublicProfile ? (
+                    <Loader2 size={12} className="absolute inset-0 m-auto animate-spin text-white" />
+                  ) : (
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
+                        publicProfile ? "translate-x-6" : "translate-x-0.5"
+                      }`}
+                    />
+                  )}
+                </button>
+              </div>
+              {publicProfile && (
+                <div className="border-t border-white/40 px-5 py-3 space-y-2">
+                  <p className="text-xs text-muted-foreground/70 font-mono truncate">
+                    {typeof window !== "undefined" ? `${window.location.origin}/p/${pet.id}` : `/p/${pet.id}`}
+                  </p>
+                  <button
+                    onClick={async () => {
+                      const url = `${window.location.origin}/p/${pet.id}`
+                      if (navigator.share) {
+                        await navigator.share({ title: `${pet.name}のプロフィール`, url }).catch(() => {})
+                      } else {
+                        await navigator.clipboard.writeText(url).catch(() => {})
+                        setIsCopiedPublicUrl(true)
+                        setTimeout(() => setIsCopiedPublicUrl(false), 2000)
+                      }
+                    }}
+                    className="flex items-center gap-1.5 text-xs text-sky-500 font-medium hover:text-sky-600 transition-colors"
+                  >
+                    {isCopiedPublicUrl ? (
+                      <><Check size={12} /> コピーしました</>
+                    ) : (
+                      <><Share2 size={12} /> URLをシェアする</>
+                    )}
+                  </button>
+                </div>
+              )}
+            </GlassCard>
+          </section>
+        )}
+
         {/* Logout */}
         <section>
           <button
@@ -850,6 +947,48 @@ export function SettingsScreen() {
             <LogOut size={16} />
             {isLoggingOut ? "ログアウト中..." : "ログアウト"}
           </button>
+        </section>
+
+        {/* Referral Invite (ISSUE-101) */}
+        <section className="space-y-3">
+          <div className="h-px bg-foreground/8" />
+          <div className="px-1 space-y-1">
+            <p className="text-xs font-medium text-muted-foreground/70">友人に紹介する</p>
+            {invitedCount > 0 && (
+              <p className="text-xs text-primary/60">{invitedCount}人に紹介済み</p>
+            )}
+          </div>
+          {referralCode ? (
+            <GlassCard className="space-y-3 py-4">
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Soraを使っている友人がいたら教えてあげてください。ペットとの記録を一緒に始めるきっかけになります。
+              </p>
+              <button
+                onClick={async () => {
+                  const url = `${window.location.origin}?ref=${referralCode}`
+                  const text = `ペットとの毎日を残せるアプリSoraを使っています。生前から記録しておくと、大切な思い出になるよ。${url}`
+                  if (navigator.share) {
+                    await navigator.share({ title: "Soraを紹介する", text }).catch(() => {})
+                  } else {
+                    await navigator.clipboard.writeText(text).catch(() => {})
+                    setIsCopiedReferral(true)
+                    setTimeout(() => setIsCopiedReferral(false), 2000)
+                  }
+                }}
+                className="w-full h-10 rounded-2xl bg-primary/10 text-primary/80 text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
+              >
+                {isCopiedReferral ? (
+                  <><Check size={14} /> コピーしました</>
+                ) : (
+                  <><Share2 size={14} /> 友人に紹介する</>
+                )}
+              </button>
+            </GlassCard>
+          ) : (
+            <GlassCard className="py-3">
+              <p className="text-xs text-muted-foreground text-center">読み込み中...</p>
+            </GlassCard>
+          )}
         </section>
 
         {/* Professional Support */}

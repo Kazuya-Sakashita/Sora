@@ -247,7 +247,7 @@ describe("SettingsScreen — 月次AIメモリーレター", () => {
       pet: {
         id: "pet-1", name: "ポチ", nickname: null, species: null, breed: null,
         birthDate: null, broughtAt: "2021-01-01", gender: null, photoUrl: null,
-        personality: null, favorites: null, status: "alive", role: "owner",
+        personality: null, favorites: null, status: "alive", role: "owner", publicProfile: false,
         createdAt: "2021-01-01T00:00:00Z", updatedAt: "2026-04-01T00:00:00Z",
       },
     })

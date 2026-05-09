@@ -3,7 +3,7 @@
 name: ISSUE-102
 type: improvement
 priority: Medium
-status: open
+status: done
 
 ---
 

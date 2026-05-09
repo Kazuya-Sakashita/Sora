@@ -1028,6 +1028,112 @@ paths:
         "200":
           description: 送信成功
 
+  /pets/{petId}/public:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [pets]
+      summary: ペットの公開プロフィールを取得する（認証不要）
+      security: []
+      responses:
+        "200":
+          description: 公開プロフィール
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, name, status, memoryCount, recentMemories]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  nickname:
+                    type: string
+                  species:
+                    type: string
+                  photoUrl:
+                    type: string
+                    format: uri
+                  broughtAt:
+                    type: string
+                    format: date
+                  daysCount:
+                    type: integer
+                  status:
+                    type: string
+                  memoryCount:
+                    type: integer
+                  recentMemories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                        title:
+                          type: string
+                        date:
+                          type: string
+                          format: date
+                        coverPhotoUrl:
+                          type: string
+                          format: uri
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /users/referral:
+    get:
+      tags: [users]
+      summary: 自分の紹介コードを取得する（なければ生成）
+      responses:
+        "200":
+          description: 紹介コード情報
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [referralCode, invitedCount]
+                properties:
+                  referralCode:
+                    type: string
+                  invitedCount:
+                    type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [users]
+      summary: 紹介経由登録時に referredBy を記録する
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [referralCode]
+              properties:
+                referralCode:
+                  type: string
+      responses:
+        "200":
+          description: 登録完了
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
 # -----------------------------------------------
 # スキーマ・共通定義
 # -----------------------------------------------
@@ -1130,6 +1236,8 @@ components:
           $ref: "#/components/schemas/PetStatus"
         role:
           $ref: "#/components/schemas/PetRole"
+        publicProfile:
+          type: boolean
         createdAt:
           type: string
           format: date-time
@@ -1171,6 +1279,8 @@ components:
           maxLength: 500
         status:
           $ref: "#/components/schemas/PetStatus"
+        publicProfile:
+          type: boolean
 
     # --- 思い出 ---
     MemoryCategory:

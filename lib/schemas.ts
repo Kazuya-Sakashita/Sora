@@ -16,7 +16,9 @@ export const PetInputSchema = z.object({
   status: z.enum(["alive", "rainbow_bridge"]).optional(),
 })
 
-export const PetPatchSchema = PetInputSchema.partial()
+export const PetPatchSchema = PetInputSchema.partial().extend({
+  publicProfile: z.boolean().optional(),
+})
 
 export const MemoryInputSchema = z.object({
   title: z.string().min(1, "title は必須です").max(100, "title は100文字以内にしてください"),

@@ -26,6 +26,7 @@ const mockPet: Pet = {
   favorites: null,
   status: "rainbow_bridge",
   role: "owner",
+  publicProfile: false,
   createdAt: "2021-01-01T00:00:00Z",
   updatedAt: "2026-04-11T00:00:00Z",
 }

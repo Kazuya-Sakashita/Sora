@@ -7,11 +7,12 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen, Pencil, Check } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen, Pencil, Check, Film } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
 import { UpgradeModal } from "@/components/upgrade-modal"
+import { VideoExportModal } from "@/components/video-export-modal"
 
 const moodMap: Record<string, { emoji: string; label: string }> = {
   happy: { emoji: "🥰", label: "うれしい" },
@@ -57,6 +58,7 @@ export function TimelineScreen() {
   const [isReactionLoading, setIsReactionLoading] = useState(false)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showPreview, setShowPreview] = useState<"photobook" | "report" | null>(null)
+  const [showVideoExport, setShowVideoExport] = useState(false)
   const [shareToast, setShareToast] = useState<"shared" | "copied" | null>(null)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
   const [downloadingPhotobook, setDownloadingPhotobook] = useState<string | null>(null)
@@ -298,6 +300,16 @@ export function TimelineScreen() {
             </h1>
             {!isAdding && (
               <>
+                {/* Video export — show when 3+ photo memories exist */}
+                {memories.filter(m => m.photoUrls.length > 0).length >= 3 && (
+                  <button
+                    aria-label="スライドショー動画を作る"
+                    onClick={() => setShowVideoExport(true)}
+                    className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground hover:bg-white/80 transition-colors"
+                  >
+                    <Film size={18} />
+                  </button>
+                )}
                 <button
                   aria-label={view === "list" ? "カレンダービューに切り替え" : "リストビューに切り替え"}
                   onClick={() => setView(v => v === "list" ? "calendar" : "list")}
@@ -652,6 +664,19 @@ export function TimelineScreen() {
 
       {/* Upgrade モーダル */}
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+
+      {/* Video Export Modal (ISSUE-100) */}
+      {showVideoExport && pet && (
+        <VideoExportModal
+          petName={pet.name}
+          photoUrls={memories
+            .filter(m => m.photoUrls.length > 0)
+            .slice(0, 9)
+            .map(m => m.photoUrls[0])}
+          label={`${new Date().getFullYear()}年${new Date().getMonth() + 1}月`}
+          onClose={() => setShowVideoExport(false)}
+        />
+      )}
 
       {/* シェアトースト */}
       {shareToast && (

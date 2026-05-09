@@ -17,6 +17,8 @@ model User {
   stripeCustomerId     String?            @map("stripe_customer_id")
   stripeSubscriptionId String?            @map("stripe_subscription_id")
   onThisDayEnabled     Boolean            @default(true) @map("on_this_day_enabled")
+  referralCode         String?            @unique @map("referral_code")
+  referredBy           String?            @map("referred_by")
   createdAt            DateTime           @default(now()) @map("created_at")
   pets                 Pet[]
   petMembers           PetMember[]
@@ -47,8 +49,9 @@ model Pet {
   favorites   String?
   photoUrl    String?    @map("photo_url")
   broughtAt   DateTime?  @map("brought_at")
-  status      PetStatus  @default(ALIVE)
-  createdAt   DateTime   @default(now()) @map("created_at")
+  status        PetStatus  @default(ALIVE)
+  publicProfile Boolean    @default(false) @map("public_profile")
+  createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
   memories            Memory[]

@@ -1154,6 +1154,7 @@ export interface components {
             favorites?: string;
             status: components["schemas"]["PetStatus"];
             role: components["schemas"]["PetRole"];
+            publicProfile: boolean;
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */

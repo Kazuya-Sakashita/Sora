@@ -621,6 +621,20 @@ export function HomeScreen() {
                 {milestoneMessage}
               </p>
             )}
+
+            {/* Accumulation Stats (ISSUE-102) */}
+            {memories.length > 0 && (
+              <div className="flex items-center justify-center gap-4 pt-2 border-t border-black/5 mt-2">
+                <span className="text-xs text-muted-foreground">
+                  📝 <span className="font-medium text-foreground/70">{memories.length.toLocaleString("ja-JP")}</span>件の思い出
+                </span>
+                {days !== null && days >= 30 && (
+                  <span className="text-xs text-muted-foreground">
+                    📅 <span className="font-medium text-foreground/70">{Math.floor(days / 30)}</span>ヶ月分
+                  </span>
+                )}
+              </div>
+            )}
           </GlassCard>
         )}
 

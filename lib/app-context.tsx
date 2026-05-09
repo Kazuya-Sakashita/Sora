@@ -30,7 +30,7 @@ type AppContextType = {
   selectPet: (id: string) => void
   createPet: (input: CreatePetInput) => Promise<void>
   updatePetStatus: (status: "alive" | "rainbow_bridge") => Promise<void>
-  updatePet: (input: Partial<Omit<CreatePetInput, "status">>) => Promise<void>
+  updatePet: (input: Partial<Omit<CreatePetInput, "status">> & { publicProfile?: boolean }) => Promise<void>
   memories: Memory[]
   memoriesTotal: number
   addMemory: (input: CreateMemoryInput) => Promise<Memory>
@@ -160,7 +160,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPets((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
   }
 
-  const updatePet = async (input: Partial<Omit<CreatePetInput, "status">>) => {
+  const updatePet = async (input: Partial<Omit<CreatePetInput, "status">> & { publicProfile?: boolean }) => {
     if (!pet) return
     const res = await fetch(`/api/pets/${pet.id}`, {
       method: "PATCH",

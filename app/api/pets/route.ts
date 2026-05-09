@@ -66,6 +66,7 @@ export function toPetResponse(pet: {
   personality: string | null
   favorites: string | null
   status: string
+  publicProfile: boolean
   createdAt: Date
   updatedAt: Date
 }) {
@@ -82,6 +83,7 @@ export function toPetResponse(pet: {
     personality: pet.personality,
     favorites: pet.favorites,
     status: pet.status === "RAINBOW_BRIDGE" ? "rainbow_bridge" : "alive",
+    publicProfile: pet.publicProfile,
     createdAt: pet.createdAt.toISOString(),
     updatedAt: pet.updatedAt.toISOString(),
   }
