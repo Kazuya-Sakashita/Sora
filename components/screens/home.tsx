@@ -355,39 +355,56 @@ export function HomeScreen() {
 
       {/* Header */}
       <header className="px-6 pt-safe">
-        <div className="h-16 flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{greeting}</p>
-            {pet && (
-              <p className="text-base font-medium text-foreground/80">{pet.name}</p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {pet && (
-              <button
-                aria-label="ペットのプロフィール"
-                onClick={() => setShowPetSheet(true)}
-                className="w-10 h-10 rounded-full overflow-hidden bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {pet.photoUrl ? (
-                  <img src={pet.photoUrl} alt={pet.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-lg">🐾</span>
-                )}
-              </button>
-            )}
-            <button
-              aria-label="設定"
-              onClick={() => setCurrentScreen("settings")}
-              className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground"
-            >
-              <Settings size={20} />
-            </button>
-          </div>
+        <div className="h-14 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">{greeting}</p>
+          <button
+            aria-label="設定"
+            onClick={() => setCurrentScreen("settings")}
+            className="w-10 h-10 rounded-full bg-white/50 backdrop-blur-sm flex items-center justify-center text-muted-foreground"
+          >
+            <Settings size={20} />
+          </button>
         </div>
       </header>
 
-      <main className="px-6 space-y-4 pb-8">
+      {/* Pet Hero Photo */}
+      {pet && (
+        <button
+          onClick={() => setShowPetSheet(true)}
+          className="w-full relative block overflow-hidden focus:outline-none active:opacity-90 transition-opacity"
+          style={{ aspectRatio: "4/3" }}
+          aria-label={`${pet.name}のプロフィール`}
+        >
+          {pet.photoUrl ? (
+            <img
+              src={pet.photoUrl}
+              alt={pet.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-linear-to-br from-primary/25 via-primary/10 to-accent/30 flex items-center justify-center">
+              <span className="text-7xl opacity-40">🐾</span>
+            </div>
+          )}
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/55 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 px-6 pb-5 pointer-events-none text-left">
+            <p
+              className="text-white text-2xl font-bold leading-tight"
+              style={{ textShadow: "0 1px 6px rgba(0,0,0,0.45)" }}
+            >
+              {pet.name}
+            </p>
+            <p
+              className="text-white/80 text-sm mt-0.5"
+              style={{ textShadow: "0 1px 4px rgba(0,0,0,0.35)" }}
+            >
+              {pet.status === "rainbow_bridge" ? "いつもそばにいます" : "といっしょに"}
+            </p>
+          </div>
+        </button>
+      )}
+
+      <main className="px-6 space-y-4 pt-4 pb-8">
         {/* First Record Nudge — memories が 0 件の時のみ */}
         {pet && memories.length === 0 && (
           <div

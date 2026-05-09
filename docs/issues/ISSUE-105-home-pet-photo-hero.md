@@ -2,7 +2,7 @@
 title: ホーム画面の「顔」をペットの写真に変える
 type: ux
 priority: critical
-status: 未対応
+status: done
 ---
 
 # 概要
