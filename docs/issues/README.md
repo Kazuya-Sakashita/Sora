@@ -109,7 +109,7 @@
 | [101](ISSUE-101-referral-invite.md) | 友人招待・リファラルリンク機能を実装する | 🟠 high | done |
 | [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | done |
 | [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
-| [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | open |
+| [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | done |
 
 ---
 
