@@ -100,7 +100,7 @@
 | [092](ISSUE-092-comeback-card.md) | 長期未記録後の「おかえり」カードをホームに実装する | 🟠 high | done |
 | [093](ISSUE-093-pet-profile-edit.md) | ペットプロフィールを設定画面から編集できるようにする | 🟡 medium | done |
 | [094](ISSUE-094-rainbow-bridge-feelings.md) | rainbow_bridge期の気持ち記録選択肢をグリーフケアに特化する | 🟡 medium | done |
-| [095](ISSUE-095-pmf-survey.md) | アプリ内PMFサーベイを実装する | 🟠 high | open |
+| [095](ISSUE-095-pmf-survey.md) | アプリ内PMFサーベイを実装する | 🟠 high | done |
 | [096](ISSUE-096-home-quick-record.md) | ホームのFABからクイック記録を1画面で完結させる | 🟠 high | open |
 | [097](ISSUE-097-third-record-milestone.md) | 3件記録達成後に「蓄積実感」メッセージを表示する | 🟡 medium | open |
 | [098](ISSUE-098-monthly-share-card-redesign.md) | 「うちの子●日目」月次シェアカードをInstagramストーリー対応にする | 🔴 critical | done |

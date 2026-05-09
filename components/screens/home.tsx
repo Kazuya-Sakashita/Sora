@@ -9,6 +9,8 @@ import { getTodayMilestone } from "@/lib/milestone"
 import { buildMonthlyRecap, isRecapWindow } from "@/lib/recap"
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { MonthlyShareCardModal } from "@/components/monthly-share-card-modal"
+import { QuickRecordSheet } from "@/components/quick-record-sheet"
+import { PmfSurveyModal } from "@/components/pmf-survey-modal"
 import { useState, useEffect } from "react"
 import { getNotificationStatus } from "@/lib/push-client"
 
@@ -43,6 +45,9 @@ export function HomeScreen() {
   const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
   const [comebackDays, setComebackDays] = useState<number | null>(null)
   const [showShareCardModal, setShowShareCardModal] = useState(false)
+  const [showQuickRecord, setShowQuickRecord] = useState(false)
+  const [showThirdRecordCard, setShowThirdRecordCard] = useState(false)
+  const [showPmfSurvey, setShowPmfSurvey] = useState(false)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -219,6 +224,22 @@ export function HomeScreen() {
     if (localStorage.getItem(dismissKey)) return
     setComebackDays(diffDays)
   }, [pet?.id, memories.length, todayStr])
+
+  // ISSUE-097: 3件目達成で「蓄積実感」カードを1回だけ表示
+  useEffect(() => {
+    if (!pet || memories.length < 3) return
+    const key = `sora:third-record-seen-${pet.id}`
+    if (localStorage.getItem(key)) return
+    setShowThirdRecordCard(true)
+  }, [pet?.id, memories.length])
+
+  // ISSUE-095: 5件以上でPMFサーベイを1回だけ表示（30秒ディレイ）
+  useEffect(() => {
+    if (!pet || memories.length < 5) return
+    if (localStorage.getItem("sora:pmf-answer")) return
+    const t = setTimeout(() => setShowPmfSurvey(true), 30_000)
+    return () => clearTimeout(t)
+  }, [pet?.id, memories.length])
 
   const handleRegenerateMonthlyMessage = async () => {
     if (!pet || isLoadingMonthlyMessage || monthlyMessageGenerated) return
@@ -415,6 +436,32 @@ export function HomeScreen() {
               <X size={14} />
             </button>
           </div>
+        )}
+
+        {/* 3件達成「蓄積実感」カード (ISSUE-097) */}
+        {showThirdRecordCard && pet && (
+          <GlassCard className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500 bg-linear-to-br from-white/60 to-primary/5 border-primary/15">
+            <div className="flex items-start justify-between gap-2">
+              <div className="space-y-1 flex-1">
+                <p className="text-sm font-medium text-foreground/85">
+                  3つの記録が積み重なりました 🌱
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  これが{pet.name}との時間の貯金です。1年後、きっと宝物になっています。
+                </p>
+              </div>
+              <button
+                aria-label="閉じる"
+                onClick={() => {
+                  localStorage.setItem(`sora:third-record-seen-${pet.id}`, "1")
+                  setShowThirdRecordCard(false)
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          </GlassCard>
         )}
 
         {/* おかえりカード (ISSUE-092) */}
@@ -641,7 +688,13 @@ export function HomeScreen() {
           </button>
         ) : (
           <button
-            onClick={() => setCurrentScreen("timeline")}
+            onClick={() => {
+              if (pet?.status === "rainbow_bridge") {
+                setCurrentScreen("timeline")
+              } else {
+                setShowQuickRecord(true)
+              }
+            }}
             className="w-full rounded-2xl overflow-hidden active:scale-[0.98] transition-all shadow-md"
             style={{ background: "linear-gradient(135deg, #F0E6D8, #EDD9B5)" }}
           >
@@ -980,6 +1033,16 @@ export function HomeScreen() {
       )}
 
       {/* ロスケア移行後ガイダンスモーダル */}
+      {/* Quick Record Sheet (ISSUE-096) */}
+      {showQuickRecord && (
+        <QuickRecordSheet onClose={() => setShowQuickRecord(false)} />
+      )}
+
+      {/* PMF Survey Modal (ISSUE-095) */}
+      {showPmfSurvey && (
+        <PmfSurveyModal onClose={() => setShowPmfSurvey(false)} />
+      )}
+
       {/* Monthly Share Card Modal (ISSUE-098) */}
       {showShareCardModal && monthlyRecap && pet && (
         <MonthlyShareCardModal
