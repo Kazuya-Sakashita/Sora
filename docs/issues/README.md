@@ -1,6 +1,6 @@
 # ISSUE一覧
 
-最終更新: 2026-05-08
+最終更新: 2026-05-10
 
 ## 現在のISSUE
 
@@ -110,6 +110,19 @@
 | [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | done |
 | [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
 | [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | done |
+| [105](ISSUE-105-home-pet-photo-hero.md) | ホーム画面をペット写真ヒーローデザインに刷新する | 🔴 critical | 未対応 |
+| [106](ISSUE-106-ai-reaction-quality.md) | AI反応品質を改善する（記録・チャット・手紙） | 🔴 critical | 未対応 |
+| [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | 未対応 |
+| [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | 未対応 |
+| [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | 未対応 |
+| [110](ISSUE-110-one-line-quick-record.md) | 「今日ひとこと」最小記録単位を追加する | 🟠 high | 未対応 |
+| [111](ISSUE-111-feeling-trend-as-story.md) | 感情トレンドを「グラフ」から「物語」として見せる | 🟡 medium | 未対応 |
+| [112](ISSUE-112-photo-grid-timeline.md) | タイムラインに写真グリッドビューを追加する | 🟠 high | 未対応 |
+| [113](ISSUE-113-pet-personality-vault.md) | 「あの子らしさ」記録機能 — 細部まで残せる場所 | 🟠 high | 未対応 |
+| [114](ISSUE-114-memorial-book-generation.md) | メモリアルブック自動生成 | 🟡 medium | 未対応 |
+| [115](ISSUE-115-new-pet-coexistence.md) | 新しい子と先代の共存設計 | 🟡 medium | 未対応 |
+| [116](ISSUE-116-sora-plus-value-redesign.md) | Sora+価値提案の見直し | 🟠 high | 未対応 |
+| [117](ISSUE-117-grief-expert-collaboration.md) | グリーフケア専門家コラボレーション | ⚪ low | 未対応 |
 
 ---
 
