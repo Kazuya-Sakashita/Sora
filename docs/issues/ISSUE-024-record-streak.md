@@ -3,7 +3,7 @@
 name: ISSUE-024
 type: feature
 priority: Critical
-status: open
+status: done
 
 ---
 

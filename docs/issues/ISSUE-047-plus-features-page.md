@@ -3,7 +3,7 @@
 name: ISSUE-047
 type: feature
 priority: Medium
-status: open
+status: done
 
 ---
 

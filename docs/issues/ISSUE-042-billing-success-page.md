@@ -3,7 +3,7 @@
 name: ISSUE-042
 type: feature
 priority: High
-status: open
+status: done
 
 ---
 

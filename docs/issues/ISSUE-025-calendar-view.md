@@ -3,7 +3,7 @@
 name: ISSUE-025
 type: feature
 priority: Critical
-status: open
+status: done
 
 ---
 

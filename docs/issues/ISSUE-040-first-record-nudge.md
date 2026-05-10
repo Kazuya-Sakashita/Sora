@@ -3,7 +3,7 @@
 name: ISSUE-040
 type: feature
 priority: Critical
-status: open
+status: done
 
 ---
 
