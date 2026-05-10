@@ -1152,6 +1152,7 @@ export interface components {
             photoUrl?: string;
             personality?: string;
             favorites?: string;
+            personalityVault?: string;
             status: components["schemas"]["PetStatus"];
             role: components["schemas"]["PetRole"];
             publicProfile: boolean;
@@ -1174,6 +1175,7 @@ export interface components {
             photoUrl?: string;
             personality?: string;
             favorites?: string;
+            personalityVault?: string;
             status?: components["schemas"]["PetStatus"];
         };
         /** @enum {string} */

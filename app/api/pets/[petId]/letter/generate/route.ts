@@ -44,8 +44,25 @@ export async function POST(_req: Request, { params }: Params) {
     ? `\n飼い主の思い出記録（直近5件）：\n${memoryLines}`
     : ""
 
+  let vaultSection = ""
+  if (access.pet.personalityVault) {
+    try {
+      const vault = JSON.parse(access.pet.personalityVault) as Record<string, string>
+      const lines = [
+        vault.favoritePlace && `・好きな場所：${vault.favoritePlace}`,
+        vault.favoriteThing && `・好きだったもの：${vault.favoriteThing}`,
+        vault.habits && `・よくやっていた癖：${vault.habits}`,
+        vault.favoriteExpression && `・好きな顔・表情：${vault.favoriteExpression}`,
+        vault.dailyLife && `・日常のこと：${vault.dailyLife}`,
+      ].filter(Boolean)
+      if (lines.length > 0) {
+        vaultSection = `\nこの子のこと（飼い主が記録した特徴）：\n${lines.join("\n")}`
+      }
+    } catch { /* skip */ }
+  }
+
   const prompt = `あなたはペット記録アプリ「Sora」のAIです。
-大切な${access.pet.name}を見送った飼い主に、穏やかな手紙を書いてください。${memoriesSection}
+大切な${access.pet.name}を見送った飼い主に、穏やかな手紙を書いてください。${vaultSection}${memoriesSection}
 
 手紙ルール：
 - 150〜200字

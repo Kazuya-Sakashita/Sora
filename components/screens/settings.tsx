@@ -13,7 +13,7 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Infinity, Mail, ChevronRight, Pencil, Share2, Camera, TrendingUp } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Infinity, Feather, ChevronRight, Pencil, Share2, Camera } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
@@ -55,6 +55,9 @@ export function SettingsScreen() {
   const [publicProfile, setPublicProfile] = useState(false)
   const [isTogglingPublicProfile, setIsTogglingPublicProfile] = useState(false)
   const [isCopiedPublicUrl, setIsCopiedPublicUrl] = useState(false)
+  const [showVaultEdit, setShowVaultEdit] = useState(false)
+  const [vaultForm, setVaultForm] = useState({ favoritePlace: "", favoriteThing: "", habits: "", favoriteExpression: "", dailyLife: "" })
+  const [isSavingVault, setIsSavingVault] = useState(false)
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient()
@@ -410,6 +413,126 @@ export function SettingsScreen() {
           </section>
         )}
 
+        {/* Personality Vault (ISSUE-113) */}
+        {pet && (
+          <section className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground/80">{pet.name}のこと</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">忘れたくない細部を残しておく場所</p>
+              </div>
+              <button
+                onClick={() => {
+                  const vault = pet.personalityVault ? (() => { try { return JSON.parse(pet.personalityVault!) } catch { return {} } })() : {}
+                  setVaultForm({
+                    favoritePlace: vault.favoritePlace ?? "",
+                    favoriteThing: vault.favoriteThing ?? "",
+                    habits: vault.habits ?? "",
+                    favoriteExpression: vault.favoriteExpression ?? "",
+                    dailyLife: vault.dailyLife ?? "",
+                  })
+                  setShowVaultEdit((v) => !v)
+                }}
+                className="flex items-center gap-1 text-xs text-primary/60 hover:text-primary/80 transition-colors"
+              >
+                <Pencil size={12} />
+                {pet.personalityVault ? "編集" : "記録する"}
+              </button>
+            </div>
+            {showVaultEdit && (
+              <GlassCard className="space-y-4 py-4">
+                {[
+                  { key: "favoritePlace", label: "好きな場所", placeholder: "よく行った公園、ソファの隅、日当たりのいい窓辺…", max: 100 },
+                  { key: "favoriteThing", label: "好きだったもの", placeholder: "おやつ、おもちゃ、誰の膝が好きだったか…", max: 100 },
+                  { key: "habits", label: "よくやっていた癖・行動", placeholder: "帰ってくると必ず…、眠るときいつも…", max: 200 },
+                ].map(({ key, label, placeholder, max }) => (
+                  <div key={key} className="space-y-1.5">
+                    <label className="text-xs text-muted-foreground">{label}</label>
+                    <textarea
+                      value={vaultForm[key as keyof typeof vaultForm]}
+                      onChange={(e) => setVaultForm((p) => ({ ...p, [key]: e.target.value.slice(0, max) }))}
+                      placeholder={placeholder}
+                      rows={2}
+                      className="w-full rounded-xl bg-white/50 border border-white/60 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground/85 placeholder:text-muted-foreground/60"
+                    />
+                    {vaultForm[key as keyof typeof vaultForm].length > max * 0.8 && (
+                      <p className="text-xs text-muted-foreground text-right">{vaultForm[key as keyof typeof vaultForm].length}/{max}</p>
+                    )}
+                  </div>
+                ))}
+                {[
+                  { key: "favoriteExpression", label: "いちばん好きな顔・表情", placeholder: "嬉しいときの顔、眠そうな顔…", max: 100, plus: plan === "FREE" },
+                  { key: "dailyLife", label: "一緒に過ごしていた日常のこと", placeholder: "朝のこと、夜のこと、決まってやっていたこと…", max: 200, plus: plan === "FREE" },
+                ].map(({ key, label, placeholder, max, plus }) => (
+                  <div key={key} className="space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <label className={`text-xs ${plus ? "text-muted-foreground/50" : "text-muted-foreground"}`}>{label}</label>
+                      {plus && <Lock size={10} className="text-amber-400" />}
+                    </div>
+                    {plus ? (
+                      <button
+                        onClick={() => { setUpgradeFeature("あの子らしさVault（全5項目）"); setShowUpgradeModal(true) }}
+                        className="w-full rounded-xl bg-amber-50/60 border border-amber-100 text-xs text-amber-600 px-3 py-2.5 text-left hover:bg-amber-50 transition-colors"
+                      >
+                        Sora+ で解放 →
+                      </button>
+                    ) : (
+                      <>
+                        <textarea
+                          value={vaultForm[key as keyof typeof vaultForm]}
+                          onChange={(e) => setVaultForm((p) => ({ ...p, [key]: e.target.value.slice(0, max) }))}
+                          placeholder={placeholder}
+                          rows={2}
+                          className="w-full rounded-xl bg-white/50 border border-white/60 text-sm px-3 py-2 resize-none focus:outline-none focus:ring-1 focus:ring-primary/30 text-foreground/85 placeholder:text-muted-foreground/60"
+                        />
+                        {vaultForm[key as keyof typeof vaultForm].length > max * 0.8 && (
+                          <p className="text-xs text-muted-foreground text-right">{vaultForm[key as keyof typeof vaultForm].length}/{max}</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                ))}
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={async () => {
+                      if (isSavingVault) return
+                      setIsSavingVault(true)
+                      try {
+                        const vaultJson = JSON.stringify({
+                          favoritePlace: vaultForm.favoritePlace || undefined,
+                          favoriteThing: vaultForm.favoriteThing || undefined,
+                          habits: vaultForm.habits || undefined,
+                          ...(plan !== "FREE" && {
+                            favoriteExpression: vaultForm.favoriteExpression || undefined,
+                            dailyLife: vaultForm.dailyLife || undefined,
+                          }),
+                        })
+                        await updatePet({ personalityVault: vaultJson })
+                        setShowVaultEdit(false)
+                      } catch {
+                        // silent
+                      } finally {
+                        setIsSavingVault(false)
+                      }
+                    }}
+                    disabled={isSavingVault}
+                    className="flex items-center gap-1.5 px-4 h-9 rounded-xl bg-primary/80 text-primary-foreground text-xs font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {isSavingVault ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                    保存する
+                  </button>
+                  <button
+                    onClick={() => setShowVaultEdit(false)}
+                    className="px-4 h-9 rounded-xl bg-white/50 text-muted-foreground text-xs border border-white/50 hover:bg-white/80 transition-colors"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </GlassCard>
+            )}
+          </section>
+        )}
+
         {/* Plan */}
         <section className="space-y-3">
           <div className="flex items-center gap-2 px-1">
@@ -428,10 +551,10 @@ export function SettingsScreen() {
           )}
 
           {[
-            { icon: Mail, label: "AIの手紙", desc: "無料：月1通 → Sora+：月4通", cta: "手紙を受け取る →" },
+            { icon: Feather, label: "AIの手紙", desc: "無料：月1通 → Sora+：月4通", cta: "手紙を受け取る →" },
             { icon: Camera, label: "写真の保存枚数", desc: "無料：50枚 → Sora+：無制限", cta: "写真を残す →" },
             { icon: BookOpen, label: "フォトブック・メモリアルブック", desc: "思い出をPDFにまとめる", cta: "作ってみる →" },
-            { icon: TrendingUp, label: "感情トレンド（全期間）", desc: "無料：直近3ヶ月 → Sora+：全期間", cta: "振り返る →" },
+            { icon: Sparkles, label: "感情トレンド（全期間）", desc: "無料：直近3ヶ月 → Sora+：全期間", cta: "振り返る →" },
             { icon: FileText, label: "年次メモリーレポート", desc: "1年間の記録を自動まとめ", cta: "見てみる →" },
             { icon: Infinity, label: "あの子らしさ記録（全5項目）", desc: "無料：3項目 → Sora+：5項目", cta: "残してみる →" },
           ].map(({ icon: Icon, label, desc, cta }) => (
@@ -500,7 +623,7 @@ export function SettingsScreen() {
         {plan === "PLUS" && (
           <section className="space-y-3">
             <div className="flex items-center gap-2 px-1">
-              <Mail size={14} className="text-amber-500" />
+              <Feather size={14} className="text-amber-500" />
               <h2 className="text-sm font-semibold text-foreground/80">AIメモリーレター</h2>
             </div>
             {letters.length === 0 ? (
@@ -518,7 +641,7 @@ export function SettingsScreen() {
                   >
                     <GlassCard className="flex items-center gap-4 py-3.5 hover:bg-white/80 transition-colors">
                       <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
-                        <Mail size={18} className="text-amber-500" />
+                        <Feather size={18} className="text-amber-500" />
                       </div>
                       <div className="flex-1 text-left">
                         <p className="text-sm font-medium text-foreground/85">{l.year}年{l.month}月のレター</p>
@@ -536,7 +659,7 @@ export function SettingsScreen() {
         {plan === "FREE" && (
           <section className="space-y-3">
             <div className="flex items-center gap-2 px-1">
-              <Mail size={14} className="text-amber-500" />
+              <Feather size={14} className="text-amber-500" />
               <h2 className="text-sm font-semibold text-foreground/80">AIメモリーレター</h2>
             </div>
             <GlassCard className="space-y-3 py-4 relative overflow-hidden">

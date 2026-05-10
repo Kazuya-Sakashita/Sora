@@ -2,7 +2,7 @@
 title: 「あの子らしさ」記録機能 — 細部まで残せる場所
 type: feature
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要

@@ -13,6 +13,7 @@ export const PetInputSchema = z.object({
   photoUrl: z.string().url("有効なURLを入力してください").optional(),
   personality: z.string().max(500).optional(),
   favorites: z.string().max(500).optional(),
+  personalityVault: z.string().max(1000).optional(),
   status: z.enum(["alive", "rainbow_bridge"]).optional(),
 })
 

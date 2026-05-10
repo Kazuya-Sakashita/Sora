@@ -43,7 +43,7 @@ const mockPet: Pet = {
   gender: null,
   photoUrl: null,
   personality: null,
-  favorites: null,
+  favorites: null, personalityVault: null,
   status: "alive",
   role: "owner",
   publicProfile: false,

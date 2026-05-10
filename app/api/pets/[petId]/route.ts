@@ -46,6 +46,7 @@ export async function PATCH(request: Request, { params }: Params) {
       ...(body.gender !== undefined && { gender: (body.gender?.toUpperCase() ?? null) as never }),
       ...(body.personality !== undefined && { personality: body.personality }),
       ...(body.favorites !== undefined && { favorites: body.favorites }),
+      ...(body.personalityVault !== undefined && { personalityVault: body.personalityVault }),
       ...(body.photoUrl !== undefined && { photoUrl: body.photoUrl }),
       ...(body.status !== undefined && { status: body.status === "rainbow_bridge" ? "RAINBOW_BRIDGE" : "ALIVE" }),
       ...(body.publicProfile !== undefined && { publicProfile: body.publicProfile }),

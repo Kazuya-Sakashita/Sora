@@ -64,6 +64,23 @@ export async function POST(req: Request, { params }: Params) {
 
   const speciesJa = access.pet.species ? (SPECIES_JA[access.pet.species] ?? "ペット") : "ペット"
 
+  let vaultSection = ""
+  if (access.pet.personalityVault) {
+    try {
+      const vault = JSON.parse(access.pet.personalityVault) as Record<string, string>
+      const lines = [
+        vault.favoritePlace && `・好きな場所：${vault.favoritePlace}`,
+        vault.favoriteThing && `・好きだったもの：${vault.favoriteThing}`,
+        vault.habits && `・よくやっていた癖：${vault.habits}`,
+        vault.favoriteExpression && `・好きな顔・表情：${vault.favoriteExpression}`,
+        vault.dailyLife && `・日常のこと：${vault.dailyLife}`,
+      ].filter(Boolean)
+      if (lines.length > 0) {
+        vaultSection = `\nこの子のこと（飼い主が記録した特徴）：\n${lines.join("\n")}`
+      }
+    } catch { /* vault is not valid JSON, skip */ }
+  }
+
   const memoryLines = recentMemories
     .map((m) => {
       const mood = m.moodTag ? ` (${MOOD_JA[m.moodTag] ?? ""})` : ""
@@ -88,7 +105,7 @@ export async function POST(req: Request, { params }: Params) {
 大切な${access.pet.name}を見送った飼い主が、思い出を穏やかに語れる場を作ってください。
 
 ペット名：${access.pet.name}
-種類：${speciesJa}${recentSection}${feelingsSection}
+種類：${speciesJa}${vaultSection}${recentSection}${feelingsSection}
 
 会話ルール：
 - 穏やか・寄り添う語り口（です・ます調）
