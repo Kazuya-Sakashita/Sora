@@ -112,7 +112,7 @@
 | [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | done |
 | [105](ISSUE-105-home-pet-photo-hero.md) | ホーム画面をペット写真ヒーローデザインに刷新する | 🔴 critical | done |
 | [106](ISSUE-106-ai-reaction-quality.md) | AI反応品質を改善する（記録・チャット・手紙） | 🔴 critical | done |
-| [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | 未対応 |
+| [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | done |
 | [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | 未対応 |
 | [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | 未対応 |
 | [110](ISSUE-110-one-line-quick-record.md) | 「今日ひとこと」最小記録単位を追加する | 🟠 high | done |

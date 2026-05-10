@@ -5,7 +5,7 @@ import { useApp } from "@/lib/app-context"
 import type { FeelingTag } from "@/lib/api-types"
 import { GlassCard } from "@/components/glass-card"
 import { MoodTrendChart } from "@/components/mood-trend-chart"
-import { ArrowLeft, Check, TrendingUp } from "lucide-react"
+import { ArrowLeft, Check, TrendingUp, Loader2 } from "lucide-react"
 import { buildDailyTrend, buildWeeklySummary, MOOD_TAGS, MOOD_INFO } from "@/lib/mood-trend"
 
 const aliveFeelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
@@ -28,7 +28,9 @@ export function FeelingsScreen() {
   const { setCurrentScreen, feelings, addFeeling, pet } = useApp()
   const feelingOptions = pet?.status === "rainbow_bridge" ? rainbowFeelingOptions : aliveFeelingOptions
   const [tab, setTab] = useState<"record" | "trend">("record")
-  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+  const [selectedTag, setSelectedTag] = useState<FeelingTag | null>(null)
+  const [memoText, setMemoText] = useState("")
+  const [isSaving, setIsSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
   const today = new Date()
@@ -39,18 +41,29 @@ export function FeelingsScreen() {
     0
   )
 
-  const handleSelectFeeling = async (tag: FeelingTag) => {
+  const handleSelectTag = (tag: FeelingTag) => {
     setSelectedTag(tag)
+    setShowConfirmation(false)
+  }
+
+  const handleSaveFeeling = async () => {
+    if (!selectedTag || isSaving) return
+    setIsSaving(true)
     try {
       await addFeeling({
-        tag,
+        tag: selectedTag,
+        memo: memoText.trim() || undefined,
         date: today.toISOString().split("T")[0],
       })
+      setMemoText("")
+      setSelectedTag(null)
+      setShowConfirmation(true)
+      setTimeout(() => setShowConfirmation(false), 3000)
     } catch {
       // silent
+    } finally {
+      setIsSaving(false)
     }
-    setShowConfirmation(true)
-    setTimeout(() => setShowConfirmation(false), 3000)
   }
 
   return (
@@ -103,7 +116,7 @@ export function FeelingsScreen() {
             {feelingOptions.map(({ emoji, label, tag }) => (
               <button
                 key={tag}
-                onClick={() => handleSelectFeeling(tag)}
+                onClick={() => handleSelectTag(tag)}
                 className={`w-full p-5 rounded-2xl flex items-center gap-4 transition-all ${
                   selectedTag === tag
                     ? "bg-primary/15 border-2 border-primary/30"
@@ -120,6 +133,29 @@ export function FeelingsScreen() {
               </button>
             ))}
           </div>
+
+          {/* Memo + Save (shown after tag selection) */}
+          {selectedTag && (
+            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+              <textarea
+                value={memoText}
+                onChange={(e) => setMemoText(e.target.value.slice(0, 100))}
+                placeholder="今日の気持ち、少し書いておきますか"
+                rows={2}
+                className="w-full resize-none rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 px-4 py-3 text-sm text-foreground/80 placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/30 focus:bg-white/70 transition-colors leading-relaxed"
+              />
+              {memoText.length > 80 && (
+                <p className="text-xs text-muted-foreground text-right">{memoText.length}/100</p>
+              )}
+              <button
+                onClick={handleSaveFeeling}
+                disabled={isSaving}
+                className="w-full h-12 rounded-2xl bg-primary/80 hover:bg-primary/90 text-primary-foreground font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : "この気持ちを残す"}
+              </button>
+            </div>
+          )}
 
           {showConfirmation && (
             <GlassCard className="bg-linear-to-br from-white/60 to-accent/10 border-accent/20 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -143,11 +179,18 @@ export function FeelingsScreen() {
                     day: "numeric",
                   })
                   return (
-                    <GlassCard key={feeling.id} className="py-4 flex items-center gap-4">
-                      <span className="text-xl">{option?.emoji || "💭"}</span>
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground/80">{option?.label || feeling.tag}</p>
-                        <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                    <GlassCard key={feeling.id} className="py-3 flex items-start gap-4">
+                      <span className="text-xl mt-0.5">{option?.emoji || "💭"}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-foreground/80">{option?.label || feeling.tag}</p>
+                          <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                        </div>
+                        {feeling.memo && (
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">
+                            {feeling.memo}
+                          </p>
+                        )}
                       </div>
                     </GlassCard>
                   )

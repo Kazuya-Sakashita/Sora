@@ -2,7 +2,7 @@
 title: 感情の受け皿を広げる — フリーテキスト気持ちメモ
 type: feature
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要
