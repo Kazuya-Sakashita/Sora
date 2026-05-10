@@ -42,7 +42,7 @@ export function HomeScreen() {
   const [rbDailyWord, setRbDailyWord] = useState<string | null>(null)
   const [showLetterCard, setShowLetterCard] = useState(false)
   const [showMilestone30Card, setShowMilestone30Card] = useState(false)
-  const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 30 | 90; message: string } | null>(null)
+  const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
   const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
   const [comebackDays, setComebackDays] = useState<number | null>(null)
   const [showShareCardModal, setShowShareCardModal] = useState(false)
@@ -117,10 +117,10 @@ export function HomeScreen() {
     const elapsed = Date.now() - parseInt(stored, 10)
     const HOUR = 60 * 60 * 1000
     const daysElapsed = Math.round(elapsed / (24 * HOUR))
-    const milestones: Array<{ day: 7 | 30 | 90; message: string }> = [
-      { day: 7,  message: `1週間経ちましたね。今日の気持ちは、どうですか` },
-      { day: 30, message: `1ヶ月経ちました。${pet.name}の写真を、ゆっくり見返してもいい日かもしれません` },
-      { day: 90, message: `${daysElapsed}日が経ちました。${pet.name}の記録が、ずっとここにいます` },
+    const milestones: Array<{ day: 7 | 14 | 30; message: string }> = [
+      { day: 7,  message: `${pet.name}がいなくなって1週間。ゆっくりでいいですよ。` },
+      { day: 14, message: `2週間、ここに残し続けてくれてありがとう。` },
+      { day: 30, message: `1ヶ月経ちました。${pet.name}のこと、いつでも話せます。` },
     ]
     for (const m of [...milestones].reverse()) {
       const windowStart = m.day * 24 * HOUR
@@ -696,6 +696,7 @@ export function HomeScreen() {
               {timelineCareCard.message}
             </p>
             <button
+              type="button"
               aria-label="カードを閉じる"
               onClick={() => {
                 localStorage.setItem(`sora:care-card-${pet.id}-${timelineCareCard.day}`, "1")
