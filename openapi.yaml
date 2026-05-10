@@ -1326,7 +1326,7 @@ components:
     # --- 思い出 ---
     MemoryCategory:
       type: string
-      enum: [trip, daily, hospital, trimming, anniversary, other]
+      enum: [trip, daily, hospital, trimming, anniversary, other, note]
 
     MoodTag:
       type: string

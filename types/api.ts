@@ -1177,7 +1177,7 @@ export interface components {
             status?: components["schemas"]["PetStatus"];
         };
         /** @enum {string} */
-        MemoryCategory: "trip" | "daily" | "hospital" | "trimming" | "anniversary" | "other";
+        MemoryCategory: "trip" | "daily" | "hospital" | "trimming" | "anniversary" | "other" | "note";
         /** @enum {string} */
         MoodTag: "happy" | "calm" | "worried" | "fun" | "loving";
         Memory: {

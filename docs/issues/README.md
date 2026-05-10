@@ -115,7 +115,7 @@
 | [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | 未対応 |
 | [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | 未対応 |
 | [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | 未対応 |
-| [110](ISSUE-110-one-line-quick-record.md) | 「今日ひとこと」最小記録単位を追加する | 🟠 high | 未対応 |
+| [110](ISSUE-110-one-line-quick-record.md) | 「今日ひとこと」最小記録単位を追加する | 🟠 high | done |
 | [111](ISSUE-111-feeling-trend-as-story.md) | 感情トレンドを「グラフ」から「物語」として見せる | 🟡 medium | 未対応 |
 | [112](ISSUE-112-photo-grid-timeline.md) | タイムラインに写真グリッドビューを追加する | 🟠 high | 未対応 |
 | [113](ISSUE-113-pet-personality-vault.md) | 「あの子らしさ」記録機能 — 細部まで残せる場所 | 🟠 high | 未対応 |

@@ -454,7 +454,69 @@ export function TimelineScreen() {
 
             {/* Memory Cards */}
             <div className="space-y-3">
-              {group.items.map((memory) => (
+              {group.items.map((memory) => memory.category === "note" ? (
+                /* Compact Note Card */
+                <div
+                  key={memory.id}
+                  id={`memory-${memory.date}`}
+                  data-memory-id={memory.id}
+                  className={`rounded-2xl bg-white/50 backdrop-blur-sm border px-4 py-3 transition-all duration-500 ${
+                    highlightMemoryId === memory.id
+                      ? "border-amber-300 shadow-amber-100/60 scale-[1.01]"
+                      : "border-white/30"
+                  }`}
+                >
+                  {editingId === memory.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editForm.description}
+                        onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+                        placeholder="ひとこと…"
+                        rows={2}
+                        className="rounded-xl bg-white/50 border-white/60 text-sm resize-none"
+                      />
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onClick={handleSaveEdit}
+                          disabled={isSavingEdit}
+                          className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-primary/80 text-primary-foreground text-xs font-medium disabled:opacity-50 transition-colors"
+                        >
+                          {isSavingEdit ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                          保存
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="px-3 h-9 rounded-xl bg-white/50 text-muted-foreground text-xs border border-white/50 hover:bg-white/80 transition-colors"
+                        >
+                          キャンセル
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0 space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-primary/50 font-medium">ひとこと</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(memory.date).toLocaleDateString("ja-JP", { month: "short", day: "numeric" })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/80 leading-relaxed">
+                          {memory.description ?? memory.title}
+                        </p>
+                      </div>
+                      <button
+                        aria-label="編集する"
+                        onClick={() => handleEditStart(memory)}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 transition-colors shrink-0"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Full Memory Card */
                 <div
                   key={memory.id}
                   id={`memory-${memory.date}`}
@@ -583,6 +645,7 @@ export function TimelineScreen() {
                 </div>
               ))}
             </div>
+
           </div>
         ))}
 

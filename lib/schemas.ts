@@ -24,7 +24,7 @@ export const MemoryInputSchema = z.object({
   title: z.string().min(1, "title は必須です").max(100, "title は100文字以内にしてください"),
   description: z.string().max(2000).optional(),
   date: dateStr,
-  category: z.enum(["trip", "daily", "hospital", "trimming", "anniversary", "other"]).optional(),
+  category: z.enum(["trip", "daily", "hospital", "trimming", "anniversary", "other", "note"]).optional(),
   moodTag: z.enum(["happy", "calm", "worried", "fun", "loving"]).optional(),
   photoUrls: z.array(z.string().url()).max(10, "写真は10枚以内にしてください").optional(),
 })

@@ -11,11 +11,11 @@ import { UpgradeModal } from "@/components/upgrade-modal"
 import { MonthlyShareCardModal } from "@/components/monthly-share-card-modal"
 import { QuickRecordSheet } from "@/components/quick-record-sheet"
 import { PmfSurveyModal } from "@/components/pmf-survey-modal"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { getNotificationStatus } from "@/lib/push-client"
 
 export function HomeScreen() {
-  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus, setPendingHighlightMemoryId } = useApp()
+  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus, setPendingHighlightMemoryId, addMemory } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
   const recentMemories = memories.slice(0, 3)
@@ -48,6 +48,10 @@ export function HomeScreen() {
   const [showQuickRecord, setShowQuickRecord] = useState(false)
   const [showThirdRecordCard, setShowThirdRecordCard] = useState(false)
   const [showPmfSurvey, setShowPmfSurvey] = useState(false)
+  const [noteText, setNoteText] = useState("")
+  const [isSavingNote, setIsSavingNote] = useState(false)
+  const [noteReaction, setNoteReaction] = useState<string | null>(null)
+  const noteInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -240,6 +244,33 @@ export function HomeScreen() {
     const t = setTimeout(() => setShowPmfSurvey(true), 30_000)
     return () => clearTimeout(t)
   }, [pet?.id, memories.length])
+
+  const handleSaveNote = async () => {
+    if (!pet || !noteText.trim() || isSavingNote) return
+    setIsSavingNote(true)
+    const text = noteText.trim().slice(0, 50)
+    const d = new Date()
+    const title = `${d.getMonth() + 1}月${d.getDate()}日のひとこと`
+    try {
+      const memory = await addMemory({
+        title,
+        description: text,
+        date: todayStr,
+        category: "note",
+        photoUrls: [],
+      })
+      setNoteText("")
+      const r = await fetch(`/api/pets/${pet.id}/memories/${memory.id}/reaction`, { method: "POST" })
+      if (r.ok) {
+        const data = await r.json()
+        setNoteReaction(data.reaction ?? null)
+      }
+    } catch {
+      // silent — don't block the user
+    } finally {
+      setIsSavingNote(false)
+    }
+  }
 
   const handleRegenerateMonthlyMessage = async () => {
     if (!pet || isLoadingMonthlyMessage || monthlyMessageGenerated) return
@@ -651,6 +682,62 @@ export function HomeScreen() {
                   </span>
                 )}
               </div>
+            )}
+          </GlassCard>
+        )}
+
+        {/* Quick Note Entry (ISSUE-110) */}
+        {pet && (
+          <GlassCard
+            className={
+              pet.status === "rainbow_bridge"
+                ? "space-y-2 border-primary/20 bg-white/70"
+                : "space-y-2"
+            }
+          >
+            <p className="text-xs text-muted-foreground">
+              {pet.status === "rainbow_bridge"
+                ? `今日も${pet.name}のことを思いましたか`
+                : `${pet.name}のことをひとこと`}
+            </p>
+            {noteReaction ? (
+              <div className="space-y-2">
+                <p className="text-sm text-foreground/80 leading-relaxed">{noteReaction}</p>
+                <button
+                  onClick={() => setNoteReaction(null)}
+                  className="text-xs text-muted-foreground underline underline-offset-2"
+                >
+                  もう一言残す
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <textarea
+                  ref={noteInputRef}
+                  value={noteText}
+                  onChange={(e) => setNoteText(e.target.value.slice(0, 50))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault()
+                      handleSaveNote()
+                    }
+                  }}
+                  placeholder={`${pet.name}のことをひとこと…`}
+                  rows={1}
+                  className="flex-1 resize-none bg-transparent text-sm text-foreground/85 placeholder:text-muted-foreground/60 focus:outline-none leading-relaxed"
+                />
+                <button
+                  onClick={handleSaveNote}
+                  disabled={!noteText.trim() || isSavingNote}
+                  aria-label="ひとことを保存"
+                  className="w-8 h-8 rounded-full bg-primary/15 hover:bg-primary/25 flex items-center justify-center text-primary/70 disabled:opacity-40 transition-colors shrink-0"
+                >
+                  {isSavingNote ? <Loader2 size={14} className="animate-spin" /> : <span className="text-sm">↑</span>}
+                </button>
+              </div>
+            )}
+            {noteText.length > 40 && (
+              <p className="text-xs text-muted-foreground text-right">{noteText.length}/50</p>
             )}
           </GlassCard>
         )}

@@ -142,6 +142,7 @@ enum MemoryCategory {
   TRIMMING
   ANNIVERSARY
   OTHER
+  NOTE
 }
 
 enum MoodTag {

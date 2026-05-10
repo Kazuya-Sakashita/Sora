@@ -2,7 +2,7 @@
 title: 「今日ひとこと」最小記録単位を追加する
 type: feature
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要
