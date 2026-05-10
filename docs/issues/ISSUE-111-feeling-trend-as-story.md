@@ -2,7 +2,7 @@
 title: 感情トレンドを「グラフ」から「物語」として見せる
 type: ux
 priority: medium
-status: 未対応
+status: done
 ---
 
 # 概要

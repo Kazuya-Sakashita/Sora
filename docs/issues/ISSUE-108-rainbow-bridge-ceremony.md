@@ -2,7 +2,7 @@
 title: Rainbow Bridge移行に「儀式感」と「受容の演出」を加える
 type: ux
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要

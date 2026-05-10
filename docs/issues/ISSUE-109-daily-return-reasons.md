@@ -2,7 +2,7 @@
 title: 毎日戻ってくる理由を作る — 「今日しかない」体験
 type: feature
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要

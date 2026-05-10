@@ -5,7 +5,7 @@ import { useApp } from "@/lib/app-context"
 import type { FeelingTag } from "@/lib/api-types"
 import { GlassCard } from "@/components/glass-card"
 import { MoodTrendChart } from "@/components/mood-trend-chart"
-import { ArrowLeft, Check, TrendingUp, Loader2 } from "lucide-react"
+import { ArrowLeft, Check, Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react"
 import { buildDailyTrend, buildWeeklySummary, MOOD_TAGS, MOOD_INFO } from "@/lib/mood-trend"
 
 const aliveFeelingOptions: { emoji: string; label: string; tag: FeelingTag }[] = [
@@ -32,6 +32,8 @@ export function FeelingsScreen() {
   const [memoText, setMemoText] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
+  const [showTrendDetail, setShowTrendDetail] = useState(false)
+  const [daysSinceTransition, setDaysSinceTransition] = useState<number | null>(null)
 
   const today = new Date()
   const trendData = buildDailyTrend(feelings, today)
@@ -40,6 +42,39 @@ export function FeelingsScreen() {
     (acc, d) => acc + MOOD_TAGS.reduce((s, t) => s + d[t], 0),
     0
   )
+
+  // ISSUE-111: monthly feeling summary
+  const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
+  const thisMonthFeelings = feelings.filter((f) => (f.date ?? "").startsWith(currentMonthStr))
+  const monthTagCounts = thisMonthFeelings.reduce<Record<string, number>>((acc, f) => {
+    if (f.tag) acc[f.tag] = (acc[f.tag] ?? 0) + 1
+    return acc
+  }, {})
+  const topThreeTags = Object.entries(monthTagCounts).sort((a, b) => b[1] - a[1]).slice(0, 3)
+  const topTag = topThreeTags[0]?.[0] ?? null
+  const topCount = topThreeTags[0]?.[1] ?? 0
+  const isRB = pet?.status === "rainbow_bridge"
+
+  const monthlySummaryText = (() => {
+    if (!topTag || topCount === 0) return null
+    const labels: Record<string, string> = {
+      happy: "うれしい", calm: "おだやか", fun: "たのしい", worried: "心配", loving: "愛おしい",
+      sad: "悲しい", hard: "つらい", numb: "よくわからない",
+    }
+    const label = labels[topTag] ?? topTag
+    if (isRB) {
+      return `今月は${label}な気持ちの日が${topCount}日ありました。それでよかったと思います。`
+    }
+    return `今月は${label}な日が${topCount}日ありました。${pet?.name ?? ""}との時間が、そのまま記録されています。`
+  })()
+
+  // days since Rainbow Bridge transition
+  const rbDays = (() => {
+    if (!pet || !isRB) return null
+    const stored = typeof window !== "undefined" ? localStorage.getItem(`sora:loss-transition-${pet.id}`) : null
+    if (!stored) return null
+    return Math.round((Date.now() - parseInt(stored, 10)) / (24 * 60 * 60 * 1000))
+  })()
 
   const handleSelectTag = (tag: FeelingTag) => {
     setSelectedTag(tag)
@@ -102,7 +137,7 @@ export function FeelingsScreen() {
                   : "text-muted-foreground hover:bg-white/40"
               }`}
             >
-              <TrendingUp size={14} />
+              <Sparkles size={14} />
               トレンド
             </button>
           </div>
@@ -206,7 +241,7 @@ export function FeelingsScreen() {
         <main className="px-4 py-6 space-y-5">
           {totalInLast30 < 5 ? (
             <GlassCard className="py-12 flex flex-col items-center gap-4 text-center">
-              <span className="text-4xl">📊</span>
+              <span className="text-4xl">💭</span>
               <div className="space-y-1">
                 <p className="font-medium text-foreground/70">もっと記録するとトレンドが見えます</p>
                 <p className="text-sm text-muted-foreground">あと {5 - totalInLast30} 件記録してみましょう</p>
@@ -214,49 +249,114 @@ export function FeelingsScreen() {
             </GlassCard>
           ) : (
             <>
-              {/* Weekly Summary */}
-              {weeklySummary && (
-                <GlassCard className="py-4 text-center">
-                  <p className="text-sm font-medium text-foreground/80">{weeklySummary}</p>
-                </GlassCard>
-              )}
+              {/* Monthly Text Summary (ISSUE-111) */}
+              <GlassCard className="space-y-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-primary/60">
+                    {today.getMonth() + 1}月の気持ち
+                  </p>
+                  {isRB && rbDays !== null && (
+                    <p className="text-xs text-muted-foreground">
+                      あれから{rbDays}日が経ちました
+                    </p>
+                  )}
+                </div>
 
-              {/* Tag Filters */}
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setSelectedTag(null)}
-                  className={`h-8 px-3 rounded-full text-xs font-medium transition-colors ${
-                    selectedTag === null
-                      ? "bg-foreground/15 text-foreground/80"
-                      : "bg-white/60 text-muted-foreground hover:bg-white/80"
-                  }`}
-                >
-                  すべて
-                </button>
-                {MOOD_TAGS.map((tag) => {
-                  const info = MOOD_INFO[tag]
-                  return (
-                    <button
-                      key={tag}
-                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                      className={`h-8 px-3 rounded-full text-xs font-medium transition-colors ${
-                        selectedTag === tag
-                          ? "text-foreground/80"
-                          : "bg-white/60 text-muted-foreground hover:bg-white/80"
-                      }`}
-                      style={selectedTag === tag ? { backgroundColor: `${info.color}40` } : undefined}
-                    >
-                      {info.emoji} {info.label}
-                    </button>
-                  )
-                })}
-              </div>
+                {/* Top 3 tag badges */}
+                {topThreeTags.length > 0 ? (
+                  <div className="flex gap-2 flex-wrap">
+                    {topThreeTags.map(([tag, count], i) => {
+                      const info = MOOD_INFO[tag as keyof typeof MOOD_INFO]
+                      if (!info) return null
+                      return (
+                        <div
+                          key={tag}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: `${info.color}${i === 0 ? "30" : "18"}`,
+                            color: i === 0 ? "rgb(var(--foreground) / 0.8)" : "rgb(var(--muted-foreground))",
+                          }}
+                        >
+                          <span>{info.emoji}</span>
+                          <span>{info.label}</span>
+                          <span className="opacity-60">{count}日</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">今月はまだ記録がありません</p>
+                )}
 
-              {/* Chart */}
-              <GlassCard className="py-4 px-2">
-                <p className="text-xs text-muted-foreground px-2 mb-3">過去30日の気持ち記録</p>
-                <MoodTrendChart data={trendData} selectedTag={selectedTag} />
+                {/* Narrative */}
+                {monthlySummaryText && (
+                  <p className="text-sm text-foreground/80 leading-relaxed">{monthlySummaryText}</p>
+                )}
+
+                {/* RB quiet question */}
+                {isRB && topTag && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    変わってきている感覚はありますか？
+                  </p>
+                )}
+
+                {/* Weekly word */}
+                {weeklySummary && !isRB && (
+                  <p className="text-xs text-primary/60 border-t border-black/5 pt-3">{weeklySummary}</p>
+                )}
               </GlassCard>
+
+              {/* 詳細を見る accordion */}
+              <div className="space-y-3">
+                <button
+                  onClick={() => setShowTrendDetail((v) => !v)}
+                  className="w-full h-10 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/60 flex items-center justify-center gap-2 text-xs text-muted-foreground hover:bg-white/70 transition-colors"
+                >
+                  {showTrendDetail ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  {showTrendDetail ? "閉じる" : "グラフで詳細を見る"}
+                </button>
+
+                {showTrendDetail && (
+                  <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {/* Tag Filters */}
+                    <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => setSelectedTag(null)}
+                        className={`h-8 px-3 rounded-full text-xs font-medium transition-colors ${
+                          selectedTag === null
+                            ? "bg-foreground/15 text-foreground/80"
+                            : "bg-white/60 text-muted-foreground hover:bg-white/80"
+                        }`}
+                      >
+                        すべて
+                      </button>
+                      {MOOD_TAGS.map((tag) => {
+                        const info = MOOD_INFO[tag]
+                        return (
+                          <button
+                            key={tag}
+                            onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                            className={`h-8 px-3 rounded-full text-xs font-medium transition-colors ${
+                              selectedTag === tag
+                                ? "text-foreground/80"
+                                : "bg-white/60 text-muted-foreground hover:bg-white/80"
+                            }`}
+                            style={selectedTag === tag ? { backgroundColor: `${info.color}40` } : undefined}
+                          >
+                            {info.emoji} {info.label}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {/* Chart */}
+                    <GlassCard className="py-4 px-2">
+                      <p className="text-xs text-muted-foreground px-2 mb-3">過去30日の気持ち記録</p>
+                      <MoodTrendChart data={trendData} selectedTag={selectedTag} />
+                    </GlassCard>
+                  </div>
+                )}
+              </div>
 
               {/* Feelings History List */}
               {feelings.length > 0 && (
@@ -272,11 +372,18 @@ export function FeelingsScreen() {
                       day: "numeric",
                     })
                     return (
-                      <GlassCard key={feeling.id} className="py-3 flex items-center gap-3">
-                        <span className="text-lg">{option?.emoji || "💭"}</span>
-                        <div className="flex-1">
-                          <p className="text-sm text-foreground/80">{option?.label || feeling.tag}</p>
-                          <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                      <GlassCard key={feeling.id} className="py-3 flex items-start gap-4">
+                        <span className="text-xl mt-0.5">{option?.emoji || "💭"}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm text-foreground/80">{option?.label || feeling.tag}</p>
+                            <p className="text-xs text-muted-foreground">{dateLabel}</p>
+                          </div>
+                          {feeling.memo && (
+                            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed line-clamp-2">
+                              {feeling.memo}
+                            </p>
+                          )}
                         </div>
                       </GlassCard>
                     )

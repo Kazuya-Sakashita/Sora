@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Mail, MessageCircle, Download, Loader2, Lock, Share2, Sparkles, Bell, X } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Feather, MessageCircle, Download, Loader2, Lock, Share2, Sparkles, Bell, X } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
@@ -38,10 +38,11 @@ export function HomeScreen() {
   const [isLoadingMonthlyMessage, setIsLoadingMonthlyMessage] = useState(false)
   const [monthlyMessageGenerated, setMonthlyMessageGenerated] = useState(false)
   const [showLossWelcome, setShowLossWelcome] = useState(false)
-  const [showLossGuidance, setShowLossGuidance] = useState(false)
+  const [showLossComplete, setShowLossComplete] = useState(false)
+  const [rbDailyWord, setRbDailyWord] = useState<string | null>(null)
   const [showLetterCard, setShowLetterCard] = useState(false)
   const [showMilestone30Card, setShowMilestone30Card] = useState(false)
-  const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 14 | 30; message: string } | null>(null)
+  const [timelineCareCard, setTimelineCareCard] = useState<{ day: 7 | 30 | 90; message: string } | null>(null)
   const [showPlusSummaryCard, setShowPlusSummaryCard] = useState(false)
   const [comebackDays, setComebackDays] = useState<number | null>(null)
   const [showShareCardModal, setShowShareCardModal] = useState(false)
@@ -52,6 +53,10 @@ export function HomeScreen() {
   const [isSavingNote, setIsSavingNote] = useState(false)
   const [noteReaction, setNoteReaction] = useState<string | null>(null)
   const noteInputRef = useRef<HTMLTextAreaElement>(null)
+  const [showMonthlyPhotoCard, setShowMonthlyPhotoCard] = useState(false)
+  const [monthlyPhotoUrl, setMonthlyPhotoUrl] = useState<string | null>(null)
+  const [showWeeklySummaryCard, setShowWeeklySummaryCard] = useState(false)
+  const [weeklyTopTag, setWeeklyTopTag] = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/billing/plan")
@@ -111,10 +116,11 @@ export function HomeScreen() {
     if (!stored) return
     const elapsed = Date.now() - parseInt(stored, 10)
     const HOUR = 60 * 60 * 1000
-    const milestones: Array<{ day: 7 | 14 | 30; message: string }> = [
-      { day: 7,  message: `${pet.name}がいなくなって1週間。ゆっくりでいいですよ。` },
-      { day: 14, message: `2週間、ここに残し続けてくれてありがとう。` },
-      { day: 30, message: `1ヶ月経ちました。${pet.name}のこと、いつでも話せます。` },
+    const daysElapsed = Math.round(elapsed / (24 * HOUR))
+    const milestones: Array<{ day: 7 | 30 | 90; message: string }> = [
+      { day: 7,  message: `1週間経ちましたね。今日の気持ちは、どうですか` },
+      { day: 30, message: `1ヶ月経ちました。${pet.name}の写真を、ゆっくり見返してもいい日かもしれません` },
+      { day: 90, message: `${daysElapsed}日が経ちました。${pet.name}の記録が、ずっとここにいます` },
     ]
     for (const m of [...milestones].reverse()) {
       const windowStart = m.day * 24 * HOUR
@@ -179,7 +185,7 @@ export function HomeScreen() {
       await updatePetStatus("rainbow_bridge")
       setShowLossCareConfirm(false)
       setShowPetSheet(false)
-      setShowLossGuidance(true)
+      setShowLossComplete(true)
     } catch {
       // keep modal open on error
     } finally {
@@ -245,6 +251,75 @@ export function HomeScreen() {
     return () => clearTimeout(t)
   }, [pet?.id, memories.length])
 
+  // ISSUE-109 ②: 毎月1日に先月の写真カードを表示
+  useEffect(() => {
+    if (!pet || today.getDate() !== 1) return
+    const year = today.getFullYear()
+    const month = today.getMonth() + 1
+    const dismissKey = `sora:monthly-photo-dismissed-${pet.id}-${year}-${month}`
+    if (localStorage.getItem(dismissKey)) return
+    const lastMonthMonth = today.getMonth() === 0 ? 12 : today.getMonth()
+    const lastMonthYear = today.getMonth() === 0 ? year - 1 : year
+    const lastMonthStr = `${lastMonthYear}-${String(lastMonthMonth).padStart(2, "0")}`
+    const photoUrls = memories
+      .filter((m) => m.date?.startsWith(lastMonthStr) && m.photoUrls && m.photoUrls.length > 0)
+      .flatMap((m) => m.photoUrls ?? [])
+    if (photoUrls.length === 0) return
+    setMonthlyPhotoUrl(photoUrls[Math.floor(Math.random() * photoUrls.length)])
+    setShowMonthlyPhotoCard(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, memories.length])
+
+  // ISSUE-109 ④: 毎週月曜に先週の気持ちサマリーを表示
+  useEffect(() => {
+    if (!pet || today.getDay() !== 1 || feelings.length === 0) return
+    const dismissKey = `sora:weekly-summary-dismissed-${pet.id}-${todayStr}`
+    if (localStorage.getItem(dismissKey)) return
+    const lastWeekEnd = new Date(today)
+    lastWeekEnd.setDate(lastWeekEnd.getDate() - 1)
+    const lastWeekStart = new Date(today)
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7)
+    const startStr = lastWeekStart.toISOString().split("T")[0]
+    const endStr = lastWeekEnd.toISOString().split("T")[0]
+    const lastWeekFeelings = feelings.filter((f) => {
+      const d = f.date ?? f.createdAt?.split("T")[0] ?? ""
+      return d >= startStr && d <= endStr
+    })
+    if (lastWeekFeelings.length === 0) return
+    const tagCounts = lastWeekFeelings.reduce<Record<string, number>>((acc, f) => {
+      if (f.tag) acc[f.tag] = (acc[f.tag] ?? 0) + 1
+      return acc
+    }, {})
+    const topTag = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+    if (!topTag) return
+    setWeeklyTopTag(topTag)
+    setShowWeeklySummaryCard(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, feelings.length, todayStr])
+
+  // ISSUE-108: RB期の「今日はここにいていい」一言（90日間、1セッション1回）
+  useEffect(() => {
+    if (!pet || pet.status !== "rainbow_bridge") return
+    const transitionKey = `sora:loss-transition-${pet.id}`
+    const stored = localStorage.getItem(transitionKey)
+    if (!stored) return
+    const elapsed = Date.now() - parseInt(stored, 10)
+    if (elapsed > 90 * 24 * 60 * 60 * 1000) return
+    const sessionKey = `sora:rb-daily-word-shown-${pet.id}`
+    if (sessionStorage.getItem(sessionKey)) return
+    sessionStorage.setItem(sessionKey, "1")
+    const phrases = [
+      `${pet.name}のことを思い出す日があっていい`,
+      `今日も来てくれてありがとう`,
+      `${pet.name}との時間が、ここにあります`,
+      `急がなくていい。今日は今日のままで`,
+      `何も変わっていなくていい`,
+      `${pet.name}のことを、ゆっくり思い出していい`,
+    ]
+    setRbDailyWord(phrases[Math.floor(Math.random() * phrases.length)])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pet?.id, pet?.status])
+
   const handleSaveNote = async () => {
     if (!pet || !noteText.trim() || isSavingNote) return
     setIsSavingNote(true)
@@ -296,6 +371,9 @@ export function HomeScreen() {
 
   const MOOD_JA_HOME: Record<string, string> = {
     HAPPY: "うれしそう", CALM: "おだやか", FUN: "楽しそう", WORRIED: "心配", LOVING: "愛おしい",
+  }
+  const MOOD_JA_WEEKLY: Record<string, string> = {
+    HAPPY: "うれしい", CALM: "おだやか", FUN: "たのしい", WORRIED: "心配", LOVING: "愛おしい",
   }
   const currentMonthStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`
   const thisMonthMemories = memories.filter((m) => m.date?.startsWith(currentMonthStr))
@@ -574,13 +652,14 @@ export function HomeScreen() {
           </div>
         )}
 
-        {/* Loss Welcome Card — 72h post-transition (ISSUE-062) */}
-        {showLossWelcome && (
+        {/* Loss Welcome Card — 72h post-transition (ISSUE-062, ISSUE-108) */}
+        {showLossWelcome && pet && (
           <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 px-5 py-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-500">
             <div className="flex items-start justify-between">
-              <p className="text-sm font-medium text-foreground/85 leading-relaxed flex-1 pr-3">
-                急がなくていい。ゆっくりでいい。<br />
-                Soraはここにいます。
+              <p className="text-sm text-foreground/80 leading-relaxed flex-1 pr-3">
+                {pet.name}のことを、{memories.length}件記録してきましたね。<br />
+                その全部が、今もここにあります。<br />
+                急がなくていいですよ。
               </p>
               <button
                 aria-label="カードを閉じる"
@@ -686,6 +765,13 @@ export function HomeScreen() {
           </GlassCard>
         )}
 
+        {/* ISSUE-108: RB期90日間の静かな一言 */}
+        {rbDailyWord && (
+          <p className="text-center text-xs text-muted-foreground/70 px-6 animate-in fade-in duration-700">
+            {rbDailyWord}
+          </p>
+        )}
+
         {/* Quick Note Entry (ISSUE-110) */}
         {pet && (
           <GlassCard
@@ -739,6 +825,67 @@ export function HomeScreen() {
             {noteText.length > 40 && (
               <p className="text-xs text-muted-foreground text-right">{noteText.length}/50</p>
             )}
+          </GlassCard>
+        )}
+
+        {/* ISSUE-109 ②: 毎月1日の先月写真カード */}
+        {showMonthlyPhotoCard && monthlyPhotoUrl && pet && (
+          <button
+            onClick={() => setCurrentScreen("timeline")}
+            className="w-full text-left active:scale-[0.98] transition-all"
+          >
+            <GlassCard className="overflow-hidden p-0 animate-in fade-in slide-in-from-top-2 duration-500">
+              <img
+                src={monthlyPhotoUrl}
+                alt={`${pet.name}の先月の写真`}
+                className="w-full h-48 object-cover"
+              />
+              <div className="px-4 py-3 flex items-center justify-between">
+                <p className="text-xs font-medium text-primary/70">先月の{pet.name}</p>
+                <button
+                  aria-label="閉じる"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    const year = today.getFullYear()
+                    const month = today.getMonth() + 1
+                    localStorage.setItem(`sora:monthly-photo-dismissed-${pet.id}-${year}-${month}`, "1")
+                    setShowMonthlyPhotoCard(false)
+                  }}
+                  className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            </GlassCard>
+          </button>
+        )}
+
+        {/* ISSUE-109 ④: 毎週月曜の先週の気持ちサマリー */}
+        {showWeeklySummaryCard && weeklyTopTag && pet && (
+          <GlassCard className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-500">
+            <div className="flex items-start justify-between gap-2">
+              <div className="space-y-1 flex-1">
+                <p className="text-xs font-medium text-primary/70">先週の気持ち</p>
+                <p className="text-sm text-foreground/85">
+                  先週いちばん多かった気持ちは「{MOOD_JA_WEEKLY[weeklyTopTag] ?? weeklyTopTag}」でした
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {pet.status === "rainbow_bridge"
+                    ? `今週は${pet.name}のことを何回思いましたか`
+                    : "今週も一緒に記録しましょう"}
+                </p>
+              </div>
+              <button
+                aria-label="閉じる"
+                onClick={() => {
+                  localStorage.setItem(`sora:weekly-summary-dismissed-${pet.id}-${todayStr}`, "1")
+                  setShowWeeklySummaryCard(false)
+                }}
+                className="w-6 h-6 rounded-full flex items-center justify-center text-muted-foreground hover:bg-black/5 shrink-0"
+              >
+                <X size={14} />
+              </button>
+            </div>
           </GlassCard>
         )}
 
@@ -854,7 +1001,7 @@ export function HomeScreen() {
               onClick={() => setCurrentScreen("letter")}
               className="h-12 rounded-2xl bg-white/60 backdrop-blur-sm border border-white/50 flex items-center justify-center gap-2 text-sm text-muted-foreground hover:bg-white/80 transition-colors"
             >
-              <Mail size={16} />
+              <Feather size={16} />
               ことば
             </button>
             <button
@@ -1120,15 +1267,18 @@ export function HomeScreen() {
         </div>
       )}
 
-      {/* ロスケア移行確認モーダル */}
+      {/* ロスケア移行確認モーダル (ISSUE-108) */}
       {showLossCareConfirm && pet && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
-            <div className="text-center space-y-4">
-              <p className="text-5xl">🌈</p>
-              <p className="text-sm text-foreground/80 leading-relaxed">
-                {pet.name}のことを教えてくれてありがとう。<br />
-                これからも、ここに残していいですよ。
+            <div className="space-y-3">
+              <p className="text-base font-medium text-foreground/85 leading-snug">
+                {pet.name}とのお別れを、<br />ここに残しておいてもいいですか
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {days !== null && `${pet.name}との${days.toLocaleString()}日間の記録が、`}
+                {memories.length > 0 && `${memories.length}件の思い出が、`}
+                ここにあります。
               </p>
             </div>
             <div className="space-y-2">
@@ -1137,13 +1287,13 @@ export function HomeScreen() {
                 disabled={isTransitioning}
                 className="w-full h-12 rounded-2xl bg-primary/10 hover:bg-primary/15 text-primary/80 font-medium text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
               >
-                {isTransitioning ? <Loader2 size={16} className="animate-spin" /> : "はい、移行します"}
+                {isTransitioning ? <Loader2 size={16} className="animate-spin" /> : "残しておく"}
               </button>
               <button
                 onClick={() => setShowLossCareConfirm(false)}
                 className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
               >
-                まだ大丈夫です
+                まだいい
               </button>
             </div>
           </div>
@@ -1177,26 +1327,41 @@ export function HomeScreen() {
         />
       )}
 
-      {showLossGuidance && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-sm rounded-3xl bg-white/95 backdrop-blur-xl border border-white/60 shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200">
-            <div className="text-center space-y-4">
+      {/* 移行完了モーダル (ISSUE-108) */}
+      {showLossComplete && pet && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-6 animate-in fade-in duration-500"
+          style={{ background: "linear-gradient(160deg, rgba(186,220,238,0.85) 0%, rgba(240,220,215,0.85) 50%, rgba(255,235,200,0.85) 100%)" }}
+        >
+          <div className="w-full max-w-sm space-y-8 text-center animate-in zoom-in-95 duration-500">
+            <div className="space-y-4">
               <p className="text-5xl">🌿</p>
-              <p className="text-sm text-foreground/80 leading-relaxed">
-                これからも、ここに残していいですよ。<br />
-                Soraには、今の気持ちを話せる「はなす」と、思い出から生まれる「ことば」があります。急がなくていい。気が向いたときに。
-              </p>
+              <div className="space-y-3">
+                <p className="text-lg font-medium text-foreground/85 leading-snug">
+                  {days !== null
+                    ? `${pet.name}との${days.toLocaleString()}日間が、ここに残りました`
+                    : `${pet.name}との記録が、ここに残りました`}
+                </p>
+                <p className="text-sm text-foreground/60 leading-relaxed">
+                  いつでも来てください。<br />急がなくていいですよ。
+                </p>
+              </div>
             </div>
             <div className="space-y-2">
               <button
-                onClick={() => { setShowLossGuidance(false); setCurrentScreen("chat") }}
-                className="w-full h-12 rounded-2xl bg-primary/10 hover:bg-primary/15 text-primary/80 font-medium text-sm transition-colors"
+                onClick={() => { setShowLossComplete(false); setCurrentScreen("chat") }}
+                className="w-full h-12 rounded-2xl bg-white/50 backdrop-blur-sm text-foreground/70 font-medium text-sm hover:bg-white/70 transition-colors"
               >
                 話してみる
               </button>
               <button
-                onClick={() => setShowLossGuidance(false)}
-                className="w-full h-10 rounded-2xl text-sm text-muted-foreground hover:bg-black/5 transition-colors"
+                onClick={() => { setShowLossComplete(false); setCurrentScreen("letter") }}
+                className="w-full h-12 rounded-2xl bg-white/50 backdrop-blur-sm text-foreground/70 font-medium text-sm hover:bg-white/70 transition-colors"
+              >
+                ことばを読む
+              </button>
+              <button
+                onClick={() => setShowLossComplete(false)}
+                className="w-full h-10 rounded-2xl text-sm text-foreground/50 hover:text-foreground/70 transition-colors"
               >
                 ホームへ
               </button>
