@@ -844,10 +844,27 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [plan]
+                required: [plan, planFeatures]
                 properties:
                   plan:
                     $ref: "#/components/schemas/BillingPlan"
+                  planFeatures:
+                    type: object
+                    properties:
+                      unlimitedPhotos:
+                        type: boolean
+                      monthlyLetters:
+                        type: integer
+                      memorialBook:
+                        type: boolean
+                      allTimeTrend:
+                        type: boolean
+                      publicProfile:
+                        type: boolean
+                      personalityVaultItems:
+                        type: integer
+                      priorityAI:
+                        type: boolean
         "401":
           $ref: "#/components/responses/Unauthorized"
 

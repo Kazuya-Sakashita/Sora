@@ -2,7 +2,7 @@
 title: Sora+価値提案の見直し
 type: business
 priority: high
-status: 未対応
+status: done
 ---
 
 # 概要

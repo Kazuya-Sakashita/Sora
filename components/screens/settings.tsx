@@ -13,7 +13,7 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Download, Infinity, Mail, ChevronRight, Pencil, Share2 } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Infinity, Mail, ChevronRight, Pencil, Share2, Camera, TrendingUp } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
@@ -417,12 +417,23 @@ export function SettingsScreen() {
             <h2 className="text-sm font-semibold text-foreground/80">Sora+ でできること</h2>
           </div>
 
+          {/* Rainbow Bridge special offer */}
+          {plan === "FREE" && pet?.status === "rainbow_bridge" && (
+            <GlassCard className="border-primary/15 bg-primary/3 space-y-1.5">
+              <p className="text-xs font-medium text-primary/70">虹の橋を渡ったばかりの方へ</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                最初の1ヶ月を無料でお試しいただけます。記録を続けることが、あの子への一番の供養になりますように。
+              </p>
+            </GlassCard>
+          )}
+
           {[
-            { icon: Mail, label: "月次AIメモリーレター", desc: "毎月の記録をAIが手紙に", cta: "見てみる →" },
-            { icon: BookOpen, label: "月別フォトブック", desc: "毎月の思い出をPDFに", cta: "作ってみる →" },
+            { icon: Mail, label: "AIの手紙", desc: "無料：月1通 → Sora+：月4通", cta: "手紙を受け取る →" },
+            { icon: Camera, label: "写真の保存枚数", desc: "無料：50枚 → Sora+：無制限", cta: "写真を残す →" },
+            { icon: BookOpen, label: "フォトブック・メモリアルブック", desc: "思い出をPDFにまとめる", cta: "作ってみる →" },
+            { icon: TrendingUp, label: "感情トレンド（全期間）", desc: "無料：直近3ヶ月 → Sora+：全期間", cta: "振り返る →" },
             { icon: FileText, label: "年次メモリーレポート", desc: "1年間の記録を自動まとめ", cta: "見てみる →" },
-            { icon: Download, label: "記念日カード保存", desc: "100日・誕生日を画像に", cta: "保存してみる →" },
-            { icon: Infinity, label: "無制限記録", desc: "50件の制限なし", cta: "今すぐ始める →" },
+            { icon: Infinity, label: "あの子らしさ記録（全5項目）", desc: "無料：3項目 → Sora+：5項目", cta: "残してみる →" },
           ].map(({ icon: Icon, label, desc, cta }) => (
             <GlassCard key={label} className="flex items-center gap-4 py-3.5">
               <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
@@ -448,25 +459,13 @@ export function SettingsScreen() {
           ))}
 
           {plan === "FREE" && (
-            <div className={`pt-1 ${process.env.NEXT_PUBLIC_PRICE_YEARLY ? "grid grid-cols-2 gap-2" : "flex"}`}>
-              <button
-                onClick={() => handleCheckout("month")}
-                disabled={isCheckingOut}
-                className="flex-1 h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-1"
-              >
-                {isCheckingOut ? <Loader2 size={16} className="animate-spin" /> : `月額 ¥${process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"}`}
-              </button>
-              {process.env.NEXT_PUBLIC_PRICE_YEARLY && (
-                <button
-                  onClick={() => handleCheckout("year")}
-                  disabled={isCheckingOut}
-                  className="h-12 rounded-2xl bg-amber-500/90 hover:bg-amber-500 text-white font-semibold text-sm transition-colors disabled:opacity-60 flex flex-col items-center justify-center leading-tight"
-                >
-                  <span>年額 ¥{process.env.NEXT_PUBLIC_PRICE_YEARLY}</span>
-                  <span className="text-[10px] opacity-80">年間まとめ払いでお得</span>
-                </button>
-              )}
-            </div>
+            <button
+              onClick={() => { setUpgradeFeature(undefined); setShowUpgradeModal(true) }}
+              className="w-full h-12 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+            >
+              <Sparkles size={15} />
+              Sora+ を始める — 月額 ¥{process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"}
+            </button>
           )}
 
           {plan === "PLUS" && (
@@ -490,7 +489,11 @@ export function SettingsScreen() {
         </section>
 
         {showUpgradeModal && (
-          <UpgradeModal featureName={upgradeFeature} onClose={() => setShowUpgradeModal(false)} />
+          <UpgradeModal
+            featureName={upgradeFeature}
+            isRainbowBridge={pet?.status === "rainbow_bridge"}
+            onClose={() => setShowUpgradeModal(false)}
+          />
         )}
 
         {/* Monthly Letter Archive */}
