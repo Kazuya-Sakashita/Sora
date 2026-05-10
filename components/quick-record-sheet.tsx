@@ -85,6 +85,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
           )}
 
           <button
+            type="button"
             onClick={onClose}
             className="w-full h-10 rounded-2xl bg-black/5 text-sm text-foreground/60 font-medium"
           >
@@ -115,6 +116,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
                 className="w-full h-40 object-cover"
               />
               <button
+                type="button"
                 onClick={() => setPhotoUrl(null)}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 flex items-center justify-center text-white"
                 aria-label="写真を外す"
@@ -129,6 +131,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground">今日の思い出を残す</p>
               <button
+                type="button"
                 onClick={onClose}
                 className="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-muted-foreground"
                 aria-label="閉じる"
@@ -142,7 +145,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave() }}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) handleSave() }}
               placeholder={`${pet?.name ?? "うちの子"}との今日は？`}
               autoFocus
               className="w-full bg-transparent text-base font-medium text-foreground/85 placeholder:text-muted-foreground/60 outline-none py-1"
@@ -153,6 +156,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
             <div className="flex items-center gap-2 pt-1">
               {/* Photo button */}
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
                 className="w-10 h-10 rounded-2xl bg-black/5 flex items-center justify-center text-muted-foreground disabled:opacity-50"
@@ -170,6 +174,7 @@ export function QuickRecordSheet({ onClose, onSaved }: Props) {
 
               {/* Save button */}
               <button
+                type="button"
                 onClick={handleSave}
                 disabled={!title.trim() || isSaving || isUploading}
                 className="flex-1 h-10 rounded-2xl bg-primary/90 text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-40 transition-opacity"
