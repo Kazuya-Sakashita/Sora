@@ -7,7 +7,7 @@ import { GlassCard } from "@/components/glass-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen, Pencil, Check, Film } from "lucide-react"
+import { ArrowLeft, Plus, X, Camera, Loader2, Image, LayoutList, CalendarDays, Share2, FileText, BookOpen, Pencil, Check, Film, Grid3X3, ChevronLeft, ChevronRight } from "lucide-react"
 import { uploadPhoto } from "@/lib/storage"
 import { MemoryCalendar } from "@/components/memory-calendar"
 import { shareMemory } from "@/lib/share"
@@ -74,7 +74,10 @@ export function TimelineScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const [view, setView] = useState<"list" | "calendar">("list")
+  const [view, setView] = useState<"list" | "photo" | "calendar">("list")
+  type LightboxState = { photoUrl: string; memory: Memory; allPhotos: { photoUrl: string; memory: Memory }[]; index: number }
+  const [lightboxPhoto, setLightboxPhoto] = useState<LightboxState | null>(null)
+  const touchStartX = useRef<number | null>(null)
   const today = new Date()
   const [calYear, setCalYear] = useState(today.getFullYear())
   const [calMonth, setCalMonth] = useState(today.getMonth())
@@ -253,6 +256,11 @@ export function TimelineScreen() {
   }
 
   const groups = groupByMonth(memories)
+  const photoOnlyMemories = memories.filter((m) => m.photoUrls && m.photoUrls.length > 0)
+  const photoGroups = groupByMonth(photoOnlyMemories)
+  const allPhotoItems = photoOnlyMemories
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .flatMap((m) => m.photoUrls.map((url) => ({ photoUrl: url, memory: m })))
 
   return (
     <div className="min-h-screen pb-safe">
@@ -311,11 +319,11 @@ export function TimelineScreen() {
                   </button>
                 )}
                 <button
-                  aria-label={view === "list" ? "カレンダービューに切り替え" : "リストビューに切り替え"}
-                  onClick={() => setView(v => v === "list" ? "calendar" : "list")}
+                  aria-label="ビューを切り替え"
+                  onClick={() => setView(v => v === "list" ? "photo" : v === "photo" ? "calendar" : "list")}
                   className="w-10 h-10 rounded-full bg-white/50 flex items-center justify-center text-muted-foreground hover:bg-white/80 transition-colors"
                 >
-                  {view === "list" ? <CalendarDays size={18} /> : <LayoutList size={18} />}
+                  {view === "list" ? <Grid3X3 size={18} /> : view === "photo" ? <CalendarDays size={18} /> : <LayoutList size={18} />}
                 </button>
                 <button
                   aria-label="思い出を追加"
@@ -407,6 +415,49 @@ export function TimelineScreen() {
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
           />
+        )}
+
+        {/* Photo Grid View */}
+        {view === "photo" && (
+          <div className="space-y-6 -mx-4">
+            {pet?.status === "rainbow_bridge" && (
+              <p className="px-4 text-sm font-medium text-foreground/60">{pet.name}との思い出</p>
+            )}
+            {allPhotoItems.length === 0 ? (
+              <div className="py-20 flex flex-col items-center gap-4 text-center px-4">
+                <div className="w-20 h-20 rounded-full bg-white/60 backdrop-blur-sm border border-white/50 flex items-center justify-center">
+                  <Image size={32} className="text-primary/40" />
+                </div>
+                <p className="text-sm text-muted-foreground">写真のある記録がまだありません</p>
+              </div>
+            ) : (
+              photoGroups.map((group) => {
+                const groupPhotos = group.items.flatMap((m) => m.photoUrls.map((url) => ({ url, memory: m })))
+                return (
+                  <div key={group.label} className="space-y-1.5">
+                    <div className="px-4 flex items-center gap-2">
+                      <span className="text-sm font-medium text-foreground/50">{group.label}</span>
+                      <span className="text-xs text-muted-foreground">（{groupPhotos.length}枚）</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-px">
+                      {groupPhotos.map(({ url, memory }, idx) => {
+                        const globalIdx = allPhotoItems.findIndex((p) => p.photoUrl === url && p.memory.id === memory.id)
+                        return (
+                          <button
+                            key={`${memory.id}-${idx}`}
+                            onClick={() => setLightboxPhoto({ photoUrl: url, memory, allPhotos: allPhotoItems, index: globalIdx })}
+                            className="aspect-square overflow-hidden bg-white/40 hover:opacity-90 transition-opacity"
+                          >
+                            <img src={url} alt={memory.title} className="w-full h-full object-cover" />
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
         )}
 
         {/* Empty State */}
@@ -727,6 +778,103 @@ export function TimelineScreen() {
 
       {/* Upgrade モーダル */}
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+
+      {/* Photo Lightbox */}
+      {lightboxPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black flex flex-col animate-in fade-in duration-200"
+          onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX }}
+          onTouchEnd={(e) => {
+            if (touchStartX.current === null) return
+            const dx = e.changedTouches[0].clientX - touchStartX.current
+            touchStartX.current = null
+            if (dx > 50 && lightboxPhoto.index > 0) {
+              const idx = lightboxPhoto.index - 1
+              const item = lightboxPhoto.allPhotos[idx]
+              setLightboxPhoto({ ...item, allPhotos: lightboxPhoto.allPhotos, index: idx })
+            } else if (dx < -50 && lightboxPhoto.index < lightboxPhoto.allPhotos.length - 1) {
+              const idx = lightboxPhoto.index + 1
+              const item = lightboxPhoto.allPhotos[idx]
+              setLightboxPhoto({ ...item, allPhotos: lightboxPhoto.allPhotos, index: idx })
+            }
+          }}
+        >
+          {/* Close button */}
+          <button
+            aria-label="閉じる"
+            onClick={() => setLightboxPhoto(null)}
+            className="absolute top-safe right-4 z-10 mt-2 w-10 h-10 rounded-full bg-black/50 flex items-center justify-center text-white"
+          >
+            <X size={20} />
+          </button>
+
+          {/* Photo */}
+          <div className="flex-1 flex items-center justify-center relative">
+            <img
+              src={lightboxPhoto.photoUrl}
+              alt={lightboxPhoto.memory.title}
+              className="max-w-full max-h-full object-contain"
+            />
+            {lightboxPhoto.index > 0 && (
+              <button
+                aria-label="前の写真"
+                onClick={() => {
+                  const idx = lightboxPhoto.index - 1
+                  const item = lightboxPhoto.allPhotos[idx]
+                  setLightboxPhoto({ ...item, allPhotos: lightboxPhoto.allPhotos, index: idx })
+                }}
+                className="absolute left-2 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center text-white"
+              >
+                <ChevronLeft size={22} />
+              </button>
+            )}
+            {lightboxPhoto.index < lightboxPhoto.allPhotos.length - 1 && (
+              <button
+                aria-label="次の写真"
+                onClick={() => {
+                  const idx = lightboxPhoto.index + 1
+                  const item = lightboxPhoto.allPhotos[idx]
+                  setLightboxPhoto({ ...item, allPhotos: lightboxPhoto.allPhotos, index: idx })
+                }}
+                className="absolute right-2 w-10 h-10 rounded-full bg-black/40 flex items-center justify-center text-white"
+              >
+                <ChevronRight size={22} />
+              </button>
+            )}
+          </div>
+
+          {/* Bottom info */}
+          <div className="bg-black/80 px-5 py-4 pb-safe space-y-1.5">
+            <p className="text-white font-medium text-sm leading-snug">{lightboxPhoto.memory.title}</p>
+            <div className="flex items-center gap-3">
+              <span className="text-white/60 text-xs">
+                {new Date(lightboxPhoto.memory.date).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })}
+              </span>
+              {lightboxPhoto.memory.moodTag && moodMap[lightboxPhoto.memory.moodTag] && (
+                <span className="text-white/60 text-xs">
+                  {moodMap[lightboxPhoto.memory.moodTag].emoji} {moodMap[lightboxPhoto.memory.moodTag].label}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                const memoryId = lightboxPhoto.memory.id
+                setLightboxPhoto(null)
+                setView("list")
+                setHighlightMemoryId(memoryId)
+                setTimeout(() => {
+                  const el = document.querySelector(`[data-memory-id="${memoryId}"]`)
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "center" })
+                }, 100)
+                setTimeout(() => setHighlightMemoryId(null), 2300)
+              }}
+              className="text-xs text-primary/80 underline underline-offset-2"
+            >
+              この記録を見る
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Video Export Modal (ISSUE-100) */}
       {showVideoExport && pet && (
