@@ -101,26 +101,26 @@
 | [093](ISSUE-093-pet-profile-edit.md) | ペットプロフィールを設定画面から編集できるようにする | 🟡 medium | done |
 | [094](ISSUE-094-rainbow-bridge-feelings.md) | rainbow_bridge期の気持ち記録選択肢をグリーフケアに特化する | 🟡 medium | done |
 | [095](ISSUE-095-pmf-survey.md) | アプリ内PMFサーベイを実装する | 🟠 high | done |
-| [096](ISSUE-096-home-quick-record.md) | ホームのFABからクイック記録を1画面で完結させる | 🟠 high | open |
-| [097](ISSUE-097-third-record-milestone.md) | 3件記録達成後に「蓄積実感」メッセージを表示する | 🟡 medium | open |
+| [096](ISSUE-096-home-quick-record.md) | ホームのFABからクイック記録を1画面で完結させる | 🟠 high | done |
+| [097](ISSUE-097-third-record-milestone.md) | 3件記録達成後に「蓄積実感」メッセージを表示する | 🟡 medium | done |
 | [098](ISSUE-098-monthly-share-card-redesign.md) | 「うちの子●日目」月次シェアカードをInstagramストーリー対応にする | 🔴 critical | done |
 | [099](ISSUE-099-pet-public-profile-page.md) | ペットの公開プロフィールページを実装する | 🟠 high | done |
 | [100](ISSUE-100-tiktok-video-export.md) | 記録スライドショーの縦型動画（TikTok/Reels対応）を出力する | 🟠 high | done |
 | [101](ISSUE-101-referral-invite.md) | 友人招待・リファラルリンク機能を実装する | 🟠 high | done |
 | [102](ISSUE-102-record-accumulation-stats.md) | 記録の蓄積量をホーム・設定画面で可視化する | 🟡 medium | done |
-| [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | open |
+| [103](ISSUE-103-app-store-optimization.md) | App Store / Google Playのストア掲載を最適化する | 🟠 high | done |
 | [104](ISSUE-104-b2b-landing-page.md) | 動物病院・ペット保険向けB2Bランディングページを作成する | 🟡 medium | done |
 | [105](ISSUE-105-home-pet-photo-hero.md) | ホーム画面をペット写真ヒーローデザインに刷新する | 🔴 critical | done |
 | [106](ISSUE-106-ai-reaction-quality.md) | AI反応品質を改善する（記録・チャット・手紙） | 🔴 critical | done |
 | [107](ISSUE-107-free-text-feeling.md) | 気持ち記録にフリーテキストメモを追加する | 🟠 high | done |
-| [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | 未対応 |
-| [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | 未対応 |
+| [108](ISSUE-108-rainbow-bridge-ceremony.md) | Rainbow Bridge移行を「儀式」として設計する | 🟠 high | done |
+| [109](ISSUE-109-daily-return-reasons.md) | 毎日戻ってくる理由を作る — 「今日しかない」体験 | 🟠 high | done |
 | [110](ISSUE-110-one-line-quick-record.md) | 「今日ひとこと」最小記録単位を追加する | 🟠 high | done |
-| [111](ISSUE-111-feeling-trend-as-story.md) | 感情トレンドを「グラフ」から「物語」として見せる | 🟡 medium | 未対応 |
-| [112](ISSUE-112-photo-grid-timeline.md) | タイムラインに写真グリッドビューを追加する | 🟠 high | 未対応 |
-| [113](ISSUE-113-pet-personality-vault.md) | 「あの子らしさ」記録機能 — 細部まで残せる場所 | 🟠 high | 未対応 |
+| [111](ISSUE-111-feeling-trend-as-story.md) | 感情トレンドを「グラフ」から「物語」として見せる | 🟡 medium | done |
+| [112](ISSUE-112-photo-grid-timeline.md) | タイムラインに写真グリッドビューを追加する | 🟠 high | done |
+| [113](ISSUE-113-pet-personality-vault.md) | 「あの子らしさ」記録機能 — 細部まで残せる場所 | 🟠 high | done |
 | [114](ISSUE-114-memorial-book-generation.md) | メモリアルブック自動生成 | 🟡 medium | 未対応 |
-| [115](ISSUE-115-new-pet-coexistence.md) | 新しい子と先代の共存設計 | 🟡 medium | 未対応 |
+| [115](ISSUE-115-new-pet-coexistence.md) | 新しい子と先代の共存設計 | 🟡 medium | done |
 | [116](ISSUE-116-sora-plus-value-redesign.md) | Sora+価値提案の見直し | 🟠 high | done |
 | [117](ISSUE-117-grief-expert-collaboration.md) | グリーフケア専門家コラボレーション | ⚪ low | 未対応 |
 

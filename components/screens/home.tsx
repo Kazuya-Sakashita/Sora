@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/app-context"
 import { GlassCard } from "@/components/glass-card"
-import { Settings, BookOpen, Heart, CalendarDays, Feather, MessageCircle, Download, Loader2, Lock, Share2, Sparkles, Bell, X } from "lucide-react"
+import { Settings, BookOpen, Heart, CalendarDays, Feather, MessageCircle, Download, Loader2, Lock, Share2, Sparkles, Bell, X, ChevronRight } from "lucide-react"
 import { calcDaysWith, getTimeGreeting } from "@/lib/date"
 import { calcStreak, getMilestoneMessage } from "@/lib/streak"
 import { getTodayMilestone } from "@/lib/milestone"
@@ -15,9 +15,10 @@ import { useState, useEffect, useRef } from "react"
 import { getNotificationStatus } from "@/lib/push-client"
 
 export function HomeScreen() {
-  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus, setPendingHighlightMemoryId, addMemory } = useApp()
+  const { pet, memories, feelings, setCurrentScreen, setPendingMemoryTitle, updatePetStatus, setPendingHighlightMemoryId, addMemory, pets, selectPet } = useApp()
   const greeting = getTimeGreeting()
   const days = pet?.broughtAt ? calcDaysWith(pet.broughtAt) : null
+  const rbPets = pets.filter((p) => p.id !== pet?.id && p.status === "rainbow_bridge")
   const recentMemories = memories.slice(0, 3)
   const today = new Date()
   const todayStr = today.toISOString().split("T")[0]
@@ -475,6 +476,47 @@ export function HomeScreen() {
           </button>
         </div>
       </header>
+
+      {/* ペット切り替えアバター列（複数ペット時のみ） */}
+      {pets.length > 1 && (
+        <div className="flex gap-3 px-6 pt-1 pb-2 overflow-x-auto">
+          {pets.map((p) => {
+            const isActive = p.id === pet?.id
+            const isRb = p.status === "rainbow_bridge"
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => selectPet(p.id)}
+                className="flex flex-col items-center gap-1 shrink-0"
+                aria-label={`${p.name}に切り替え`}
+                aria-pressed={isActive}
+              >
+                <div
+                  className={[
+                    "w-12 h-12 rounded-2xl overflow-hidden",
+                    isActive
+                      ? "ring-2 ring-primary/70 ring-offset-1"
+                      : "opacity-55",
+                    isRb ? "ring-2 ring-purple-200/80 ring-offset-1" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {p.photoUrl ? (
+                    <img src={p.photoUrl} alt={p.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-linear-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl">
+                      🐾
+                    </div>
+                  )}
+                </div>
+                <span className="text-[10px] text-muted-foreground leading-none">{p.name}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       {/* Pet Hero Photo */}
       {pet && (
@@ -1215,6 +1257,44 @@ export function HomeScreen() {
                         {memory.description}
                       </p>
                     )}
+                  </GlassCard>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+        {/* 大切な記憶セクション（alive期かつ先代ペットあり） */}
+        {pet?.status === "alive" && rbPets.length > 0 && (
+          <section className="space-y-3 pt-2">
+            <h2 className="text-sm font-medium text-foreground/60 px-1">大切な記憶</h2>
+            <div className="space-y-2">
+              {rbPets.map((rbPet) => (
+                <button
+                  key={rbPet.id}
+                  type="button"
+                  className="w-full text-left"
+                  onClick={() => {
+                    selectPet(rbPet.id)
+                    setCurrentScreen("timeline")
+                  }}
+                >
+                  <GlassCard className="py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 ring-1 ring-purple-200/60">
+                        {rbPet.photoUrl ? (
+                          <img src={rbPet.photoUrl} alt={rbPet.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-linear-to-br from-purple-50 to-indigo-50 flex items-center justify-center text-lg">
+                            🐾
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground/80">{rbPet.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">いつもそばにいます</p>
+                      </div>
+                      <ChevronRight size={16} className="text-muted-foreground/50 shrink-0" />
+                    </div>
                   </GlassCard>
                 </button>
               ))}

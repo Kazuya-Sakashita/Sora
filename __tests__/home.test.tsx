@@ -394,3 +394,135 @@ describe("HomeScreen — Push通知バナー", () => {
     expect(screen.queryByText("記録を忘れた日に、そっとお知らせします")).not.toBeInTheDocument()
   })
 })
+
+describe("HomeScreen — Sora+誘引バナー (ISSUE-043)", () => {
+  beforeEach(() => localStorage.clear())
+
+  it("Free + 5件以上でバナーが表示される", async () => {
+    const fiveMemories = Array.from({ length: 5 }, (_, i) => ({
+      ...memoryToday,
+      id: `mem-${i}`,
+      date: `2026-04-0${i + 1}`,
+    }))
+    mockContext(fiveMemories)
+    render(<HomeScreen />)
+    expect(await screen.findByText("Sora+ を見る")).toBeInTheDocument()
+  })
+
+  it("Free + 4件以下ではバナーが表示されない", async () => {
+    const fourMemories = Array.from({ length: 4 }, (_, i) => ({
+      ...memoryToday,
+      id: `mem-${i}`,
+      date: `2026-04-0${i + 1}`,
+    }))
+    mockContext(fourMemories)
+    render(<HomeScreen />)
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.queryByText("Sora+ を見る")).not.toBeInTheDocument()
+  })
+
+  it("Plus プランではバナーが表示されない", async () => {
+    vi.mocked(global.fetch).mockImplementationOnce((url: unknown) => {
+      const u = url as string
+      if (typeof u === "string" && u.includes("/daily-question")) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ question: "今日は？" }) }) as ReturnType<typeof fetch>
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({ plan: "PLUS" }) }) as ReturnType<typeof fetch>
+    })
+    const fiveMemories = Array.from({ length: 5 }, (_, i) => ({
+      ...memoryToday,
+      id: `mem-${i}`,
+      date: `2026-04-0${i + 1}`,
+    }))
+    mockContext(fiveMemories)
+    render(<HomeScreen />)
+    await new Promise((r) => setTimeout(r, 50))
+    expect(screen.queryByText("Sora+ を見る")).not.toBeInTheDocument()
+  })
+
+  it("「Sora+ を見る」ボタンタップで UpgradeModal が開く", async () => {
+    const fiveMemories = Array.from({ length: 5 }, (_, i) => ({
+      ...memoryToday,
+      id: `mem-${i}`,
+      date: `2026-04-0${i + 1}`,
+    }))
+    mockContext(fiveMemories)
+    render(<HomeScreen />)
+    const btn = await screen.findByText("Sora+ を見る")
+    await userEvent.click(btn)
+    expect(screen.getByRole("heading", { name: "Sora+" })).toBeInTheDocument()
+  })
+})
+
+describe("HomeScreen — 複数ペット共存 (ISSUE-115)", () => {
+  const rbPet: Pet = {
+    ...mockPet,
+    id: "pet-rb",
+    name: "ハナ",
+    status: "rainbow_bridge",
+  }
+
+  beforeEach(() => localStorage.clear())
+
+  it("ペットが1頭の場合はアバター列が表示されない", () => {
+    mockContext([], mockPet)
+    render(<HomeScreen />)
+    expect(screen.queryByRole("button", { name: /に切り替え/ })).not.toBeInTheDocument()
+  })
+
+  it("2頭以上の場合にアバター列が表示される", () => {
+    const selectPetFn = vi.fn()
+    vi.mocked(useApp).mockReturnValue({
+      ...vi.mocked(useApp)(),
+      pet: mockPet,
+      pets: [mockPet, rbPet],
+      selectPet: selectPetFn,
+      memories: [],
+      memoriesTotal: 0,
+    } as ReturnType<typeof import("@/lib/app-context").useApp>)
+    render(<HomeScreen />)
+    expect(screen.getByRole("button", { name: "ハナに切り替え" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "ポチに切り替え" })).toBeInTheDocument()
+  })
+
+  it("alive期に先代ペットがいると「大切な記憶」セクションが表示される", () => {
+    vi.mocked(useApp).mockReturnValue({
+      ...vi.mocked(useApp)(),
+      pet: mockPet,
+      pets: [mockPet, rbPet],
+      selectPet: vi.fn(),
+      memories: [],
+      memoriesTotal: 0,
+    } as ReturnType<typeof import("@/lib/app-context").useApp>)
+    render(<HomeScreen />)
+    expect(screen.getByText("大切な記憶")).toBeInTheDocument()
+    expect(screen.getAllByText("ハナ").length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText("いつもそばにいます")).toBeInTheDocument()
+  })
+
+  it("先代ペットが0頭の場合は「大切な記憶」が表示されない", () => {
+    mockContext([], mockPet)
+    render(<HomeScreen />)
+    expect(screen.queryByText("大切な記憶")).not.toBeInTheDocument()
+  })
+
+  it("先代ペットカードをタップするとselectPetとタイムライン遷移が呼ばれる", async () => {
+    const selectPetFn = vi.fn()
+    const setCurrentScreenFn = vi.fn()
+    vi.mocked(useApp).mockReturnValue({
+      ...vi.mocked(useApp)(),
+      pet: mockPet,
+      pets: [mockPet, rbPet],
+      selectPet: selectPetFn,
+      setCurrentScreen: setCurrentScreenFn,
+      memories: [],
+      memoriesTotal: 0,
+    } as ReturnType<typeof import("@/lib/app-context").useApp>)
+    render(<HomeScreen />)
+    // アバター切り替えボタンではなく「大切な記憶」セクションのカードを対象にする
+    const card = screen.getByRole("button", { name: /いつもそばにいます/ })
+    await userEvent.click(card)
+    expect(selectPetFn).toHaveBeenCalledWith("pet-rb")
+    expect(setCurrentScreenFn).toHaveBeenCalledWith("timeline")
+  })
+})

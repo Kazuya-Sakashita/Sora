@@ -43,11 +43,11 @@ Free ユーザーのホーム画面に「今月のフォトブックを作る」
 
 ## 受け入れ条件
 
-- [ ] memories 5件以上の Free ユーザーにバナーが表示される
-- [ ] memories 4件以下では表示されない
-- [ ] Plus ユーザーには表示されない
-- [ ] ボタンタップで UpgradeModal が開く
-- [ ] `pnpm tsc --noEmit` 通過
+- [x] memories 5件以上の Free ユーザーにバナーが表示される
+- [x] memories 4件以下では表示されない
+- [x] Plus ユーザーには表示されない
+- [x] ボタンタップで UpgradeModal が開く
+- [x] `pnpm tsc --noEmit` 通過
 
 ## テスト観点
 
