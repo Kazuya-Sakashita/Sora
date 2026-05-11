@@ -119,7 +119,7 @@
 | [111](ISSUE-111-feeling-trend-as-story.md) | 感情トレンドを「グラフ」から「物語」として見せる | 🟡 medium | done |
 | [112](ISSUE-112-photo-grid-timeline.md) | タイムラインに写真グリッドビューを追加する | 🟠 high | done |
 | [113](ISSUE-113-pet-personality-vault.md) | 「あの子らしさ」記録機能 — 細部まで残せる場所 | 🟠 high | done |
-| [114](ISSUE-114-memorial-book-generation.md) | メモリアルブック自動生成 | 🟡 medium | 未対応 |
+| [114](ISSUE-114-memorial-book-generation.md) | メモリアルブック自動生成 | 🟡 medium | done |
 | [115](ISSUE-115-new-pet-coexistence.md) | 新しい子と先代の共存設計 | 🟡 medium | done |
 | [116](ISSUE-116-sora-plus-value-redesign.md) | Sora+価値提案の見直し | 🟠 high | done |
 | [117](ISSUE-117-grief-expert-collaboration.md) | グリーフケア専門家コラボレーション | ⚪ low | 未対応 |

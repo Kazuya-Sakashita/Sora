@@ -13,7 +13,7 @@ import {
 } from "@/lib/push-client"
 import { GlassCard } from "@/components/glass-card"
 import { UpgradeModal } from "@/components/upgrade-modal"
-import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Infinity, Feather, ChevronRight, Pencil, Share2, Camera } from "lucide-react"
+import { ArrowLeft, Bell, Palette, Lock, MessageCircle, Check, LogOut, Loader2, Sparkles, ExternalLink, Rainbow, Users, Copy, X, BookOpen, FileText, Infinity, Feather, ChevronRight, Pencil, Share2, Camera, Download } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type Member = { id: string; userId: string; email: string; role: string; joinedAt: string }
@@ -45,6 +45,7 @@ export function SettingsScreen() {
   const [isLoadingLetter, setIsLoadingLetter] = useState(false)
   const [onThisDayEnabled, setOnThisDayEnabled] = useState(true)
   const [isTogglingOnThisDay, setIsTogglingOnThisDay] = useState(false)
+  const [isDownloadingMemorialBook, setIsDownloadingMemorialBook] = useState(false)
   const [showPetEdit, setShowPetEdit] = useState(false)
   const [petEditForm, setPetEditForm] = useState({ name: "", birthDate: "", broughtAt: "", species: "" })
   const [isSavingPet, setIsSavingPet] = useState(false)
@@ -126,6 +127,24 @@ export function SettingsScreen() {
       if (url) window.location.href = url
     } finally {
       setIsCheckingOut(false)
+    }
+  }
+
+  const handleDownloadMemorialBook = async () => {
+    if (!pet) return
+    setIsDownloadingMemorialBook(true)
+    try {
+      const res = await fetch(`/api/pets/${pet.id}/memorial-book`)
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `sora-${pet.name}-memorial-book.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setIsDownloadingMemorialBook(false)
     }
   }
 
@@ -589,6 +608,31 @@ export function SettingsScreen() {
               <Sparkles size={15} />
               Sora+ を始める — 月額 ¥{process.env.NEXT_PUBLIC_PRICE_MONTHLY ?? "480"}
             </button>
+          )}
+
+          {plan === "PLUS" && pet && (
+            <GlassCard className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
+                  <BookOpen size={18} className="text-amber-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground/85">メモリアルブック</p>
+                  <p className="text-xs text-muted-foreground">全記録・AIの手紙をPDFにまとめる</p>
+                </div>
+              </div>
+              <button
+                onClick={handleDownloadMemorialBook}
+                disabled={isDownloadingMemorialBook}
+                className="w-full h-10 rounded-2xl bg-amber-400/90 hover:bg-amber-400 text-white font-medium text-sm transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {isDownloadingMemorialBook ? (
+                  <><Loader2 size={14} className="animate-spin" />生成中…</>
+                ) : (
+                  <><Download size={14} />{pet.name}のメモリアルブックを作る</>
+                )}
+              </button>
+            </GlassCard>
           )}
 
           {plan === "PLUS" && (

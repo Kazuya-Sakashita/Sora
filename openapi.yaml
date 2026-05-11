@@ -798,6 +798,29 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
+  # === メモリアルブック ===
+
+  /pets/{petId}/memorial-book:
+    parameters:
+      - $ref: "#/components/parameters/petId"
+    get:
+      tags: [report]
+      summary: メモリアルブックを PDF で取得する（Sora+ のみ）
+      responses:
+        "200":
+          description: PDF 生成成功
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          $ref: "#/components/responses/PaymentRequired"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
   # === 年次メモリーレポート ===
 
   /pets/{petId}/report:
